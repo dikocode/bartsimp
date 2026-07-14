@@ -259,8 +259,12 @@ class Obstacle {
 
 function spawnObstacle() {
     spawnTimer++;
-    let minGap = Math.max(60, 140 - gameSpeed * 2);
-    if (spawnTimer > minGap + Math.random() * 90) {
+    
+    // Scale minimum spawn window down as score increases to cram obstacles closer
+    let minGap = Math.max(35, 110 - (score * 0.2) - (gameSpeed * 1.5));
+    let randomBuffer = Math.max(20, 80 - (score * 0.15));
+    
+    if (spawnTimer > minGap + Math.random() * randomBuffer) {
         const type = Math.random() > 0.5 ? 'spike' : 'block';
         obstacles.push(new Obstacle(type));
         spawnTimer = 0;
@@ -457,7 +461,7 @@ function animate() {
             obstacles.splice(i, 1);
             score += 10;
             scoreBoard.innerText = "SCORE: " + score;
-            gameSpeed += 0.25;
+            gameSpeed += 0.35; // Increments difficulty faster
         }
     }
 
