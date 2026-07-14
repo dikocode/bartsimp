@@ -33,8 +33,9 @@
             left: 50%;
             transform: translateX(-50%);
             font-size: 28px;
-            text-shadow: 2px 2px #000;
+            text-shadow: 3px 3px #000;
             z-index: 10;
+            color: #FFD90F;
         }
         #start-screen {
             position: absolute;
@@ -77,7 +78,6 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
-<!-- Fixed the audio file extension to mp3 here -->
 <audio id="bgm" src="bartsimpfunk.mp3" loop></audio>
 
 <script>
@@ -93,27 +93,26 @@ let score = 0;
 let gameSpeed = 6;
 let obstacles = [];
 let spawnTimer = 0;
+let bgOffset = 0;
 
 const player = {
-    x: 150,
+    x: 180,
     y: 300,
-    width: 40,
-    height: 60,
-    originalHeight: 60,
-    color: "#FFD90F", 
+    width: 45,
+    height: 70,
+    originalHeight: 70,
     vy: 0,
     gravity: 1.2,
-    jumpForce: -18,
+    jumpForce: -19,
     isGrounded: true,
     isSliding: false
 };
 
 const bob = {
-    x: 20,
-    y: 280,
-    width: 50,
-    height: 80,
-    color: "#007F3E" 
+    x: 30,
+    y: 260,
+    width: 60,
+    height: 110
 };
 
 const keys = {};
@@ -127,7 +126,7 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowDown" && player.isGrounded) {
         player.isSliding = true;
         player.height = player.originalHeight / 2;
-        player.y = 330;
+        player.y = 335;
     }
 });
 
@@ -149,7 +148,7 @@ startBtn.addEventListener("click", () => {
     player.y = 300;
     player.vy = 0;
     player.isGrounded = true;
-    bgm.play().catch(e => console.log("Audio play blocked, click inside window first"));
+    bgm.play().catch(e => console.log("Audio blocked"));
     animate();
 });
 
@@ -158,13 +157,13 @@ class Obstacle {
         this.type = type; 
         this.x = canvas.width;
         if (type === 'spike') {
-            this.width = 30;
-            this.height = 30;
+            this.width = 40;
+            this.height = 40;
             this.y = 330;
         } else {
-            this.width = 50;
-            this.height = 50;
-            this.y = 270; 
+            this.width = 60;
+            this.height = 45;
+            this.y = 250; 
         }
     }
 
@@ -174,24 +173,44 @@ class Obstacle {
 
     draw() {
         if (this.type === 'spike') {
-            ctx.fillStyle = "#FF3B30";
+            // Rusty Springfield metallic spikes
+            ctx.fillStyle = "#7A7A7A";
             ctx.beginPath();
             ctx.moveTo(this.x, this.y + this.height);
             ctx.lineTo(this.x + this.width / 2, this.y);
             ctx.lineTo(this.x + this.width, this.y + this.height);
             ctx.closePath();
             ctx.fill();
+            
+            // Highlight
+            ctx.strokeStyle = "#FFF";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y + this.height);
+            ctx.lineTo(this.x + this.width / 2, this.y);
+            ctx.stroke();
         } else {
-            ctx.fillStyle = "#007AFF";
+            // Wood crate texture block you can slide under
+            ctx.fillStyle = "#8B5A2B";
             ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.strokeStyle = "#5C3A21";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(this.x, this.y, this.width, this.height);
+            // Draw an X on the crate
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + this.width, this.y + this.height);
+            ctx.moveTo(this.x + this.width, this.y);
+            ctx.lineTo(this.x, this.y + this.height);
+            ctx.stroke();
         }
     }
 }
 
 function spawnObstacle() {
     spawnTimer++;
-    let minGap = Math.max(50, 120 - gameSpeed * 2);
-    if (spawnTimer > minGap + Math.random() * 80) {
+    let minGap = Math.max(60, 140 - gameSpeed * 2);
+    if (spawnTimer > minGap + Math.random() * 90) {
         const type = Math.random() > 0.5 ? 'spike' : 'block';
         obstacles.push(new Obstacle(type));
         spawnTimer = 0;
@@ -212,35 +231,197 @@ function gameOver() {
     startBtn.innerText = "TRY AGAIN";
 }
 
+function drawBackground() {
+    // Sky
+    ctx.fillStyle = "#5C94FC";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Clouds (Slow scrolling)
+    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+    let cloudOffset = (bgOffset * 0.2) % 800;
+    for (let i = 0; i < 2; i++) {
+        let cx = 100 + i * 400 - cloudOffset;
+        if (cx < -150) cx += 800;
+        ctx.beginPath();
+        ctx.arc(cx, 80, 30, 0, Math.PI * 2);
+        ctx.arc(cx + 40, 70, 40, 0, Math.PI * 2);
+        ctx.arc(cx + 80, 80, 30, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    // Springfield Hills (Medium scrolling)
+    ctx.fillStyle = "#41924B";
+    let hillOffset = (bgOffset * 0.5) % 800;
+    ctx.beginPath();
+    ctx.moveTo(0 - hillOffset, 370);
+    ctx.quadraticCurveTo(200 - hillOffset, 250, 400 - hillOffset, 370);
+    ctx.quadraticCurveTo(600 - hillOffset, 220, 800 - hillOffset, 370);
+    ctx.quadraticCurveTo(1000 - hillOffset, 250, 1200 - hillOffset, 370);
+    ctx.lineTo(canvas.width, canvas.height);
+    ctx.lineTo(0, canvas.height);
+    ctx.fill();
+
+    // Springfield Street Road
+    ctx.fillStyle = "#737578";
+    ctx.fillRect(0, 350, canvas.width, 50);
+    ctx.fillStyle = "#EAEAEA";
+    // Sidewalk curb line
+    ctx.fillRect(0, 350, canvas.width, 6);
+}
+
+function drawBart(x, y, w, h, sliding) {
+    ctx.save();
+    
+    // Yellow head & spikes
+    ctx.fillStyle = "#FFD90F";
+    if (!sliding) {
+        // Spikey Hair head shape
+        ctx.beginPath();
+        ctx.moveTo(x, y + 25);
+        // Spikes
+        for (let i = 0; i < 9; i++) {
+            let px = x + (w / 9) * i;
+            let py = (i % 2 === 0) ? y - 2 : y + 3;
+            ctx.lineTo(px, py);
+        }
+        ctx.lineTo(x + w, y + 25);
+        ctx.lineTo(x + w, y + 35);
+        ctx.lineTo(x, y + 35);
+        ctx.closePath();
+        ctx.fill();
+
+        // Face & Eyes
+        ctx.fillStyle = "#FFF";
+        ctx.beginPath();
+        ctx.arc(x + w - 12, y + 18, 6, 0, Math.PI * 2);
+        ctx.arc(x + w - 3, y + 18, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#000";
+        ctx.fillRect(x + w - 10, y + 17, 2, 2);
+        ctx.fillRect(x + w - 2, y + 17, 2, 2);
+
+        // Red T-Shirt
+        ctx.fillStyle = "#F14B32";
+        ctx.fillRect(x + 5, y + 32, w - 10, 23);
+
+        // Blue Shorts
+        ctx.fillStyle = "#004BFF";
+        ctx.fillRect(x + 5, y + 55, w - 10, 10);
+
+        // Yellow legs/feet
+        ctx.fillStyle = "#FFD90F";
+        ctx.fillRect(x + 10, y + 65, 8, 5);
+        ctx.fillRect(x + w - 18, y + 65, 8, 5);
+    } else {
+        // Sliding Bart layout (crouched/lowered head)
+        ctx.beginPath();
+        ctx.moveTo(x, y + 15);
+        for (let i = 0; i < 9; i++) {
+            let px = x + (w / 9) * i;
+            let py = (i % 2 === 0) ? y - 2 : y + 3;
+            ctx.lineTo(px, py);
+        }
+        ctx.lineTo(x + w, y + 15);
+        ctx.lineTo(x + w, y + 25);
+        ctx.lineTo(x, y + 25);
+        ctx.closePath();
+        ctx.fill();
+
+        // Eyes
+        ctx.fillStyle = "#FFF";
+        ctx.beginPath();
+        ctx.arc(x + w - 12, y + 12, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#000";
+        ctx.fillRect(x + w - 10, y + 11, 2, 2);
+
+        // Red shirt & shorts laying down flat
+        ctx.fillStyle = "#F14B32";
+        ctx.fillRect(x - 5, y + 20, w, 15);
+        ctx.fillStyle = "#004BFF";
+        ctx.fillRect(x - 15, y + 22, 12, 13);
+    }
+    
+    ctx.restore();
+}
+
+function drawSideshowBob(x, y, w, h) {
+    ctx.save();
+
+    // Giant Red Palm Tree Hair (The spikes)
+    ctx.fillStyle = "#D6221D";
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, y + 40);
+    // Left hair leaves
+    ctx.quadraticCurveTo(x - 30, y + 10, x - 25, y - 25);
+    ctx.quadraticCurveTo(x - 10, y + 15, x + 10, y + 30);
+    // Center hair leaves
+    ctx.quadraticCurveTo(x + w / 2, y - 45, x + w / 2 + 5, y - 45);
+    ctx.quadraticCurveTo(x + w / 2 + 10, y + 20, x + w - 10, y + 30);
+    // Right hair leaves
+    ctx.quadraticCurveTo(x + w + 30, y + 10, x + w + 25, y - 25);
+    ctx.quadraticCurveTo(x + w + 10, y + 15, x + w / 2, y + 40);
+    ctx.closePath();
+    ctx.fill();
+
+    // Yellow head / face
+    ctx.fillStyle = "#FFD90F";
+    ctx.fillRect(x + 10, y + 35, w - 20, 30);
+
+    // Sinister expression eyes
+    ctx.fillStyle = "#FFF";
+    ctx.beginPath();
+    ctx.arc(x + w - 25, y + 48, 7, 0, Math.PI * 2);
+    ctx.arc(x + w - 13, y + 48, 7, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = "#000";
+    ctx.beginPath();
+    // angry pupils
+    ctx.arc(x + w - 23, y + 48, 2, 0, Math.PI * 2);
+    ctx.arc(x + w - 15, y + 48, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Evil grin
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(x + w - 20, y + 58, 8, 0, Math.PI, false);
+    ctx.stroke();
+
+    // Green shirt
+    ctx.fillStyle = "#008543";
+    ctx.fillRect(x + 5, y + 65, w - 10, 45);
+
+    // Blue pants showing at bottom
+    ctx.fillStyle = "#004BFF";
+    ctx.fillRect(x + 8, y + 100, w - 16, 10);
+
+    ctx.restore();
+}
+
 function animate() {
     if (!gameActive) return;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    bgOffset += gameSpeed;
+    drawBackground();
 
-    ctx.fillStyle = "#444";
-    ctx.fillRect(0, 360, canvas.width, 40);
-
+    // Physics
     player.vy += player.gravity;
     player.y += player.vy;
 
-    const currentGround = 360 - player.height;
+    const currentGround = 350 - player.height;
     if (player.y >= currentGround) {
         player.y = currentGround;
         player.vy = 0;
         player.isGrounded = true;
     }
 
-    bob.y = 280 + Math.sin(Date.now() * 0.01) * 10;
+    // Bob chases menacingly on his feet
+    bob.y = 240 + Math.sin(Date.now() * 0.015) * 8;
 
-    ctx.fillStyle = bob.color;
-    ctx.fillRect(bob.x, bob.y, bob.width, bob.height);
-    ctx.fillStyle = "#FF3B30";
-    ctx.fillRect(bob.x - 10, bob.y - 15, bob.width + 20, 20);
-
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-    ctx.fillStyle = "#007AFF";
-    ctx.fillRect(player.x, player.y + player.height - 15, player.width, 15);
+    drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
+    drawBart(player.x, player.y, player.width, player.height, player.isSliding);
 
     spawnObstacle();
     for (let i = obstacles.length - 1; i >= 0; i--) {
