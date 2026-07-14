@@ -210,11 +210,24 @@ class Obstacle {
     constructor(type) {
         this.type = type; 
         this.x = canvas.width;
+        
         if (type === 'spike') {
             this.width = 40;
             this.height = 40;
             this.y = 330;
-        } else {
+        } else if (type === 'double-spike') {
+            this.width = 80;
+            this.height = 40;
+            this.y = 330;
+        } else if (type === 'triple-spike') {
+            this.width = 120;
+            this.height = 40;
+            this.y = 330;
+        } else if (type === 'double-block') {
+            this.width = 120;
+            this.height = 45;
+            this.y = 250;
+        } else { // single block
             this.width = 60;
             this.height = 45;
             this.y = 250; 
@@ -226,32 +239,44 @@ class Obstacle {
     }
 
     draw() {
-        if (this.type === 'spike') {
+        if (this.type.includes('spike')) {
             ctx.fillStyle = "#7A7A7A";
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y + this.height);
-            ctx.lineTo(this.x + this.width / 2, this.y);
-            ctx.lineTo(this.x + this.width, this.y + this.height);
-            ctx.closePath();
-            ctx.fill();
+            let spikeCount = 1;
+            if (this.type === 'double-spike') spikeCount = 2;
+            if (this.type === 'triple-spike') spikeCount = 3;
             
-            ctx.strokeStyle = "#FFF";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y + this.height);
-            ctx.lineTo(this.x + this.width / 2, this.y);
-            ctx.stroke();
+            let singleSpikeWidth = this.width / spikeCount;
+            
+            for (let i = 0; i < spikeCount; i++) {
+                let startX = this.x + (i * singleSpikeWidth);
+                ctx.beginPath();
+                ctx.moveTo(startX, this.y + this.height);
+                ctx.lineTo(startX + singleSpikeWidth / 2, this.y);
+                ctx.lineTo(startX + singleSpikeWidth, this.y + this.height);
+                ctx.closePath();
+                ctx.fill();
+                
+                ctx.strokeStyle = "#FFF";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(startX, this.y + this.height);
+                ctx.lineTo(startX + singleSpikeWidth / 2, this.y);
+                ctx.stroke();
+            }
         } else {
             ctx.fillStyle = "#8B5A2B";
             ctx.fillRect(this.x, this.y, this.width, this.height);
             ctx.strokeStyle = "#5C3A21";
             ctx.lineWidth = 3;
             ctx.strokeRect(this.x, this.y, this.width, this.height);
+            
             ctx.beginPath();
             ctx.moveTo(this.x, this.y);
             ctx.lineTo(this.x + this.width, this.y + this.height);
-            ctx.moveTo(this.x + this.width, this.y);
-            ctx.lineTo(this.x, this.y + this.height);
+            if (this.type === 'double-block') {
+                ctx.moveTo(this.x + this.width / 2, this.y);
+                ctx.lineTo(this.x + this.width / 2, this.y + this.height);
+            }
             ctx.stroke();
         }
     }
@@ -260,12 +285,24 @@ class Obstacle {
 function spawnObstacle() {
     spawnTimer++;
     
-    // Scale minimum spawn window down as score increases to cram obstacles closer
-    let minGap = Math.max(35, 110 - (score * 0.2) - (gameSpeed * 1.5));
-    let randomBuffer = Math.max(20, 80 - (score * 0.15));
+    let minGap = Math.max(40, 120 - (score * 0.15) - (gameSpeed * 1.3));
+    let randomBuffer = Math.max(25, 90 - (score * 0.1));
     
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
-        const type = Math.random() > 0.5 ? 'spike' : 'block';
+        let pool = ['spike', 'block'];
+        
+        // Add harder types as score rises
+        if (score >= 100) {
+            pool.push('double-spike');
+        }
+        if (score >= 250) {
+            pool.push('double-block');
+        }
+        if (score >= 400) {
+            pool.push('triple-spike');
+        }
+        
+        const type = pool[Math.floor(Math.random() * pool.length)];
         obstacles.push(new Obstacle(type));
         spawnTimer = 0;
     }
@@ -461,7 +498,7 @@ function animate() {
             obstacles.splice(i, 1);
             score += 10;
             scoreBoard.innerText = "SCORE: " + score;
-            gameSpeed += 0.35; // Increments difficulty faster
+            gameSpeed += 0.35; 
         }
     }
 
