@@ -58,9 +58,30 @@
             padding: 10px;
             box-sizing: border-box;
         }
+        #powerup-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10,10,10,0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
         button {
             padding: 12px 30px;
-            font-size: 20px;
+            font-size: 18px;
             font-family: inherit;
             background: #FFD90F;
             color: #000;
@@ -72,10 +93,32 @@
         button:hover {
             transform: scale(1.1);
         }
+        .shop-item {
+            background: #222;
+            border: 2px solid #FFD90F;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 8px;
+            width: 80%;
+            max-width: 400px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .shop-item button {
+            padding: 6px 15px;
+            font-size: 14px;
+        }
         #audio-status {
             font-size: 12px;
             color: #ff5555;
             margin-top: 10px;
+        }
+        .points-display {
+            color: #55ff55;
+            font-size: 20px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px #000;
         }
     </style>
 </head>
@@ -83,12 +126,51 @@
 
 <div id="game-container">
     <div id="score-board">SCORE: 0</div>
+    
+    <!-- MAIN MENU -->
     <div id="start-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 10px; font-size: min(6vw, 36px);">BART SIMPSON RUN</h1>
+        <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6vw, 36px);">BART SIMPSON RUN</h1>
+        <div class="points-display" id="menu-points">POINTS: 0</div>
+        <div class="btn-group">
+            <button id="start-btn">START RUNNING</button>
+            <button id="open-shop-btn" style="background: #55ff55;">POWER UPS</button>
+        </div>
         <p style="margin-bottom: 15px; font-size: min(3.5vw, 16px);">TAP RIGHT to Jump | TAP LEFT to Slide<br>Keyboard: SPACE to Jump | DOWN to Slide</p>
-        <button id="start-btn">START RUNNING</button>
         <div id="audio-status">Audio Status: Standby</div>
     </div>
+
+    <!-- POWER UPS SHOP -->
+    <div id="powerup-screen">
+        <h1 style="color: #55ff55; margin-bottom: 5px; font-size: min(6vw, 32px);">UPGRADES</h1>
+        <div class="points-display" id="shop-points">POINTS: 0</div>
+        
+        <div class="shop-item">
+            <div style="text-align: left;">
+                <div style="font-size: 14px;">SLOT 1: EXTRA LIFE</div>
+                <div style="font-size: 11px; color: #aaa;" id="life-desc">Survive a hit (Max 1)</div>
+            </div>
+            <button id="buy-life-btn">COST: 50 PTS</button>
+        </div>
+
+        <div class="shop-item">
+            <div style="text-align: left;">
+                <div style="font-size: 14px;">SLOT 2: GRAVITY BOOST</div>
+                <div style="font-size: 11px; color: #aaa;" id="grav-desc">Fall faster to dodge spikes</div>
+            </div>
+            <button id="buy-grav-btn">COST: 20 PTS</button>
+        </div>
+
+        <div class="shop-item">
+            <div style="text-align: left;">
+                <div style="font-size: 14px;">SLOT 3: DOUBLE POINTS</div>
+                <div style="font-size: 11px; color: #aaa;" id="points-desc">Boost points gained per run</div>
+            </div>
+            <button id="buy-points-btn">COST: 35 PTS</button>
+        </div>
+
+        <button id="close-shop-btn" style="background: #ff5555; margin-top: 15px;">BACK TO MENU</button>
+    </div>
+
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
@@ -98,10 +180,20 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const startScreen = document.getElementById("start-screen");
+const powerupScreen = document.getElementById("powerup-screen");
 const startBtn = document.getElementById("start-btn");
+const openShopBtn = document.getElementById("open-shop-btn");
+const closeShopBtn = document.getElementById("close-shop-btn");
 const scoreBoard = document.getElementById("score-board");
 const bgm = document.getElementById("bgm");
 const audioStatus = document.getElementById("audio-status");
+
+// Shop elements
+const menuPointsDisplay = document.getElementById("menu-points");
+const shopPointsDisplay = document.getElementById("shop-points");
+const buyLifeBtn = document.getElementById("buy-life-btn");
+const buyGravBtn = document.getElementById("buy-grav-btn");
+const buyPointsBtn = document.getElementById("buy-points-btn");
 
 let gameActive = false;
 let score = 0;
@@ -110,6 +202,85 @@ let obstacles = [];
 let spawnTimer = 0;
 let bgOffset = 0;
 
+// Persistent Progression variables (saved in localStorage)
+let playerPoints = parseInt(localStorage.getItem("bart_points")) || 0;
+let upgradeLife = parseInt(localStorage.getItem("bart_up_life")) || 0; // 0 or 1 max
+let upgradeGrav = parseInt(localStorage.getItem("bart_up_grav")) || 0; // level 0 to 3
+let upgradeDouble = parseInt(localStorage.getItem("bart_up_double")) || 0; // level 0 to 3
+
+function updatePointsUI() {
+    menuPointsDisplay.innerText = "POINTS: " + playerPoints;
+    shopPointsDisplay.innerText = "POINTS: " + playerPoints;
+    
+    // Update shop button text/status
+    if (upgradeLife >= 1) {
+        buyLifeBtn.innerText = "MAXED";
+        buyLifeBtn.disabled = true;
+    } else {
+        buyLifeBtn.innerText = "COST: 50 PTS";
+    }
+
+    if (upgradeGrav >= 3) {
+        buyGravBtn.innerText = "MAXED";
+        buyGravBtn.disabled = true;
+    } else {
+        buyGravBtn.innerText = `LVL ${upgradeGrav}/3 (COST: ${(upgradeGrav+1)*20} PTS)`;
+    }
+
+    if (upgradeDouble >= 3) {
+        buyPointsBtn.innerText = "MAXED";
+        buyPointsBtn.disabled = true;
+    } else {
+        buyPointsBtn.innerText = `LVL ${upgradeDouble}/3 (COST: ${(upgradeDouble+1)*35} PTS)`;
+    }
+}
+updatePointsUI();
+
+// Shop listeners
+openShopBtn.addEventListener("click", () => {
+    startScreen.style.display = "none";
+    powerupScreen.style.display = "flex";
+    updatePointsUI();
+});
+
+closeShopBtn.addEventListener("click", () => {
+    powerupScreen.style.display = "none";
+    startScreen.style.display = "flex";
+});
+
+buyLifeBtn.addEventListener("click", () => {
+    if (playerPoints >= 50 && upgradeLife < 1) {
+        playerPoints -= 50;
+        upgradeLife = 1;
+        localStorage.setItem("bart_points", playerPoints);
+        localStorage.setItem("bart_up_life", upgradeLife);
+        updatePointsUI();
+    }
+});
+
+buyGravBtn.addEventListener("click", () => {
+    let cost = (upgradeGrav + 1) * 20;
+    if (playerPoints >= cost && upgradeGrav < 3) {
+        playerPoints -= cost;
+        upgradeGrav++;
+        localStorage.setItem("bart_points", playerPoints);
+        localStorage.setItem("bart_up_grav", upgradeGrav);
+        updatePointsUI();
+    }
+});
+
+buyPointsBtn.addEventListener("click", () => {
+    let cost = (upgradeDouble + 1) * 35;
+    if (playerPoints >= cost && upgradeDouble < 3) {
+        playerPoints -= cost;
+        upgradeDouble++;
+        localStorage.setItem("bart_points", playerPoints);
+        localStorage.setItem("bart_up_double", upgradeDouble);
+        updatePointsUI();
+    }
+});
+
+// Audio listeners
 bgm.addEventListener('canplaythrough', () => {
     audioStatus.innerText = "Audio Status: Ready!";
     audioStatus.style.color = "#55ff55";
@@ -120,6 +291,9 @@ bgm.addEventListener('error', (e) => {
     audioStatus.style.color = "#ff5555";
 });
 
+// Run-time variables
+let hasLifeActive = 0;
+
 const player = {
     x: 180,
     y: 300,
@@ -127,7 +301,7 @@ const player = {
     height: 70,
     originalHeight: 70,
     vy: 0,
-    gravity: 1.2,
+    gravity: 1.2, // will modify in startBtn event based on upgrades
     jumpForce: -19,
     isGrounded: true,
     isSliding: false
@@ -140,7 +314,7 @@ const bob = {
     height: 110
 };
 
-// Keyboard controls
+// Controls
 window.addEventListener("keydown", (e) => {
     if (e.code === "Space" && player.isGrounded && !player.isSliding) {
         player.vy = player.jumpForce;
@@ -161,7 +335,6 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
-// Mobile touch controls
 window.addEventListener("touchstart", (e) => {
     if (!gameActive) return;
     const touch = e.touches[0];
@@ -198,6 +371,10 @@ startBtn.addEventListener("click", () => {
     player.vy = 0;
     player.isGrounded = true;
     
+    // Apply upgrades to run
+    hasLifeActive = upgradeLife; // 1 or 0
+    player.gravity = 1.2 + (upgradeGrav * 0.25); // increase gravity per level so u fall down faster
+    
     bgm.currentTime = 0;
     bgm.play().catch(e => {
         console.log("Audio play blocked", e);
@@ -227,7 +404,7 @@ class Obstacle {
             this.width = 120;
             this.height = 45;
             this.y = 250;
-        } else { // single block
+        } else { 
             this.width = 60;
             this.height = 45;
             this.y = 250; 
@@ -291,7 +468,6 @@ function spawnObstacle() {
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
         let pool = ['spike', 'block'];
         
-        // Add harder types as score rises
         if (score >= 100) {
             pool.push('double-spike');
         }
@@ -318,8 +494,20 @@ function checkCollision(rect1, rect2) {
 function gameOver() {
     gameActive = false;
     bgm.pause();
+    
+    // Calculate and earn points (10 score = 1 point, multiplied by Double Points level boost)
+    let pointsEarned = Math.floor(score / 10);
+    if (upgradeDouble > 0) {
+        pointsEarned = Math.floor(pointsEarned * (1 + (upgradeDouble * 0.5))); // LVL 1 is 1.5x, LVL 3 is 2.5x points
+    }
+    
+    playerPoints += pointsEarned;
+    localStorage.setItem("bart_points", playerPoints);
+    updatePointsUI();
+    
     startScreen.style.display = "flex";
     document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
+    document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff5555; font-size:14px;">(+${pointsEarned}!)</span>`;
     startBtn.innerText = "TRY AGAIN";
 }
 
@@ -359,6 +547,13 @@ function drawBackground() {
 function drawBart(x, y, w, h, sliding) {
     ctx.save();
     ctx.fillStyle = "#FFD90F";
+    
+    // Draw visual glow if extra life shield is up
+    if (hasLifeActive > 0) {
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = "#55ff55";
+    }
+    
     if (!sliding) {
         ctx.beginPath();
         ctx.moveTo(x, y + 25);
@@ -490,8 +685,15 @@ function animate() {
         obstacles[i].draw();
 
         if (checkCollision(player, obstacles[i])) {
-            gameOver();
-            return;
+            if (hasLifeActive > 0) {
+                // Break shield and destroy obstacle instead of dying
+                hasLifeActive = 0;
+                obstacles.splice(i, 1);
+                continue;
+            } else {
+                gameOver();
+                return;
+            }
         }
 
         if (obstacles[i].x + obstacles[i].width < 0) {
