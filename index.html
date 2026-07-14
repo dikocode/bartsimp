@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Bart Escape</title>
     <style>
         body {
@@ -16,23 +16,28 @@
             justify-content: center;
             height: 100vh;
             overflow: hidden;
+            touch-action: none;
         }
         #game-container {
             position: relative;
-            width: 800px;
-            height: 400px;
+            width: 95vw;
+            max-width: 800px;
+            aspect-ratio: 2 / 1;
         }
         canvas {
             background: #222;
             border: 4px solid #fff;
             display: block;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
         }
         #score-board {
             position: absolute;
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 28px;
+            font-size: 24px;
             text-shadow: 3px 3px #000;
             z-index: 10;
             color: #FFD90F;
@@ -41,18 +46,21 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 800px;
-            height: 400px;
+            width: 100%;
+            height: 100%;
             background: rgba(0,0,0,0.85);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 20;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
         }
         button {
-            padding: 15px 40px;
-            font-size: 24px;
+            padding: 12px 30px;
+            font-size: 20px;
             font-family: inherit;
             background: #FFD90F;
             color: #000;
@@ -65,7 +73,7 @@
             transform: scale(1.1);
         }
         #audio-status {
-            font-size: 14px;
+            font-size: 12px;
             color: #ff5555;
             margin-top: 10px;
         }
@@ -76,15 +84,14 @@
 <div id="game-container">
     <div id="score-board">SCORE: 0</div>
     <div id="start-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 20px;">BART SIMPSON RUN</h1>
-        <p style="margin-bottom: 20px; font-size: 18px;">SPACE to Jump (Spikes) | DOWN ARROW to Slide (Blocks)</p>
+        <h1 style="color: #FFD90F; margin-bottom: 10px; font-size: min(6vw, 36px);">BART SIMPSON RUN</h1>
+        <p style="margin-bottom: 15px; font-size: min(3.5vw, 16px);">TAP RIGHT to Jump | TAP LEFT to Slide<br>Keyboard: SPACE to Jump | DOWN to Slide</p>
         <button id="start-btn">START RUNNING</button>
         <div id="audio-status">Audio Status: Standby</div>
     </div>
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
-<!-- Points to your local file in the same folder -->
 <audio id="bgm" src="BART SIMP DO COPY.mp3" loop preload="auto"></audio>
 
 <script>
@@ -103,16 +110,14 @@ let obstacles = [];
 let spawnTimer = 0;
 let bgOffset = 0;
 
-// Verify file loading
 bgm.addEventListener('canplaythrough', () => {
     audioStatus.innerText = "Audio Status: Ready!";
     audioStatus.style.color = "#55ff55";
 });
 
 bgm.addEventListener('error', (e) => {
-    audioStatus.innerText = "Audio Status: Error finding 'BART SIMP DO COPY.mp3'. Make sure it's in the same folder!";
+    audioStatus.innerText = "Audio Status: Error finding 'BART SIMP DO COPY.mp3' in same folder";
     audioStatus.style.color = "#ff5555";
-    console.error("Audio failed to load:", e);
 });
 
 const player = {
@@ -135,10 +140,8 @@ const bob = {
     height: 110
 };
 
-const keys = {};
-
+// Keyboard controls
 window.addEventListener("keydown", (e) => {
-    keys[e.code] = true;
     if (e.code === "Space" && player.isGrounded && !player.isSliding) {
         player.vy = player.jumpForce;
         player.isGrounded = false;
@@ -151,12 +154,38 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-    keys[e.code] = false;
     if (e.code === "ArrowDown") {
         player.isSliding = false;
         player.height = player.originalHeight;
         player.y = 300;
     }
+});
+
+// Mobile touch controls
+window.addEventListener("touchstart", (e) => {
+    if (!gameActive) return;
+    const touch = e.touches[0];
+    const screenWidth = window.innerWidth;
+    
+    if (touch.clientX < screenWidth / 2) {
+        if (player.isGrounded) {
+            player.isSliding = true;
+            player.height = player.originalHeight / 2;
+            player.y = 335;
+        }
+    } else {
+        if (player.isGrounded && !player.isSliding) {
+            player.vy = player.jumpForce;
+            player.isGrounded = false;
+        }
+    }
+});
+
+window.addEventListener("touchend", () => {
+    if (!gameActive) return;
+    player.isSliding = false;
+    player.height = player.originalHeight;
+    player.y = 300;
 });
 
 startBtn.addEventListener("click", () => {
@@ -171,8 +200,7 @@ startBtn.addEventListener("click", () => {
     
     bgm.currentTime = 0;
     bgm.play().catch(e => {
-        console.log("Audio playback failed:", e);
-        audioStatus.innerText = "Audio play blocked. Click anywhere on the screen first.";
+        console.log("Audio play blocked", e);
     });
     
     animate();
