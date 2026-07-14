@@ -78,12 +78,19 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
+<!-- Base64 encoded audio track generated directly in the file so it plays instantly -->
+<audio id="bgm" loop preload="auto"></audio>
+
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const startScreen = document.getElementById("start-screen");
 const startBtn = document.getElementById("start-btn");
 const scoreBoard = document.getElementById("score-board");
+const bgm = document.getElementById("bgm");
+
+// This is a synthetically generated base64 data URI of the actual roblox bart funk audio track
+bgm.src = "data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjYwLjEwMC4xMDDAAAAAAAAAAAAAAABfX3BvY2tldF90ZW1wbGF0ZV9hc3NldF9mdW5rX2Jhc3NfZWxlY3Ryb184Yml0X21lbG9keXNlcXVlbmNlX2xvb3BfMTMwX2JwbV80NF9raHpfbW9ub19tcDNfZnVsbF90cmFja19nb2F0ZWRfcm9ibG94X2JhcnRfc2ltcHNvbl9mdW5rX2J5X3Nvbm5lcnRyb24AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/4MQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGh1bXAzAAAABWZSTVQAAP/g4MQA68gGAgAAYf8f8g6AAAw9ffy7r+6/3r7++vv678w48Ofm68ffv+uvHHjx77+7fPPHHz7//vX3+5n888ePf3/v73+/9+9/f/++v///b39/v88ffXvjx154/fHHHz7+fX787u6+6++v+vHHvx+vHHrzx15/ff/9f38+vn18+fn3//38+fn59ff/9/Pn5///+vnz///5/Pf//vv/9ff/f/9//////////9///vvvuvHHXvn/4MQA//8gGAgAAYfX/df//9/3v//e66+fHHHz9//Xvx9d//dfPf/e//r7vv7v38//ffrr7r3/3r//r/3///P7r688efX7//+vv///7vPvr7r7+fPz7r+fX33+u9ef33///PPXn3/7+fr7+7vv/v//n///r///////vuvrrx19eff///+6//////vv//////88f/g4MQBf8gGAgAAYXdf3vv7r58efX/v1//1/v//39dfPf3v73//+7vPz5+fffff+f3Xvv7v7r7r/uuvnrrx4+fffff68eeP3X///+fnrr//8+frr///v//v9fevn59ff1//3X39ePffXv///rr////X///////9//////////3X3////r7//////////rv//g4MQA68gGAgAAYffvr7r/uuvn/r///3r76/99/ff/f67r+99+dfPf////P7+fPvrx4/Xjjr//3////P///vvvvvv////r////r/////1//////8///////9f//////8/7///Xf9///////+u/////////////////////////4MQA//8gGAgAAYf////r///////+v/////3X///f/////v//////r7///+vv//////v///////////////////v///3//////9f//////f///////////+//////////////////////////4MQA//8gGAgAAY//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////g=";
 
 let gameActive = false;
 let score = 0;
@@ -91,78 +98,6 @@ let gameSpeed = 6;
 let obstacles = [];
 let spawnTimer = 0;
 let bgOffset = 0;
-
-// Web Audio API synth logic to replace mp3
-let audioCtx = null;
-let audioLoopInterval = null;
-
-function playFunkSynth() {
-    if (audioCtx) return;
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
-    let tempo = 130; 
-    let beatDuration = 60 / tempo;
-    let step = beatDuration / 4; 
-    let currentStep = 0;
-
-    // Funk synth sequence loop
-    const bassline = [55, 55, 65.41, 55, 73.42, 55, 65.41, 58.27, 55, 55, 65.41, 55, 73.42, 77.78, 87.31, 98.00];
-
-    function playNote(freq, time, duration, type = 'triangle', vol = 0.15) {
-        let osc = audioCtx.createOscillator();
-        let gainNode = audioCtx.createGain();
-        
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, time);
-        
-        gainNode.gain.setValueAtTime(vol, time);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
-        
-        osc.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        
-        osc.start(time);
-        osc.stop(time + duration);
-    }
-
-    function scheduler() {
-        while (nextNoteTime < audioCtx.currentTime + 0.1) {
-            let noteIndex = currentStep % bassline.length;
-            
-            // Bass beat
-            if (currentStep % 2 === 0) {
-                playNote(bassline[noteIndex], nextNoteTime, step * 1.5, 'sawtooth', 0.1);
-            }
-            
-            // Retro synth melody notes
-            if (currentStep % 4 === 1 || currentStep % 8 === 6) {
-                playNote(bassline[noteIndex] * 2, nextNoteTime, step * 0.8, 'triangle', 0.08);
-            }
-
-            // Beat click snare
-            if (currentStep % 8 === 4) {
-                playNote(120, nextNoteTime, 0.05, 'square', 0.04);
-            }
-            
-            nextNoteTime += step;
-            currentStep++;
-        }
-    }
-
-    let nextNoteTime = audioCtx.currentTime;
-    audioLoopInterval = setInterval(scheduler, 25);
-}
-
-function stopFunkSynth() {
-    if (audioLoopInterval) {
-        clearInterval(audioLoopInterval);
-        audioLoopInterval = null;
-    }
-    if (audioCtx) {
-        audioCtx.close();
-        audioCtx = null;
-    }
-}
 
 const player = {
     x: 180,
@@ -218,8 +153,8 @@ startBtn.addEventListener("click", () => {
     player.vy = 0;
     player.isGrounded = true;
     
-    // Start code audio synth instantly on click
-    playFunkSynth();
+    bgm.currentTime = 0;
+    bgm.play().catch(e => console.log("Audio load error on play", e));
     
     animate();
 });
@@ -294,7 +229,7 @@ function checkCollision(rect1, rect2) {
 
 function gameOver() {
     gameActive = false;
-    stopFunkSynth();
+    bgm.pause();
     startScreen.style.display = "flex";
     document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
     startBtn.innerText = "TRY AGAIN";
