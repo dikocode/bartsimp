@@ -78,16 +78,12 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
-<!-- Audio element -->
-<audio id="bgm" src="bartsimpfunk.mp3" loop preload="auto"></audio>
-
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const startScreen = document.getElementById("start-screen");
 const startBtn = document.getElementById("start-btn");
 const scoreBoard = document.getElementById("score-board");
-const bgm = document.getElementById("bgm");
 
 let gameActive = false;
 let score = 0;
@@ -95,6 +91,78 @@ let gameSpeed = 6;
 let obstacles = [];
 let spawnTimer = 0;
 let bgOffset = 0;
+
+// Web Audio API synth logic to replace mp3
+let audioCtx = null;
+let audioLoopInterval = null;
+
+function playFunkSynth() {
+    if (audioCtx) return;
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    let tempo = 130; 
+    let beatDuration = 60 / tempo;
+    let step = beatDuration / 4; 
+    let currentStep = 0;
+
+    // Funk synth sequence loop
+    const bassline = [55, 55, 65.41, 55, 73.42, 55, 65.41, 58.27, 55, 55, 65.41, 55, 73.42, 77.78, 87.31, 98.00];
+
+    function playNote(freq, time, duration, type = 'triangle', vol = 0.15) {
+        let osc = audioCtx.createOscillator();
+        let gainNode = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, time);
+        
+        gainNode.gain.setValueAtTime(vol, time);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, time + duration);
+        
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc.start(time);
+        osc.stop(time + duration);
+    }
+
+    function scheduler() {
+        while (nextNoteTime < audioCtx.currentTime + 0.1) {
+            let noteIndex = currentStep % bassline.length;
+            
+            // Bass beat
+            if (currentStep % 2 === 0) {
+                playNote(bassline[noteIndex], nextNoteTime, step * 1.5, 'sawtooth', 0.1);
+            }
+            
+            // Retro synth melody notes
+            if (currentStep % 4 === 1 || currentStep % 8 === 6) {
+                playNote(bassline[noteIndex] * 2, nextNoteTime, step * 0.8, 'triangle', 0.08);
+            }
+
+            // Beat click snare
+            if (currentStep % 8 === 4) {
+                playNote(120, nextNoteTime, 0.05, 'square', 0.04);
+            }
+            
+            nextNoteTime += step;
+            currentStep++;
+        }
+    }
+
+    let nextNoteTime = audioCtx.currentTime;
+    audioLoopInterval = setInterval(scheduler, 25);
+}
+
+function stopFunkSynth() {
+    if (audioLoopInterval) {
+        clearInterval(audioLoopInterval);
+        audioLoopInterval = null;
+    }
+    if (audioCtx) {
+        audioCtx.close();
+        audioCtx = null;
+    }
+}
 
 const player = {
     x: 180,
@@ -140,7 +208,6 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
-// Sound activation fix on click
 startBtn.addEventListener("click", () => {
     startScreen.style.display = "none";
     gameActive = true;
@@ -151,13 +218,8 @@ startBtn.addEventListener("click", () => {
     player.vy = 0;
     player.isGrounded = true;
     
-    // Reset track and play
-    bgm.currentTime = 0;
-    bgm.play().then(() => {
-        console.log("playing bartsimpfunk.mp3");
-    }).catch(err => {
-        console.log("Audio load error - make sure bartsimpfunk.mp3 is in the exact same folder as this html file", err);
-    });
+    // Start code audio synth instantly on click
+    playFunkSynth();
     
     animate();
 });
@@ -232,6 +294,7 @@ function checkCollision(rect1, rect2) {
 
 function gameOver() {
     gameActive = false;
+    stopFunkSynth();
     startScreen.style.display = "flex";
     document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
     startBtn.innerText = "TRY AGAIN";
