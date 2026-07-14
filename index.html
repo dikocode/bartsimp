@@ -77,7 +77,8 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
-<audio id="bgm" src="bartsimpfunk.mp4" loop></audio>
+<!-- Fixed the audio file extension to mp3 here -->
+<audio id="bgm" src="bartsimpfunk.mp3" loop></audio>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
@@ -99,7 +100,7 @@ const player = {
     width: 40,
     height: 60,
     originalHeight: 60,
-    color: "#FFD90F", // Bart Yellow
+    color: "#FFD90F", 
     vy: 0,
     gravity: 1.2,
     jumpForce: -18,
@@ -112,7 +113,7 @@ const bob = {
     y: 280,
     width: 50,
     height: 80,
-    color: "#007F3E" // Bob Green hair / clothes
+    color: "#007F3E" 
 };
 
 const keys = {};
@@ -154,7 +155,7 @@ startBtn.addEventListener("click", () => {
 
 class Obstacle {
     constructor(type) {
-        this.type = type; // 'spike' or 'block'
+        this.type = type; 
         this.x = canvas.width;
         if (type === 'spike') {
             this.width = 30;
@@ -163,7 +164,7 @@ class Obstacle {
         } else {
             this.width = 50;
             this.height = 50;
-            this.y = 270; // Floating block you must slide under
+            this.y = 270; 
         }
     }
 
@@ -216,11 +217,9 @@ function animate() {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Draw Ground
     ctx.fillStyle = "#444";
     ctx.fillRect(0, 360, canvas.width, 40);
 
-    // Physics
     player.vy += player.gravity;
     player.y += player.vy;
 
@@ -231,24 +230,18 @@ function animate() {
         player.isGrounded = true;
     }
 
-    // Dynamic Bob visual bobbing
     bob.y = 280 + Math.sin(Date.now() * 0.01) * 10;
 
-    // Draw Sideshow Bob
     ctx.fillStyle = bob.color;
     ctx.fillRect(bob.x, bob.y, bob.width, bob.height);
-    // Draw wild hair top
     ctx.fillStyle = "#FF3B30";
     ctx.fillRect(bob.x - 10, bob.y - 15, bob.width + 20, 20);
 
-    // Draw Bart
     ctx.fillStyle = player.color;
     ctx.fillRect(player.x, player.y, player.width, player.height);
-    // Bart blue shorts/shirt
     ctx.fillStyle = "#007AFF";
     ctx.fillRect(player.x, player.y + player.height - 15, player.width, 15);
 
-    // Manage Obstacles
     spawnObstacle();
     for (let i = obstacles.length - 1; i >= 0; i--) {
         obstacles[i].update();
@@ -263,7 +256,6 @@ function animate() {
             obstacles.splice(i, 1);
             score += 10;
             scoreBoard.innerText = "SCORE: " + score;
-            // Ramp up speed
             gameSpeed += 0.25;
         }
     }
