@@ -14,6 +14,7 @@
             user-select: none;
             outline: none;
             -webkit-tap-highlight-color: transparent;
+            touch-action: none;
         }
         body {
             margin: 0;
@@ -33,6 +34,7 @@
             width: 95vw;
             max-width: 800px;
             aspect-ratio: 2 / 1;
+            touch-action: none;
         }
         canvas {
             background: #0f051d;
@@ -45,6 +47,7 @@
             box-shadow: 0 0 30px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none;
         }
         #version-tag {
             position: absolute;
@@ -80,6 +83,18 @@
             letter-spacing: 1px;
             pointer-events: none;
         }
+        #lives-indicator {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            font-size: 16px;
+            color: #ff3366;
+            text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
+            z-index: 15;
+            font-family: inherit;
+            pointer-events: none;
+            display: none;
+        }
         #jetpack-btn {
             position: absolute;
             bottom: 60px;
@@ -96,6 +111,7 @@
             z-index: 15;
             display: none;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            touch-action: none;
         }
         #start-screen {
             position: absolute;
@@ -117,6 +133,7 @@
             border-radius: 16px;
             border: 1px solid rgba(255, 0, 255, 0.2);
             box-shadow: 0 0 40px rgba(255, 0, 255, 0.25);
+            touch-action: none;
         }
         #powerup-screen {
             position: absolute;
@@ -138,6 +155,7 @@
             border-radius: 16px;
             border: 1px solid rgba(0, 255, 255, 0.2);
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
+            touch-action: none;
         }
         .btn-group {
             display: flex;
@@ -158,6 +176,7 @@
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             user-select: none;
             -webkit-user-select: none;
+            touch-action: none;
         }
         button:hover {
             transform: scale(1.05) translateY(-2px);
@@ -179,6 +198,7 @@
             align-items: center;
             box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
             transition: border-color 0.3s, box-shadow 0.3s;
+            touch-action: none;
         }
         .shop-item:hover {
             border-color: rgba(255, 0, 255, 0.3);
@@ -236,6 +256,7 @@
     <div id="version-tag">v1.2 "the neon ages"</div>
     <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
+    <div id="lives-indicator">LIVES: 0</div>
     <button id="jetpack-btn">JETPACK [J] (0)</button>
     
     <div id="start-screen">
@@ -262,10 +283,10 @@
         
         <div class="shop-item">
             <div style="text-align: left;">
-                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 1: EXTRA LIFE</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="life-desc">Survive a hit (Max 1)</div>
+                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 1: EXTRA LIVES</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="life-desc">Survive hits (Max 5 stacked)</div>
             </div>
-            <button id="buy-life-btn">COST: 50 PTS</button>
+            <button id="buy-life-btn">COST: 50 PTS (0/5)</button>
         </div>
 
         <div class="shop-item">
@@ -301,6 +322,7 @@ const startBtn = document.getElementById("start-btn");
 const openShopBtn = document.getElementById("open-shop-btn");
 const closeShopBtn = document.getElementById("close-shop-btn");
 const scoreBoard = document.getElementById("score-board");
+const livesIndicator = document.getElementById("lives-indicator");
 const jetpackBtn = document.getElementById("jetpack-btn");
 const bgm = document.getElementById("bgm");
 const audioStatus = document.getElementById("audio-status");
@@ -311,22 +333,42 @@ const buyLifeBtn = document.getElementById("buy-life-btn");
 const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
-const safeStorage = {
-    getItem(key) {
-        try {
-            return sessionStorage.getItem(key);
-        } catch (e) {
-            return this[key] || null;
+window.addEventListener("touchstart", (e) => {
+    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+    }
+}, { passive: false });
+window.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+}, { passive: false });
+window.addEventListener("touchend", (e) => {
+    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+        e.preventDefault();
+    }
+}, { passive: false });
+
+function setCookie(name, value, days = 365) {
+    const d = new Date();
+    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + d.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+}
+
+function getCookie(name) {
+    const cname = name + "=";
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const ca = decodedCookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
         }
-    },
-    setItem(key, val) {
-        try {
-            sessionStorage.setItem(key, val);
-        } catch (e) {
-            this[key] = val;
+        if (c.indexOf(cname) == 0) {
+            return c.substring(cname.length, c.length);
         }
     }
-};
+    return "";
+}
 
 let audioCtx = null;
 function playCoinSFX() {
@@ -388,10 +430,10 @@ let spawnTimer = 0;
 let bgOffset = 0;
 let particles = [];
 
-let playerPoints = parseInt(safeStorage.getItem("bart_points")) || 0;
-let upgradeLife = parseInt(safeStorage.getItem("bart_up_life")) || 0; 
-let upgradeJetpack = parseInt(safeStorage.getItem("bart_up_jetpack")) || 0; 
-let upgradeDouble = parseInt(safeStorage.getItem("bart_up_double")) || 0; 
+let playerPoints = parseInt(getCookie("bart_points")) || 0;
+let upgradeLife = parseInt(getCookie("bart_up_life")) || 0; 
+let upgradeJetpack = parseInt(getCookie("bart_up_jetpack")) || 0; 
+let upgradeDouble = parseInt(getCookie("bart_up_double")) || 0; 
 
 let lastTime = 0;
 
@@ -405,11 +447,11 @@ function updatePointsUI() {
     menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
     shopPointsDisplay.innerText = "POINTS: " + playerPoints;
     
-    if (upgradeLife >= 1) {
-        buyLifeBtn.innerText = "MAXED";
+    if (upgradeLife >= 5) {
+        buyLifeBtn.innerText = "MAXED (5/5)";
         buyLifeBtn.disabled = true;
     } else {
-        buyLifeBtn.innerText = "COST: 50 PTS";
+        buyLifeBtn.innerText = `COST: 50 PTS (${upgradeLife}/5)`;
         buyLifeBtn.disabled = false;
     }
 
@@ -442,11 +484,11 @@ closeShopBtn.addEventListener("click", () => {
 });
 
 buyLifeBtn.addEventListener("click", () => {
-    if (playerPoints >= 50 && upgradeLife < 1) {
+    if (playerPoints >= 50 && upgradeLife < 5) {
         playerPoints -= 50;
-        upgradeLife = 1;
-        safeStorage.setItem("bart_points", playerPoints);
-        safeStorage.setItem("bart_up_life", upgradeLife);
+        upgradeLife++;
+        setCookie("bart_points", playerPoints);
+        setCookie("bart_up_life", upgradeLife);
         updatePointsUI();
     }
 });
@@ -455,8 +497,8 @@ buyJetpackBtn.addEventListener("click", () => {
     if (playerPoints >= 30 && upgradeJetpack < 32) {
         playerPoints -= 30;
         upgradeJetpack++;
-        safeStorage.setItem("bart_points", playerPoints);
-        safeStorage.setItem("bart_up_jetpack", upgradeJetpack);
+        setCookie("bart_points", playerPoints);
+        setCookie("bart_up_jetpack", upgradeJetpack);
         updatePointsUI();
     }
 });
@@ -466,8 +508,8 @@ buyPointsBtn.addEventListener("click", () => {
     if (playerPoints >= cost && upgradeDouble < 3) {
         playerPoints -= cost;
         upgradeDouble++;
-        safeStorage.setItem("bart_points", playerPoints);
-        safeStorage.setItem("bart_up_double", upgradeDouble);
+        setCookie("bart_points", playerPoints);
+        setCookie("bart_up_double", upgradeDouble);
         updatePointsUI();
     }
 });
@@ -482,7 +524,7 @@ bgm.addEventListener('error', (e) => {
     audioStatus.style.color = "#ff3366";
 });
 
-let hasLifeActive = 0;
+let activeLives = 0;
 let isThrusting = false;
 
 const player = {
@@ -520,7 +562,7 @@ window.addEventListener("keydown", (e) => {
         if (jetpackState === 'ready' && upgradeJetpack > 0) {
             jetpackState = 'active';
             upgradeJetpack--;
-            safeStorage.setItem("bart_up_jetpack", upgradeJetpack);
+            setCookie("bart_up_jetpack", upgradeJetpack);
             updatePointsUI();
             jetpackFuel = 1500;
         }
@@ -562,6 +604,10 @@ window.addEventListener("touchstart", (e) => {
     }
 }, { passive: false });
 
+window.addEventListener("touchmove", (e) => {
+    e.preventDefault(); 
+}, { passive: false });
+
 window.addEventListener("touchend", (e) => {
     if (!gameActive) return;
     if (e.target === jetpackBtn) return;
@@ -580,7 +626,7 @@ jetpackBtn.addEventListener("touchstart", (e) => {
     if (jetpackState === 'ready' && upgradeJetpack > 0) {
         jetpackState = 'active';
         upgradeJetpack--;
-        safeStorage.setItem("bart_up_jetpack", upgradeJetpack);
+        setCookie("bart_up_jetpack", upgradeJetpack);
         updatePointsUI();
         jetpackFuel = 1500;
     }
@@ -594,6 +640,15 @@ jetpackBtn.addEventListener("touchend", (e) => {
 window.addEventListener("contextmenu", (e) => {
     e.preventDefault();
 });
+
+function updateLivesIndicator() {
+    if (activeLives > 0) {
+        livesIndicator.style.display = "block";
+        livesIndicator.innerText = "LIVES: " + activeLives;
+    } else {
+        livesIndicator.style.display = "none";
+    }
+}
 
 startBtn.addEventListener("click", () => {
     startScreen.style.display = "none";
@@ -613,7 +668,9 @@ startBtn.addEventListener("click", () => {
     player.isSliding = false;
     isThrusting = false;
     
-    hasLifeActive = upgradeLife; 
+    activeLives = upgradeLife; 
+    updateLivesIndicator();
+    
     jetpackState = 'ready';
     jetpackCooldownTimer = 0;
     jKeyPressed = false;
@@ -819,17 +876,17 @@ function spawnObstacle() {
     
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
         let r = Math.random();
-        if (r < 0.45) { // raised probability to make platforms and coin lines spawn more often
+        if (r < 0.45) { 
             let plat = new Platform();
             platforms.push(plat);
             
-            let numCoins = 3 + Math.floor(Math.random() * 4); // more coins on platforms
+            let numCoins = 3 + Math.floor(Math.random() * 4); 
             let spacing = plat.width / (numCoins + 1);
             for (let i = 1; i <= numCoins; i++) {
                 coins.push(new Coin(plat.x + (i * spacing) - 12, plat.y - 35));
             }
-        } else if (r < 0.72) { // raised probability of raw horizontal coin paths spawning
-            let numCoins = 4 + Math.floor(Math.random() * 5); // bigger coin lines
+        } else if (r < 0.72) { 
+            let numCoins = 4 + Math.floor(Math.random() * 5); 
             let startY = 140 + Math.random() * 80;
             for (let i = 0; i < numCoins; i++) {
                 coins.push(new Coin(canvas.width + (i * 35), startY + Math.sin(i * 0.6) * 35));
@@ -843,7 +900,6 @@ function spawnObstacle() {
             const type = pool[Math.floor(Math.random() * pool.length)];
             obstacles.push(new Obstacle(type));
             
-            // spawn some bonus coins over spikes to tempt jumps
             if (Math.random() < 0.65) {
                 coins.push(new Coin(canvas.width + 40, 160 + Math.random() * 50));
             }
@@ -864,6 +920,7 @@ function gameOver() {
     bgm.pause();
     isThrusting = false;
     jetpackBtn.style.display = "none";
+    livesIndicator.style.display = "none";
     
     let pointsEarned = score;
     if (upgradeDouble > 0) {
@@ -871,7 +928,7 @@ function gameOver() {
     }
     
     playerPoints += pointsEarned;
-    safeStorage.setItem("bart_points", playerPoints);
+    setCookie("bart_points", playerPoints);
     updatePointsUI();
     
     startScreen.style.display = "flex";
@@ -956,7 +1013,7 @@ function drawBart(x, y, w, h, sliding) {
         ctx.fillRect(x - 14, y + 30, 3, 15);
     }
 
-    if (hasLifeActive > 0) {
+    if (activeLives > 0) {
         ctx.shadowBlur = 20;
         ctx.shadowColor = "#00ffcc";
     } else {
@@ -1072,12 +1129,11 @@ function handleParticles() {
     }
 }
 
-function animate() {
+function animate(nowTime = performance.now()) {
     if (!gameActive) return;
 
-    const now = performance.now();
-    const dt = now - lastTime;
-    lastTime = now;
+    const dt = Math.min(nowTime - lastTime, 100); 
+    lastTime = nowTime;
 
     if (jetpackState === 'active') {
         if (jKeyPressed) {
@@ -1159,8 +1215,9 @@ function animate() {
                     continue; 
                 }
 
-                if (hasLifeActive > 0) {
-                    hasLifeActive = 0;
+                if (activeLives > 0) {
+                    activeLives--;
+                    updateLivesIndicator();
                     platforms.splice(i, 1);
                     continue;
                 } else {
@@ -1232,8 +1289,9 @@ function animate() {
         obstacles[i].draw();
 
         if (checkCollision(player, obstacles[i])) {
-            if (hasLifeActive > 0) {
-                hasLifeActive = 0;
+            if (activeLives > 0) {
+                activeLives--;
+                updateLivesIndicator();
                 obstacles.splice(i, 1);
                 continue;
             } else {
@@ -1244,7 +1302,6 @@ function animate() {
 
         if (obstacles[i].x + obstacles[i].width < 0) {
             obstacles.splice(i, 1);
-            // score increment removed here (only coins give score now)
             gameSpeed += 0.35; 
         }
     }
