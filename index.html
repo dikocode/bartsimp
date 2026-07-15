@@ -63,6 +63,21 @@
             z-index: 10;
             color: #FFD90F;
         }
+        #jetpack-timer {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 14px;
+            color: #55ff55;
+            text-shadow: 2px 2px #000;
+            z-index: 10;
+            display: none;
+            background: rgba(0,0,0,0.6);
+            padding: 4px 10px;
+            border-radius: 5px;
+            border: 1px solid #55ff55;
+        }
         #start-screen {
             position: absolute;
             top: 0;
@@ -166,6 +181,7 @@
     <div id="version-tag">v1.0 alpha</div>
     <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
     <div id="score-board">SCORE: 0</div>
+    <div id="jetpack-timer">JETPACK: 30.0s</div>
     
     <div id="start-screen">
         <h1 style="color: #FFD90F; margin-bottom: 2px; font-size: min(6vw, 32px); margin-top: 15px;">BART SIMPSON RUN</h1>
@@ -199,8 +215,8 @@
 
         <div class="shop-item">
             <div style="text-align: left;">
-                <div style="font-size: 14px;">SLOT 2: JETPACK</div>
-                <div style="font-size: 11px; color: #aaa;" id="jetpack-desc">Fly over obstacles! Hold Space or Tap Right</div>
+                <div style="font-size: 14px;">SLOT 2: JETPACK (1-USE)</div>
+                <div style="font-size: 11px; color: #aaa;" id="jetpack-desc">Fly for 30s! Space or Right Tap</div>
             </div>
             <button id="buy-jetpack-btn">COST: 30 PTS</button>
         </div>
@@ -230,6 +246,7 @@ const startBtn = document.getElementById("start-btn");
 const openShopBtn = document.getElementById("open-shop-btn");
 const closeShopBtn = document.getElementById("close-shop-btn");
 const scoreBoard = document.getElementById("score-board");
+const jetpackTimerUI = document.getElementById("jetpack-timer");
 const bgm = document.getElementById("bgm");
 const audioStatus = document.getElementById("audio-status");
 
@@ -252,6 +269,11 @@ let upgradeLife = parseInt(sessionStorage.getItem("bart_up_life")) || 0;
 let upgradeJetpack = parseInt(sessionStorage.getItem("bart_up_jetpack")) || 0; 
 let upgradeDouble = parseInt(sessionStorage.getItem("bart_up_double")) || 0; 
 
+// Track active status and active fuel timer for jetpack
+let jetpackActiveThisRun = false;
+let jetpackTimeRemaining = 30000; // 30 seconds in ms
+let lastTime = 0;
+
 function updatePointsUI() {
     menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
     shopPointsDisplay.innerText = "POINTS: " + playerPoints;
@@ -261,13 +283,15 @@ function updatePointsUI() {
         buyLifeBtn.disabled = true;
     } else {
         buyLifeBtn.innerText = "COST: 50 PTS";
+        buyLifeBtn.disabled = false;
     }
 
     if (upgradeJetpack >= 1) {
-        buyJetpackBtn.innerText = "OWNED";
+        buyJetpackBtn.innerText = "READY";
         buyJetpackBtn.disabled = true;
     } else {
         buyJetpackBtn.innerText = "COST: 30 PTS";
+        buyJetpackBtn.disabled = false;
     }
 
     if (upgradeDouble >= 3) {
@@ -356,7 +380,7 @@ const bob = {
 
 window.addEventListener("keydown", (e) => {
     if (e.code === "Space") {
-        if (upgradeJetpack > 0) {
+        if (jetpackActiveThisRun) {
             isThrusting = true;
             player.isGrounded = false;
         } else if (player.isGrounded && !player.isSliding) {
@@ -394,7 +418,7 @@ window.addEventListener("touchstart", (e) => {
             player.y = 335;
         }
     } else {
-        if (upgradeJetpack > 0) {
+        if (jetpackActiveThisRun) {
             isThrusting = true;
             player.isGrounded = false;
         } else if (player.isGrounded && !player.isSliding) {
@@ -426,11 +450,23 @@ startBtn.addEventListener("click", () => {
     
     hasLifeActive = upgradeLife; 
     
+    // Set up Jetpack usage for this specific run
+    if (upgradeJetpack > 0) {
+        jetpackActiveThisRun = true;
+        jetpackTimeRemaining = 30000; // Reset to 30 seconds
+        jetpackTimerUI.style.display = "block";
+        jetpackTimerUI.innerText = "JETPACK: 30.0s";
+    } else {
+        jetpackActiveThisRun = false;
+        jetpackTimerUI.style.display = "none";
+    }
+    
     bgm.currentTime = 0;
     bgm.play().catch(e => {
         console.log("Audio play blocked", e);
     });
     
+    lastTime = performance.now();
     animate();
 });
 
@@ -545,6 +581,8 @@ function checkCollision(rect1, rect2) {
 function gameOver() {
     gameActive = false;
     bgm.pause();
+    isThrusting = false;
+    jetpackTimerUI.style.display = "none";
     
     let pointsEarned = Math.floor(score / 10);
     if (upgradeDouble > 0) {
@@ -604,8 +642,8 @@ function drawBart(x, y, w, h, sliding) {
     }
     
     if (!sliding) {
-        // Draw Jetpack on Bart's back if owned
-        if (upgradeJetpack > 0) {
+        // Draw Jetpack on Bart's back if active
+        if (jetpackActiveThisRun) {
             ctx.fillStyle = "#555";
             ctx.fillRect(x - 12, y + 30, 12, 30);
             ctx.fillStyle = "#777";
@@ -717,7 +755,7 @@ function drawSideshowBob(x, y, w, h) {
 }
 
 function handleParticles() {
-    if (isThrusting) {
+    if (isThrusting && jetpackActiveThisRun) {
         particles.push({
             x: player.x - 8,
             y: player.y + 55,
@@ -749,10 +787,30 @@ function handleParticles() {
 function animate() {
     if (!gameActive) return;
 
+    // Calculate time differences for the 30-second fuel limit
+    const now = performance.now();
+    const dt = now - lastTime;
+    lastTime = now;
+
+    if (jetpackActiveThisRun) {
+        jetpackTimeRemaining -= dt;
+        if (jetpackTimeRemaining <= 0) {
+            // Jetpack runs out completely!
+            jetpackActiveThisRun = false;
+            isThrusting = false;
+            upgradeJetpack = 0; // Strip the upgrade away entirely
+            sessionStorage.setItem("bart_up_jetpack", 0);
+            jetpackTimerUI.style.display = "none";
+            updatePointsUI();
+        } else {
+            jetpackTimerUI.innerText = "JETPACK: " + (jetpackTimeRemaining / 1000).toFixed(1) + "s";
+        }
+    }
+
     bgOffset += gameSpeed;
     drawBackground();
 
-    if (isThrusting && upgradeJetpack > 0) {
+    if (isThrusting && jetpackActiveThisRun) {
         player.vy -= 1.8; // Stronger upforce
         if (player.vy < -11) player.vy = -11; // Terminal upward velocity limit
     } else {
