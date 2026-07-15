@@ -12,6 +12,8 @@
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
+            outline: none;
+            -webkit-tap-highlight-color: transparent;
         }
         body {
             margin: 0;
@@ -41,6 +43,8 @@
             box-sizing: border-box;
             border-radius: 16px;
             box-shadow: 0 0 30px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
+            user-select: none;
+            -webkit-user-select: none;
         }
         #version-tag {
             position: absolute;
@@ -51,6 +55,7 @@
             text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
             z-index: 15;
             font-family: monospace;
+            pointer-events: none;
         }
         #music-watermark {
             position: absolute;
@@ -73,6 +78,7 @@
             z-index: 10;
             color: #FFD90F;
             letter-spacing: 1px;
+            pointer-events: none;
         }
         #jetpack-btn {
             position: absolute;
@@ -150,6 +156,8 @@
             box-shadow: 0 6px 20px rgba(255, 0, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
             transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            user-select: none;
+            -webkit-user-select: none;
         }
         button:hover {
             transform: scale(1.05) translateY(-2px);
@@ -186,6 +194,7 @@
             color: #ff55bb;
             margin-top: 8px;
             opacity: 0.8;
+            pointer-events: none;
         }
         .points-display {
             color: #00ffff;
@@ -193,6 +202,7 @@
             margin-bottom: 8px;
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
             letter-spacing: 1px;
+            pointer-events: none;
         }
         .credits-box {
             margin-top: 12px;
@@ -205,6 +215,8 @@
             font-family: sans-serif;
             line-height: 1.5;
             max-width: 90%;
+            user-select: none;
+            -webkit-user-select: none;
         }
         .credits-box a {
             color: #00ffff;
@@ -221,9 +233,9 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.2 "the neon age"</div>
+    <div id="version-tag">v1.2 "the neon ages"</div>
     <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
-    <div id="score-board">SCORE: 0</div>
+    <div id="score-board">POINTS: 0</div>
     <button id="jetpack-btn">JETPACK [J] (0)</button>
     
     <div id="start-screen">
@@ -588,6 +600,7 @@ startBtn.addEventListener("click", () => {
     jetpackBtn.style.display = "block";
     gameActive = true;
     score = 0;
+    scoreBoard.innerText = "POINTS: " + score;
     gameSpeed = 6;
     obstacles = [];
     platforms = [];
@@ -806,20 +819,20 @@ function spawnObstacle() {
     
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
         let r = Math.random();
-        if (r < 0.38) {
+        if (r < 0.45) { // raised probability to make platforms and coin lines spawn more often
             let plat = new Platform();
             platforms.push(plat);
             
-            let numCoins = 2 + Math.floor(Math.random() * 3);
+            let numCoins = 3 + Math.floor(Math.random() * 4); // more coins on platforms
             let spacing = plat.width / (numCoins + 1);
             for (let i = 1; i <= numCoins; i++) {
                 coins.push(new Coin(plat.x + (i * spacing) - 12, plat.y - 35));
             }
-        } else if (r < 0.60) {
-            let numCoins = 3 + Math.floor(Math.random() * 4);
+        } else if (r < 0.72) { // raised probability of raw horizontal coin paths spawning
+            let numCoins = 4 + Math.floor(Math.random() * 5); // bigger coin lines
             let startY = 140 + Math.random() * 80;
             for (let i = 0; i < numCoins; i++) {
-                coins.push(new Coin(canvas.width + (i * 40), startY + Math.sin(i * 0.6) * 35));
+                coins.push(new Coin(canvas.width + (i * 35), startY + Math.sin(i * 0.6) * 35));
             }
         } else {
             let pool = ['spike', 'block'];
@@ -829,6 +842,11 @@ function spawnObstacle() {
             
             const type = pool[Math.floor(Math.random() * pool.length)];
             obstacles.push(new Obstacle(type));
+            
+            // spawn some bonus coins over spikes to tempt jumps
+            if (Math.random() < 0.65) {
+                coins.push(new Coin(canvas.width + 40, 160 + Math.random() * 50));
+            }
         }
         spawnTimer = 0;
     }
@@ -1120,7 +1138,6 @@ function animate() {
 
         let plat = platforms[i];
         
-        // Check landing safely on top
         if (player.x + player.width - 12 > plat.x && 
             player.x + 12 < plat.x + plat.width && 
             player.y + player.height <= plat.y + 12 && 
@@ -1133,13 +1150,11 @@ function animate() {
                 onPlatform = true;
             }
         } else {
-            // Only hit platform sides/bottom if bart is hitting it horizontally and NOT running off the edge
             if (player.x < plat.x + plat.width &&
                 player.x + player.width > plat.x &&
                 player.y < plat.y + plat.height &&
                 player.y + player.height > plat.y) {
                 
-                // If player falls below platform top level, but is fully off horizontally, do not die
                 if (player.x + 12 > plat.x + plat.width || player.x + player.width - 12 < plat.x) {
                     continue; 
                 }
@@ -1190,7 +1205,7 @@ function animate() {
             coins.splice(i, 1);
             score += 1; 
             playCoinSFX(); 
-            scoreBoard.innerText = "SCORE: " + score;
+            scoreBoard.innerText = "POINTS: " + score;
 
             for (let c = 0; c < 8; c++) {
                 particles.push({
@@ -1229,8 +1244,7 @@ function animate() {
 
         if (obstacles[i].x + obstacles[i].width < 0) {
             obstacles.splice(i, 1);
-            score += 1; 
-            scoreBoard.innerText = "SCORE: " + score;
+            // score increment removed here (only coins give score now)
             gameSpeed += 0.35; 
         }
     }
