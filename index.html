@@ -7,7 +7,7 @@
     <style>
         body {
             margin: 0;
-            background: #111;
+            background: radial-gradient(circle at center, #1b0a2a 0%, #08030d 100%);
             color: #fff;
             font-family: 'Arial Black', sans-serif;
             display: flex;
@@ -25,20 +25,22 @@
             aspect-ratio: 2 / 1;
         }
         canvas {
-            background: #222;
-            border: 4px solid #fff;
+            background: #0f051d;
+            border: 4px solid #ff00ff;
             display: block;
             width: 100%;
             height: 100%;
             box-sizing: border-box;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
         }
         #version-tag {
             position: absolute;
             top: 15px;
             left: 15px;
             font-size: 14px;
-            color: #ff5555;
-            text-shadow: 2px 2px #000;
+            color: #00ffff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
             z-index: 15;
             font-family: monospace;
         }
@@ -47,7 +49,7 @@
             top: 15px;
             right: 15px;
             font-size: 11px;
-            color: #aaa;
+            color: rgba(255, 255, 255, 0.4);
             text-shadow: 1px 1px #000;
             z-index: 15;
             font-family: sans-serif;
@@ -58,10 +60,11 @@
             top: 15px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 24px;
-            text-shadow: 3px 3px #000;
+            font-size: 26px;
+            text-shadow: 0 0 10px rgba(255, 217, 15, 0.5);
             z-index: 10;
             color: #FFD90F;
+            letter-spacing: 1px;
         }
         #jetpack-timer {
             position: absolute;
@@ -70,13 +73,15 @@
             transform: translateX(-50%);
             font-size: 14px;
             color: #55ff55;
-            text-shadow: 2px 2px #000;
+            text-shadow: 0 0 8px rgba(85, 255, 85, 0.6);
             z-index: 10;
             display: none;
-            background: rgba(0,0,0,0.6);
-            padding: 4px 10px;
-            border-radius: 5px;
-            border: 1px solid #55ff55;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(85, 255, 85, 0.4);
         }
         #start-screen {
             position: absolute;
@@ -84,15 +89,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: linear-gradient(135deg, rgba(20, 10, 35, 0.85) 0%, rgba(8, 4, 16, 0.95) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 20;
             text-align: center;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 0, 255, 0.2);
+            box-shadow: 0 0 40px rgba(255, 0, 255, 0.25);
         }
         #powerup-screen {
             position: absolute;
@@ -100,15 +110,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10,10,10,0.95);
+            background: linear-gradient(135deg, rgba(15, 5, 30, 0.9) 0%, rgba(5, 2, 10, 0.98) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             z-index: 30;
             text-align: center;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
         }
         .btn-group {
             display: flex;
@@ -119,59 +134,79 @@
             padding: 12px 30px;
             font-size: 18px;
             font-family: inherit;
-            background: #FFD90F;
-            color: #000;
-            border: none;
+            background: linear-gradient(135deg, #ff00ff 0%, #7000ff 100%);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
-            border-radius: 10px;
-            transition: 0.2s;
+            border-radius: 14px;
+            box-shadow: 0 6px 20px rgba(255, 0, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         button:hover {
-            transform: scale(1.1);
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
+            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
+            border-color: rgba(255, 255, 255, 0.6);
         }
         .shop-item {
-            background: #222;
-            border: 2px solid #FFD90F;
-            border-radius: 8px;
-            padding: 10px;
-            margin: 8px;
-            width: 80%;
-            max-width: 400px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 12px;
+            padding: 12px;
+            margin: 6px;
+            width: 85%;
+            max-width: 420px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .shop-item:hover {
+            border-color: rgba(255, 0, 255, 0.3);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
         .shop-item button {
-            padding: 6px 15px;
-            font-size: 14px;
+            padding: 8px 18px;
+            font-size: 13px;
+            border-radius: 10px;
         }
         #audio-status {
             font-size: 11px;
-            color: #ff5555;
-            margin-top: 5px;
+            color: #ff55bb;
+            margin-top: 8px;
+            opacity: 0.8;
         }
         .points-display {
-            color: #55ff55;
-            font-size: 20px;
-            margin-bottom: 5px;
-            text-shadow: 2px 2px #000;
+            color: #00ffff;
+            font-size: 22px;
+            margin-bottom: 8px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+            letter-spacing: 1px;
         }
         .credits-box {
-            margin-top: 10px;
-            padding: 8px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px dashed #555;
-            border-radius: 5px;
+            margin-top: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
             font-size: 10px;
-            color: #ccc;
+            color: #aaa;
             font-family: sans-serif;
-            line-height: 1.4;
+            line-height: 1.5;
             max-width: 90%;
         }
         .credits-box a {
-            color: #55ff55;
-            text-decoration: underline;
+            color: #00ffff;
+            text-decoration: none;
+            border-bottom: 1px dashed rgba(0, 255, 255, 0.4);
             pointer-events: auto;
+            transition: color 0.2s;
+        }
+        .credits-box a:hover {
+            color: #ff00ff;
         }
     </style>
 </head>
@@ -184,13 +219,13 @@
     <div id="jetpack-timer">JETPACK: 30.0s</div>
     
     <div id="start-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 2px; font-size: min(6vw, 32px); margin-top: 15px;">BART SIMPSON RUN</h1>
+        <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6.5vw, 36px); margin-top: 10px; text-shadow: 0 0 15px rgba(255,217,15,0.4); letter-spacing: 1px;">BART SIMPSON RUN</h1>
         <div class="points-display" id="menu-points">POINTS: 0</div>
         <div class="btn-group">
             <button id="start-btn">START RUNNING</button>
-            <button id="open-shop-btn" style="background: #55ff55;">POWER UPS</button>
+            <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
         </div>
-        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #ddd;">HOLD SPACE or HOLD RIGHT to Jetpack | TAP LEFT to Slide</p>
+        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">HOLD SPACE or HOLD RIGHT to Jetpack | TAP LEFT to Slide</p>
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
@@ -202,34 +237,34 @@
     </div>
 
     <div id="powerup-screen">
-        <h1 style="color: #55ff55; margin-bottom: 5px; font-size: min(6vw, 32px);">UPGRADES</h1>
+        <h1 style="color: #00ffff; margin-bottom: 8px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);">UPGRADES</h1>
         <div class="points-display" id="shop-points">POINTS: 0</div>
         
         <div class="shop-item">
             <div style="text-align: left;">
-                <div style="font-size: 14px;">SLOT 1: EXTRA LIFE</div>
-                <div style="font-size: 11px; color: #aaa;" id="life-desc">Survive a hit (Max 1)</div>
+                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 1: EXTRA LIFE</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="life-desc">Survive a hit (Max 1)</div>
             </div>
             <button id="buy-life-btn">COST: 50 PTS</button>
         </div>
 
         <div class="shop-item">
             <div style="text-align: left;">
-                <div style="font-size: 14px;">SLOT 2: JETPACK (1-USE)</div>
-                <div style="font-size: 11px; color: #aaa;" id="jetpack-desc">Fly for 30s! Space or Right Tap</div>
+                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 2: JETPACK (1-USE)</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="jetpack-desc">Fly for 30s! Space or Right Tap</div>
             </div>
             <button id="buy-jetpack-btn">COST: 30 PTS</button>
         </div>
 
         <div class="shop-item">
             <div style="text-align: left;">
-                <div style="font-size: 14px;">SLOT 3: DOUBLE POINTS</div>
-                <div style="font-size: 11px; color: #aaa;" id="points-desc">Boost points gained per run</div>
+                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 3: DOUBLE POINTS</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="points-desc">Boost points gained per run</div>
             </div>
             <button id="buy-points-btn">COST: 35 PTS</button>
         </div>
 
-        <button id="close-shop-btn" style="background: #ff5555; margin-top: 15px;">BACK TO MENU</button>
+        <button id="close-shop-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); margin-top: 15px;">BACK TO MENU</button>
     </div>
 
     <canvas id="gameCanvas" width="800" height="400"></canvas>
@@ -269,9 +304,8 @@ let upgradeLife = parseInt(sessionStorage.getItem("bart_up_life")) || 0;
 let upgradeJetpack = parseInt(sessionStorage.getItem("bart_up_jetpack")) || 0; 
 let upgradeDouble = parseInt(sessionStorage.getItem("bart_up_double")) || 0; 
 
-// Track active status and active fuel timer for jetpack
 let jetpackActiveThisRun = false;
-let jetpackTimeRemaining = 30000; // 30 seconds in ms
+let jetpackTimeRemaining = 30000; 
 let lastTime = 0;
 
 function updatePointsUI() {
@@ -347,12 +381,12 @@ buyPointsBtn.addEventListener("click", () => {
 
 bgm.addEventListener('canplaythrough', () => {
     audioStatus.innerText = "Audio Status: Ready!";
-    audioStatus.style.color = "#55ff55";
+    audioStatus.style.color = "#00ffff";
 });
 
 bgm.addEventListener('error', (e) => {
     audioStatus.innerText = "Audio Status: Error finding 'BART SIMP DO COPY.mp3' in same folder";
-    audioStatus.style.color = "#ff5555";
+    audioStatus.style.color = "#ff3366";
 });
 
 let hasLifeActive = 0;
@@ -360,7 +394,7 @@ let isThrusting = false;
 
 const player = {
     x: 180,
-    y: 300,
+    y: 280,
     width: 45,
     height: 70,
     originalHeight: 70,
@@ -391,7 +425,7 @@ window.addEventListener("keydown", (e) => {
     if (e.code === "ArrowDown" && player.isGrounded) {
         player.isSliding = true;
         player.height = player.originalHeight / 2;
-        player.y = 335;
+        player.y = 350 - player.height;
     }
 });
 
@@ -400,9 +434,11 @@ window.addEventListener("keyup", (e) => {
         isThrusting = false;
     }
     if (e.code === "ArrowDown") {
-        player.isSliding = false;
-        player.height = player.originalHeight;
-        player.y = 300;
+        if (player.isSliding) {
+            player.isSliding = false;
+            player.height = player.originalHeight;
+            player.y = 350 - player.height;
+        }
     }
 });
 
@@ -415,7 +451,7 @@ window.addEventListener("touchstart", (e) => {
         if (player.isGrounded) {
             player.isSliding = true;
             player.height = player.originalHeight / 2;
-            player.y = 335;
+            player.y = 350 - player.height;
         }
     } else {
         if (jetpackActiveThisRun) {
@@ -431,9 +467,11 @@ window.addEventListener("touchstart", (e) => {
 window.addEventListener("touchend", () => {
     if (!gameActive) return;
     isThrusting = false;
-    player.isSliding = false;
-    player.height = player.originalHeight;
-    player.y = 300;
+    if (player.isSliding) {
+        player.isSliding = false;
+        player.height = player.originalHeight;
+        player.y = 350 - player.height;
+    }
 });
 
 startBtn.addEventListener("click", () => {
@@ -443,17 +481,18 @@ startBtn.addEventListener("click", () => {
     gameSpeed = 6;
     obstacles = [];
     particles = [];
-    player.y = 300;
+    player.height = player.originalHeight;
+    player.y = 350 - player.height;
     player.vy = 0;
     player.isGrounded = true;
+    player.isSliding = false;
     isThrusting = false;
     
     hasLifeActive = upgradeLife; 
     
-    // Set up Jetpack usage for this specific run
     if (upgradeJetpack > 0) {
         jetpackActiveThisRun = true;
-        jetpackTimeRemaining = 30000; // Reset to 30 seconds
+        jetpackTimeRemaining = 30000; 
         jetpackTimerUI.style.display = "block";
         jetpackTimerUI.innerText = "JETPACK: 30.0s";
     } else {
@@ -478,23 +517,23 @@ class Obstacle {
         if (type === 'spike') {
             this.width = 40;
             this.height = 40;
-            this.y = 330;
+            this.y = 310;
         } else if (type === 'double-spike') {
             this.width = 80;
             this.height = 40;
-            this.y = 330;
+            this.y = 310;
         } else if (type === 'triple-spike') {
             this.width = 120;
             this.height = 40;
-            this.y = 330;
+            this.y = 310;
         } else if (type === 'double-block') {
             this.width = 120;
             this.height = 45;
-            this.y = 250;
+            this.y = 240;
         } else { 
             this.width = 60;
             this.height = 45;
-            this.y = 250; 
+            this.y = 240; 
         }
     }
 
@@ -503,8 +542,12 @@ class Obstacle {
     }
 
     draw() {
+        ctx.save();
         if (this.type.includes('spike')) {
-            ctx.fillStyle = "#7A7A7A";
+            ctx.shadowColor = "#ff00ff";
+            ctx.shadowBlur = 10;
+            ctx.fillStyle = "linear-gradient(to top, #ff00ff, #8800ff)";
+            
             let spikeCount = 1;
             if (this.type === 'double-spike') spikeCount = 2;
             if (this.type === 'triple-spike') spikeCount = 3;
@@ -513,6 +556,13 @@ class Obstacle {
             
             for (let i = 0; i < spikeCount; i++) {
                 let startX = this.x + (i * singleSpikeWidth);
+                
+                let spikeGrad = ctx.createLinearGradient(startX, this.y + this.height, startX, this.y);
+                spikeGrad.addColorStop(0, "#7b009a");
+                spikeGrad.addColorStop(0.5, "#ff00ff");
+                spikeGrad.addColorStop(1, "#ffffff");
+                
+                ctx.fillStyle = spikeGrad;
                 ctx.beginPath();
                 ctx.moveTo(startX, this.y + this.height);
                 ctx.lineTo(startX + singleSpikeWidth / 2, this.y);
@@ -520,7 +570,7 @@ class Obstacle {
                 ctx.closePath();
                 ctx.fill();
                 
-                ctx.strokeStyle = "#FFF";
+                ctx.strokeStyle = "#ffffff";
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.moveTo(startX, this.y + this.height);
@@ -528,9 +578,18 @@ class Obstacle {
                 ctx.stroke();
             }
         } else {
-            ctx.fillStyle = "#8B5A2B";
+            ctx.shadowColor = "#00ffff";
+            ctx.shadowBlur = 10;
+            
+            let blockGrad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+            blockGrad.addColorStop(0, "rgba(0, 255, 255, 0.4)");
+            blockGrad.addColorStop(0.5, "rgba(0, 150, 255, 0.3)");
+            blockGrad.addColorStop(1, "rgba(0, 50, 150, 0.6)");
+            
+            ctx.fillStyle = blockGrad;
             ctx.fillRect(this.x, this.y, this.width, this.height);
-            ctx.strokeStyle = "#5C3A21";
+            
+            ctx.strokeStyle = "#00ffff";
             ctx.lineWidth = 3;
             ctx.strokeRect(this.x, this.y, this.width, this.height);
             
@@ -543,6 +602,7 @@ class Obstacle {
             }
             ctx.stroke();
         }
+        ctx.restore();
     }
 }
 
@@ -595,41 +655,74 @@ function gameOver() {
     
     startScreen.style.display = "flex";
     document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
-    document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff5555; font-size:14px;">(+${pointsEarned}!)</span>`;
+    document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff; font-size:14px;">(+${pointsEarned}!)</span>`;
     startBtn.innerText = "TRY AGAIN";
 }
 
 function drawBackground() {
-    ctx.fillStyle = "#5C94FC";
+    let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    grad.addColorStop(0, "#120524"); 
+    grad.addColorStop(0.5, "#2e084c"); 
+    grad.addColorStop(1, "#54004e"); 
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
-    let cloudOffset = (bgOffset * 0.2) % 800;
-    for (let i = 0; i < 2; i++) {
-        let cx = 100 + i * 400 - cloudOffset;
-        if (cx < -150) cx += 800;
+    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+    let starOffset = (bgOffset * 0.1) % 800;
+    for (let i = 0; i < 15; i++) {
+        let sx = (i * 85 - starOffset + 800) % 800;
+        let sy = (i * 23) % 200 + 30;
+        let size = (i % 3 === 0) ? 3 : 1.5;
         ctx.beginPath();
-        ctx.arc(cx, 80, 30, 0, Math.PI * 2);
-        ctx.arc(cx + 40, 70, 40, 0, Math.PI * 2);
-        ctx.arc(cx + 80, 80, 30, 0, Math.PI * 2);
+        ctx.arc(sx, sy, size, 0, Math.PI * 2);
         ctx.fill();
     }
 
-    ctx.fillStyle = "#41924B";
-    let hillOffset = (bgOffset * 0.5) % 800;
+    ctx.save();
+    ctx.shadowColor = "#ff00ff";
+    ctx.shadowBlur = 25;
+    ctx.fillStyle = "#fffdf0";
+    ctx.beginPath();
+    ctx.arc(700, 80, 45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.shadowColor = "#ff00ff";
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = "rgba(46, 8, 76, 0.7)";
+    let hillOffset = (bgOffset * 0.4) % 800;
     ctx.beginPath();
     ctx.moveTo(0 - hillOffset, 370);
-    ctx.quadraticCurveTo(200 - hillOffset, 250, 400 - hillOffset, 370);
-    ctx.quadraticCurveTo(600 - hillOffset, 220, 800 - hillOffset, 370);
-    ctx.quadraticCurveTo(1000 - hillOffset, 250, 1200 - hillOffset, 370);
+    ctx.quadraticCurveTo(200 - hillOffset, 220, 400 - hillOffset, 370);
+    ctx.quadraticCurveTo(600 - hillOffset, 190, 800 - hillOffset, 370);
+    ctx.quadraticCurveTo(1000 - hillOffset, 220, 1200 - hillOffset, 370);
     ctx.lineTo(canvas.width, canvas.height);
     ctx.lineTo(0, canvas.height);
     ctx.fill();
+    ctx.restore();
 
-    ctx.fillStyle = "#737578";
+    ctx.fillStyle = "#0c021a";
     ctx.fillRect(0, 350, canvas.width, 50);
-    ctx.fillStyle = "#EAEAEA";
-    ctx.fillRect(0, 350, canvas.width, 6);
+    
+    ctx.fillStyle = "#ff00ff";
+    ctx.fillRect(0, 350, canvas.width, 4); 
+}
+
+function drawPlayerShadow() {
+    const groundY = 350;
+    const distance = groundY - (player.y + player.height);
+    const maxDistance = 300;
+    const scale = Math.max(0.1, 1 - (distance / maxDistance));
+    const width = player.width * scale;
+    const height = 8 * scale;
+    
+    ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
+    ctx.beginPath();
+    ctx.ellipse(player.x + player.width/2, groundY, width/2, height/2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
 }
 
 function drawBart(x, y, w, h, sliding) {
@@ -639,16 +732,19 @@ function drawBart(x, y, w, h, sliding) {
     if (hasLifeActive > 0) {
         ctx.shadowBlur = 15;
         ctx.shadowColor = "#55ff55";
+    } else {
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = "rgba(0, 0, 0, 0.5)";
+        ctx.shadowOffsetY = 4;
     }
     
     if (!sliding) {
-        // Draw Jetpack on Bart's back if active
         if (jetpackActiveThisRun) {
-            ctx.fillStyle = "#555";
+            ctx.fillStyle = "#444";
             ctx.fillRect(x - 12, y + 30, 12, 30);
-            ctx.fillStyle = "#777";
+            ctx.fillStyle = "#ff00ff";
             ctx.fillRect(x - 14, y + 35, 3, 20);
-            ctx.fillStyle = "#FFD90F"; // Reset Bart yellow
+            ctx.fillStyle = "#FFD90F"; 
         }
 
         ctx.beginPath();
@@ -713,16 +809,30 @@ function drawBart(x, y, w, h, sliding) {
 
 function drawSideshowBob(x, y, w, h) {
     ctx.save();
+    ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
+    ctx.beginPath();
+    ctx.ellipse(x + w/2, 350, w/2, 8, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#930f0a"; 
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, y + 40);
+    ctx.bezierCurveTo(x - 45, y + 5, x - 40, y - 40, x - 35, y - 45);
+    ctx.bezierCurveTo(x - 20, y, x, y + 20, x + w / 2, y + 40);
+    ctx.fill();
+    
+    ctx.fillStyle = "#D6221D"; 
+    ctx.beginPath();
+    ctx.moveTo(x + w / 2, y + 40);
+    ctx.bezierCurveTo(x - 15, y - 20, x + 5, y - 55, x + 10, y - 60);
+    ctx.bezierCurveTo(x + 15, y - 10, x + 20, y + 20, x + w / 2, y + 40);
+    ctx.fill();
+
     ctx.fillStyle = "#D6221D";
     ctx.beginPath();
     ctx.moveTo(x + w / 2, y + 40);
-    ctx.quadraticCurveTo(x - 30, y + 10, x - 25, y - 25);
-    ctx.quadraticCurveTo(x - 10, y + 15, x + 10, y + 30);
-    ctx.quadraticCurveTo(x + w / 2, y - 45, x + w / 2 + 5, y - 45);
-    ctx.quadraticCurveTo(x + w / 2 + 10, y + 20, x + w - 10, y + 30);
-    ctx.quadraticCurveTo(x + w + 30, y + 10, x + w + 25, y - 25);
-    ctx.quadraticCurveTo(x + w + 10, y + 15, x + w / 2, y + 40);
-    ctx.closePath();
+    ctx.bezierCurveTo(x + w + 15, y - 20, x + w + 40, y - 40, x + w + 35, y - 45);
+    ctx.bezierCurveTo(x + w + 20, y + 10, x + w - 5, y + 25, x + w / 2, y + 40);
     ctx.fill();
 
     ctx.fillStyle = "#FFD90F";
@@ -741,13 +851,29 @@ function drawSideshowBob(x, y, w, h) {
     ctx.fill();
 
     ctx.strokeStyle = "#000";
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.arc(x + w - 20, y + 58, 8, 0, Math.PI, false);
+    ctx.moveTo(x + w - 32, y + 39);
+    ctx.lineTo(x + w - 20, y + 43);
+    ctx.moveTo(x + w - 7, y + 39);
+    ctx.lineTo(x + w - 18, y + 43);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(x + w - 20, y + 56, 8, 0, Math.PI, false);
     ctx.stroke();
 
     ctx.fillStyle = "#008543";
     ctx.fillRect(x + 5, y + 65, w - 10, 45);
+
+    ctx.strokeStyle = "#005C2E";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(x + 15, y + 65);
+    ctx.lineTo(x + 15, y + 110);
+    ctx.moveTo(x + w - 15, y + 65);
+    ctx.lineTo(x + w - 15, y + 110);
+    ctx.stroke();
 
     ctx.fillStyle = "#004BFF";
     ctx.fillRect(x + 8, y + 100, w - 16, 10);
@@ -762,7 +888,7 @@ function handleParticles() {
             vx: -2 - Math.random() * 3,
             vy: 2 + Math.random() * 4,
             size: 4 + Math.random() * 6,
-            color: Math.random() > 0.4 ? "#FF5500" : "#FFCC00",
+            color: Math.random() > 0.4 ? "#ff00ff" : "#00ffff",
             life: 25
         });
     }
@@ -787,7 +913,6 @@ function handleParticles() {
 function animate() {
     if (!gameActive) return;
 
-    // Calculate time differences for the 30-second fuel limit
     const now = performance.now();
     const dt = now - lastTime;
     lastTime = now;
@@ -795,10 +920,9 @@ function animate() {
     if (jetpackActiveThisRun) {
         jetpackTimeRemaining -= dt;
         if (jetpackTimeRemaining <= 0) {
-            // Jetpack runs out completely!
             jetpackActiveThisRun = false;
             isThrusting = false;
-            upgradeJetpack = 0; // Strip the upgrade away entirely
+            upgradeJetpack = 0; 
             sessionStorage.setItem("bart_up_jetpack", 0);
             jetpackTimerUI.style.display = "none";
             updatePointsUI();
@@ -809,17 +933,17 @@ function animate() {
 
     bgOffset += gameSpeed;
     drawBackground();
+    drawPlayerShadow();
 
     if (isThrusting && jetpackActiveThisRun) {
-        player.vy -= 1.8; // Stronger upforce
-        if (player.vy < -11) player.vy = -11; // Terminal upward velocity limit
+        player.vy -= 1.8; 
+        if (player.vy < -11) player.vy = -11; 
     } else {
         player.vy += player.gravity;
     }
     
     player.y += player.vy;
 
-    // Roof limit so you don't fly off screen entirely
     if (player.y < 15) {
         player.y = 15;
         player.vy = 0;
