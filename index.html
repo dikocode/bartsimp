@@ -221,7 +221,7 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.2 beta</div>
+    <div id="version-tag">v1.2 "the neon age"</div>
     <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
     <div id="score-board">SCORE: 0</div>
     <button id="jetpack-btn">JETPACK [J] (0)</button>
@@ -806,7 +806,6 @@ function spawnObstacle() {
     
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
         let r = Math.random();
-        // Spawning coins and platforms more frequently
         if (r < 0.38) {
             let plat = new Platform();
             platforms.push(plat);
@@ -1121,6 +1120,7 @@ function animate() {
 
         let plat = platforms[i];
         
+        // Check landing safely on top
         if (player.x + player.width - 12 > plat.x && 
             player.x + 12 < plat.x + plat.width && 
             player.y + player.height <= plat.y + 12 && 
@@ -1133,11 +1133,17 @@ function animate() {
                 onPlatform = true;
             }
         } else {
+            // Only hit platform sides/bottom if bart is hitting it horizontally and NOT running off the edge
             if (player.x < plat.x + plat.width &&
                 player.x + player.width > plat.x &&
                 player.y < plat.y + plat.height &&
                 player.y + player.height > plat.y) {
                 
+                // If player falls below platform top level, but is fully off horizontally, do not die
+                if (player.x + 12 > plat.x + plat.width || player.x + player.width - 12 < plat.x) {
+                    continue; 
+                }
+
                 if (hasLifeActive > 0) {
                     hasLifeActive = 0;
                     platforms.splice(i, 1);
@@ -1182,8 +1188,8 @@ function animate() {
             player.y + player.height > coinObj.y) {
             
             coins.splice(i, 1);
-            score += 1; // Coin only gives 1 point now
-            playCoinSFX(); // Play custom synthesizer audio
+            score += 1; 
+            playCoinSFX(); 
             scoreBoard.innerText = "SCORE: " + score;
 
             for (let c = 0; c < 8; c++) {
@@ -1223,7 +1229,7 @@ function animate() {
 
         if (obstacles[i].x + obstacles[i].width < 0) {
             obstacles.splice(i, 1);
-            score += 1; // Obstacles also give 1 point now to scale correctly
+            score += 1; 
             scoreBoard.innerText = "SCORE: " + score;
             gameSpeed += 0.35; 
         }
