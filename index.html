@@ -299,7 +299,6 @@ const buyLifeBtn = document.getElementById("buy-life-btn");
 const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
-// Safe Storage helper
 const safeStorage = {
     getItem(key) {
         try {
@@ -317,10 +316,46 @@ const safeStorage = {
     }
 };
 
+let audioCtx = null;
+function playCoinSFX() {
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        
+        let osc1 = audioCtx.createOscillator();
+        let osc2 = audioCtx.createOscillator();
+        let gainNode = audioCtx.createGain();
+        
+        osc1.type = 'sine';
+        osc2.type = 'triangle';
+        
+        osc1.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
+        osc1.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); 
+        
+        osc2.frequency.setValueAtTime(587.33, audioCtx.currentTime);
+        osc2.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
+        
+        gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        
+        osc1.connect(gainNode);
+        osc2.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        
+        osc1.start();
+        osc2.start();
+        osc1.stop(audioCtx.currentTime + 0.3);
+        osc2.stop(audioCtx.currentTime + 0.3);
+    } catch (err) {}
+}
+
 let bartLoaded = false;
 let bobLoaded = false;
 
-// Loads local sprites from repository folder
 const bartImg = new Image();
 bartImg.onload = () => { bartLoaded = true; };
 bartImg.onerror = () => { bartLoaded = false; };
@@ -348,12 +383,11 @@ let upgradeDouble = parseInt(safeStorage.getItem("bart_up_double")) || 0;
 
 let lastTime = 0;
 
-// Jetpack Variables
-let jetpackState = 'ready'; // 'ready', 'active', 'cooldown'
+let jetpackState = 'ready'; 
 let jetpackFuel = 1500; 
 let jetpackCooldownTimer = 0;
 let jKeyPressed = false;
-const JETPACK_COOLDOWN_TIME = 5000; // 5s
+const JETPACK_COOLDOWN_TIME = 5000; 
 
 function updatePointsUI() {
     menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
@@ -494,7 +528,6 @@ window.addEventListener("keyup", (e) => {
     }
 });
 
-// Mobile Controls
 window.addEventListener("touchstart", (e) => {
     if (!gameActive) return;
     if (e.target === jetpackBtn) return; 
@@ -529,7 +562,6 @@ window.addEventListener("touchend", (e) => {
     }
 }, { passive: false });
 
-// Mobile Jetpack Button Handling
 jetpackBtn.addEventListener("touchstart", (e) => {
     e.preventDefault();
     jKeyPressed = true;
@@ -682,7 +714,7 @@ class Obstacle {
 class Platform {
     constructor() {
         this.x = canvas.width;
-        this.y = 170 + Math.random() * 60; 
+        this.y = 220 + Math.random() * 30; 
         this.width = 170 + Math.random() * 80;
         this.height = 24;
     }
@@ -704,7 +736,6 @@ class Platform {
         ctx.lineWidth = 2;
         ctx.strokeRect(this.x, this.y, this.width, this.height);
 
-        // Danger spikes underneath
         ctx.fillStyle = "#ff0055";
         ctx.shadowColor = "#ff0055";
         ctx.shadowBlur = 8;
@@ -775,26 +806,27 @@ function spawnObstacle() {
     
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
         let r = Math.random();
-        if (r < 0.28) {
+        // Spawning coins and platforms more frequently
+        if (r < 0.38) {
             let plat = new Platform();
             platforms.push(plat);
             
-            let numCoins = 1 + Math.floor(Math.random() * 3);
+            let numCoins = 2 + Math.floor(Math.random() * 3);
             let spacing = plat.width / (numCoins + 1);
             for (let i = 1; i <= numCoins; i++) {
                 coins.push(new Coin(plat.x + (i * spacing) - 12, plat.y - 35));
             }
-        } else if (r < 0.45) {
-            let numCoins = 3 + Math.floor(Math.random() * 3);
+        } else if (r < 0.60) {
+            let numCoins = 3 + Math.floor(Math.random() * 4);
             let startY = 140 + Math.random() * 80;
             for (let i = 0; i < numCoins; i++) {
                 coins.push(new Coin(canvas.width + (i * 40), startY + Math.sin(i * 0.6) * 35));
             }
         } else {
             let pool = ['spike', 'block'];
-            if (score >= 100) pool.push('double-spike');
-            if (score >= 250) pool.push('double-block');
-            if (score >= 400) pool.push('triple-spike');
+            if (score >= 15) pool.push('double-spike');
+            if (score >= 35) pool.push('double-block');
+            if (score >= 60) pool.push('triple-spike');
             
             const type = pool[Math.floor(Math.random() * pool.length)];
             obstacles.push(new Obstacle(type));
@@ -816,7 +848,7 @@ function gameOver() {
     isThrusting = false;
     jetpackBtn.style.display = "none";
     
-    let pointsEarned = Math.floor(score / 10);
+    let pointsEarned = score;
     if (upgradeDouble > 0) {
         pointsEarned = Math.floor(pointsEarned * (1 + (upgradeDouble * 0.5))); 
     }
@@ -925,7 +957,6 @@ function drawBart(x, y, w, h, sliding) {
             ctx.drawImage(bartImg, x, y, w, h);
         }
     } else {
-        // Fallback vector drawing if Image fails to load
         ctx.translate(x + w/2, y + h/2);
         if (sliding) ctx.rotate(Math.PI / 2);
         
@@ -968,7 +999,6 @@ function drawSideshowBob(x, y, w, h) {
         ctx.scale(-1, 1);
         ctx.drawImage(bobImg, 0, 0, w, h);
     } else {
-        // Fallback vector drawing if Image fails to load
         ctx.translate(x + w/2, y + h/2);
         
         ctx.fillStyle = "#1133aa";
@@ -1152,7 +1182,8 @@ function animate() {
             player.y + player.height > coinObj.y) {
             
             coins.splice(i, 1);
-            score += 100; 
+            score += 1; // Coin only gives 1 point now
+            playCoinSFX(); // Play custom synthesizer audio
             scoreBoard.innerText = "SCORE: " + score;
 
             for (let c = 0; c < 8; c++) {
@@ -1192,7 +1223,7 @@ function animate() {
 
         if (obstacles[i].x + obstacles[i].width < 0) {
             obstacles.splice(i, 1);
-            score += 10;
+            score += 1; // Obstacles also give 1 point now to scale correctly
             scoreBoard.innerText = "SCORE: " + score;
             gameSpeed += 0.35; 
         }
