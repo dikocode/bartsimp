@@ -299,6 +299,24 @@ const buyLifeBtn = document.getElementById("buy-life-btn");
 const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
+// Safe Storage helper to prevent script crashes on restricted browser sandbox environments
+const safeStorage = {
+    getItem(key) {
+        try {
+            return sessionStorage.getItem(key);
+        } catch (e) {
+            return this[key] || null;
+        }
+    },
+    setItem(key, val) {
+        try {
+            sessionStorage.setItem(key, val);
+        } catch (e) {
+            this[key] = val;
+        }
+    }
+};
+
 const bartImg = new Image();
 bartImg.src = "https://upload.wikimedia.org/wikipedia/en/a/aa/Bart_Simpson.png";
 
@@ -315,10 +333,10 @@ let spawnTimer = 0;
 let bgOffset = 0;
 let particles = [];
 
-let playerPoints = parseInt(sessionStorage.getItem("bart_points")) || 0;
-let upgradeLife = parseInt(sessionStorage.getItem("bart_up_life")) || 0; 
-let upgradeJetpack = parseInt(sessionStorage.getItem("bart_up_jetpack")) || 0; 
-let upgradeDouble = parseInt(sessionStorage.getItem("bart_up_double")) || 0; 
+let playerPoints = parseInt(safeStorage.getItem("bart_points")) || 0;
+let upgradeLife = parseInt(safeStorage.getItem("bart_up_life")) || 0; 
+let upgradeJetpack = parseInt(safeStorage.getItem("bart_up_jetpack")) || 0; 
+let upgradeDouble = parseInt(safeStorage.getItem("bart_up_double")) || 0; 
 
 let lastTime = 0;
 
@@ -373,8 +391,8 @@ buyLifeBtn.addEventListener("click", () => {
     if (playerPoints >= 50 && upgradeLife < 1) {
         playerPoints -= 50;
         upgradeLife = 1;
-        sessionStorage.setItem("bart_points", playerPoints);
-        sessionStorage.setItem("bart_up_life", upgradeLife);
+        safeStorage.setItem("bart_points", playerPoints);
+        safeStorage.setItem("bart_up_life", upgradeLife);
         updatePointsUI();
     }
 });
@@ -383,8 +401,8 @@ buyJetpackBtn.addEventListener("click", () => {
     if (playerPoints >= 30 && upgradeJetpack < 32) {
         playerPoints -= 30;
         upgradeJetpack++;
-        sessionStorage.setItem("bart_points", playerPoints);
-        sessionStorage.setItem("bart_up_jetpack", upgradeJetpack);
+        safeStorage.setItem("bart_points", playerPoints);
+        safeStorage.setItem("bart_up_jetpack", upgradeJetpack);
         updatePointsUI();
     }
 });
@@ -394,8 +412,8 @@ buyPointsBtn.addEventListener("click", () => {
     if (playerPoints >= cost && upgradeDouble < 3) {
         playerPoints -= cost;
         upgradeDouble++;
-        sessionStorage.setItem("bart_points", playerPoints);
-        sessionStorage.setItem("bart_up_double", upgradeDouble);
+        safeStorage.setItem("bart_points", playerPoints);
+        safeStorage.setItem("bart_up_double", upgradeDouble);
         updatePointsUI();
     }
 });
@@ -448,7 +466,7 @@ window.addEventListener("keydown", (e) => {
         if (jetpackState === 'ready' && upgradeJetpack > 0) {
             jetpackState = 'active';
             upgradeJetpack--;
-            sessionStorage.setItem("bart_up_jetpack", upgradeJetpack);
+            safeStorage.setItem("bart_up_jetpack", upgradeJetpack);
             updatePointsUI();
             jetpackFuel = 1500;
         }
@@ -471,7 +489,7 @@ window.addEventListener("keyup", (e) => {
 // Mobile Controls
 window.addEventListener("touchstart", (e) => {
     if (!gameActive) return;
-    if (e.target === jetpackBtn) return; // handled separately
+    if (e.target === jetpackBtn) return; 
 
     e.preventDefault(); 
     const touch = e.touches[0];
@@ -510,7 +528,7 @@ jetpackBtn.addEventListener("touchstart", (e) => {
     if (jetpackState === 'ready' && upgradeJetpack > 0) {
         jetpackState = 'active';
         upgradeJetpack--;
-        sessionStorage.setItem("bart_up_jetpack", upgradeJetpack);
+        safeStorage.setItem("bart_up_jetpack", upgradeJetpack);
         updatePointsUI();
         jetpackFuel = 1500;
     }
@@ -547,7 +565,13 @@ startBtn.addEventListener("click", () => {
     jetpackCooldownTimer = 0;
     jKeyPressed = false;
     
-    bgm.currentTime = 0;
+    // Safely attempt resetting audio to prevent crashes if it has not loaded yet
+    try {
+        bgm.currentTime = 0;
+    } catch (e) {
+        console.log("Audio reset skipped");
+    }
+    
     bgm.play().catch(e => {
         console.log("Audio play blocked", e);
     });
@@ -750,25 +774,21 @@ function spawnObstacle() {
     if (spawnTimer > minGap + Math.random() * randomBuffer) {
         let r = Math.random();
         if (r < 0.28) {
-            // Spawn Spiky Safe Platform
             let plat = new Platform();
             platforms.push(plat);
             
-            // Put coins on top of it
             let numCoins = 1 + Math.floor(Math.random() * 3);
             let spacing = plat.width / (numCoins + 1);
             for (let i = 1; i <= numCoins; i++) {
                 coins.push(new Coin(plat.x + (i * spacing) - 12, plat.y - 35));
             }
         } else if (r < 0.45) {
-            // Spawn floating coin arc
             let numCoins = 3 + Math.floor(Math.random() * 3);
             let startY = 140 + Math.random() * 80;
             for (let i = 0; i < numCoins; i++) {
                 coins.push(new Coin(canvas.width + (i * 40), startY + Math.sin(i * 0.6) * 35));
             }
         } else {
-            // Spawn standard obstacles
             let pool = ['spike', 'block'];
             if (score >= 100) pool.push('double-spike');
             if (score >= 250) pool.push('double-block');
@@ -800,7 +820,7 @@ function gameOver() {
     }
     
     playerPoints += pointsEarned;
-    sessionStorage.setItem("bart_points", playerPoints);
+    safeStorage.setItem("bart_points", playerPoints);
     updatePointsUI();
     
     startScreen.style.display = "flex";
@@ -958,7 +978,6 @@ function animate() {
     const dt = now - lastTime;
     lastTime = now;
 
-    // Jetpack Logic & HUD Cooldown Updates
     if (jetpackState === 'active') {
         if (jKeyPressed) {
             player.vy -= 1.8; 
@@ -1011,7 +1030,6 @@ function animate() {
         player.vy = 0;
     }
 
-    // Platforms Logic and safe landing checks
     let onPlatform = false;
     for (let i = platforms.length - 1; i >= 0; i--) {
         platforms[i].update();
@@ -1019,20 +1037,18 @@ function animate() {
 
         let plat = platforms[i];
         
-        // Land on top safe landing logic
         if (player.x + player.width - 12 > plat.x && 
             player.x + 12 < plat.x + plat.width && 
             player.y + player.height <= plat.y + 12 && 
             player.y + player.height + player.vy >= plat.y) {
             
-            if (player.vy >= 0) { // falling down
+            if (player.vy >= 0) { 
                 player.y = plat.y - player.height;
                 player.vy = 0;
                 player.isGrounded = true;
                 onPlatform = true;
             }
         } else {
-            // Collision from side or hitting bottom dangerous spikes
             if (player.x < plat.x + plat.width &&
                 player.x + player.width > plat.x &&
                 player.y < plat.y + plat.height &&
@@ -1054,7 +1070,6 @@ function animate() {
         }
     }
 
-    // Standard ground detection
     const currentGround = 350 - player.height;
     if (!onPlatform) {
         if (player.y >= currentGround) {
@@ -1072,7 +1087,6 @@ function animate() {
     drawBart(player.x, player.y, player.width, player.height, player.isSliding);
     handleParticles();
 
-    // Coins rendering and collection
     for (let i = coins.length - 1; i >= 0; i--) {
         coins[i].update();
         coins[i].draw();
@@ -1084,10 +1098,9 @@ function animate() {
             player.y + player.height > coinObj.y) {
             
             coins.splice(i, 1);
-            score += 100; // Adds 100 to runner score which evaluates to 10 points in the points system!
+            score += 100; 
             scoreBoard.innerText = "SCORE: " + score;
 
-            // Flashy collectible effects
             for (let c = 0; c < 8; c++) {
                 particles.push({
                     x: coinObj.x + 12,
