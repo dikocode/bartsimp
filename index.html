@@ -32,6 +32,27 @@
             height: 100%;
             box-sizing: border-box;
         }
+        #version-tag {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            font-size: 14px;
+            color: #ff5555;
+            text-shadow: 2px 2px #000;
+            z-index: 15;
+            font-family: monospace;
+        }
+        #music-watermark {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 11px;
+            color: #aaa;
+            text-shadow: 1px 1px #000;
+            z-index: 15;
+            font-family: sans-serif;
+            pointer-events: none;
+        }
         #score-board {
             position: absolute;
             top: 15px;
@@ -77,7 +98,7 @@
         .btn-group {
             display: flex;
             gap: 15px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
         }
         button {
             padding: 12px 30px;
@@ -110,31 +131,57 @@
             font-size: 14px;
         }
         #audio-status {
-            font-size: 12px;
+            font-size: 11px;
             color: #ff5555;
-            margin-top: 10px;
+            margin-top: 5px;
         }
         .points-display {
             color: #55ff55;
             font-size: 20px;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             text-shadow: 2px 2px #000;
+        }
+        .credits-box {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed #555;
+            border-radius: 5px;
+            font-size: 10px;
+            color: #ccc;
+            font-family: sans-serif;
+            line-height: 1.4;
+            max-width: 90%;
+        }
+        .credits-box a {
+            color: #55ff55;
+            text-decoration: underline;
+            pointer-events: auto;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
+    <div id="version-tag">v1.0 alpha</div>
+    <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
     <div id="score-board">SCORE: 0</div>
     
     <div id="start-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6vw, 36px);">BART SIMPSON RUN</h1>
+        <h1 style="color: #FFD90F; margin-bottom: 2px; font-size: min(6vw, 32px); margin-top: 15px;">BART SIMPSON RUN</h1>
         <div class="points-display" id="menu-points">POINTS: 0</div>
         <div class="btn-group">
             <button id="start-btn">START RUNNING</button>
             <button id="open-shop-btn" style="background: #55ff55;">POWER UPS</button>
         </div>
-        <p style="margin-bottom: 15px; font-size: min(3.5vw, 16px);">TAP RIGHT to Jump | TAP LEFT to Slide<br>Keyboard: SPACE to Jump | DOWN to Slide</p>
+        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #ddd;">HOLD SPACE or HOLD RIGHT to Jetpack | TAP LEFT to Slide</p>
+        
+        <div class="credits-box" id="credits-pane">
+            credits to walt disney<br>
+            credits to <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
+        </div>
+        
         <div id="audio-status">Audio Status: Standby</div>
     </div>
 
@@ -152,10 +199,10 @@
 
         <div class="shop-item">
             <div style="text-align: left;">
-                <div style="font-size: 14px;">SLOT 2: FAST FALL</div>
-                <div style="font-size: 11px; color: #aaa;" id="grav-desc">Fall back down faster after jumping</div>
+                <div style="font-size: 14px;">SLOT 2: JETPACK</div>
+                <div style="font-size: 11px; color: #aaa;" id="jetpack-desc">Fly over obstacles! Hold Space or Tap Right</div>
             </div>
-            <button id="buy-grav-btn">COST: 20 PTS</button>
+            <button id="buy-jetpack-btn">COST: 30 PTS</button>
         </div>
 
         <div class="shop-item">
@@ -189,7 +236,7 @@ const audioStatus = document.getElementById("audio-status");
 const menuPointsDisplay = document.getElementById("menu-points");
 const shopPointsDisplay = document.getElementById("shop-points");
 const buyLifeBtn = document.getElementById("buy-life-btn");
-const buyGravBtn = document.getElementById("buy-grav-btn");
+const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
 let gameActive = false;
@@ -198,15 +245,15 @@ let gameSpeed = 6;
 let obstacles = [];
 let spawnTimer = 0;
 let bgOffset = 0;
+let particles = [];
 
-// Switched to sessionStorage so it resets when leaving the website
 let playerPoints = parseInt(sessionStorage.getItem("bart_points")) || 0;
 let upgradeLife = parseInt(sessionStorage.getItem("bart_up_life")) || 0; 
-let upgradeGrav = parseInt(sessionStorage.getItem("bart_up_grav")) || 0; 
+let upgradeJetpack = parseInt(sessionStorage.getItem("bart_up_jetpack")) || 0; 
 let upgradeDouble = parseInt(sessionStorage.getItem("bart_up_double")) || 0; 
 
 function updatePointsUI() {
-    menuPointsDisplay.innerText = "POINTS: " + playerPoints;
+    menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
     shopPointsDisplay.innerText = "POINTS: " + playerPoints;
     
     if (upgradeLife >= 1) {
@@ -216,11 +263,11 @@ function updatePointsUI() {
         buyLifeBtn.innerText = "COST: 50 PTS";
     }
 
-    if (upgradeGrav >= 3) {
-        buyGravBtn.innerText = "MAXED";
-        buyGravBtn.disabled = true;
+    if (upgradeJetpack >= 1) {
+        buyJetpackBtn.innerText = "OWNED";
+        buyJetpackBtn.disabled = true;
     } else {
-        buyGravBtn.innerText = `LVL ${upgradeGrav}/3 (COST: ${(upgradeGrav+1)*20} PTS)`;
+        buyJetpackBtn.innerText = "COST: 30 PTS";
     }
 
     if (upgradeDouble >= 3) {
@@ -253,13 +300,12 @@ buyLifeBtn.addEventListener("click", () => {
     }
 });
 
-buyGravBtn.addEventListener("click", () => {
-    let cost = (upgradeGrav + 1) * 20;
-    if (playerPoints >= cost && upgradeGrav < 3) {
-        playerPoints -= cost;
-        upgradeGrav++;
+buyJetpackBtn.addEventListener("click", () => {
+    if (playerPoints >= 30 && upgradeJetpack < 1) {
+        playerPoints -= 30;
+        upgradeJetpack = 1;
         sessionStorage.setItem("bart_points", playerPoints);
-        sessionStorage.setItem("bart_up_grav", upgradeGrav);
+        sessionStorage.setItem("bart_up_jetpack", upgradeJetpack);
         updatePointsUI();
     }
 });
@@ -286,6 +332,7 @@ bgm.addEventListener('error', (e) => {
 });
 
 let hasLifeActive = 0;
+let isThrusting = false;
 
 const player = {
     x: 180,
@@ -308,10 +355,14 @@ const bob = {
 };
 
 window.addEventListener("keydown", (e) => {
-    if (e.code === "Space" && player.isGrounded && !player.isSliding) {
-        let currentGravity = 1.2 + (upgradeGrav * 0.4);
-        player.vy = -Math.sqrt(2 * currentGravity * 150); 
-        player.isGrounded = false;
+    if (e.code === "Space") {
+        if (upgradeJetpack > 0) {
+            isThrusting = true;
+            player.isGrounded = false;
+        } else if (player.isGrounded && !player.isSliding) {
+            player.vy = player.jumpForce;
+            player.isGrounded = false;
+        }
     }
     if (e.code === "ArrowDown" && player.isGrounded) {
         player.isSliding = true;
@@ -321,6 +372,9 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
+    if (e.code === "Space") {
+        isThrusting = false;
+    }
     if (e.code === "ArrowDown") {
         player.isSliding = false;
         player.height = player.originalHeight;
@@ -340,9 +394,11 @@ window.addEventListener("touchstart", (e) => {
             player.y = 335;
         }
     } else {
-        if (player.isGrounded && !player.isSliding) {
-            let currentGravity = 1.2 + (upgradeGrav * 0.4);
-            player.vy = -Math.sqrt(2 * currentGravity * 150);
+        if (upgradeJetpack > 0) {
+            isThrusting = true;
+            player.isGrounded = false;
+        } else if (player.isGrounded && !player.isSliding) {
+            player.vy = player.jumpForce;
             player.isGrounded = false;
         }
     }
@@ -350,6 +406,7 @@ window.addEventListener("touchstart", (e) => {
 
 window.addEventListener("touchend", () => {
     if (!gameActive) return;
+    isThrusting = false;
     player.isSliding = false;
     player.height = player.originalHeight;
     player.y = 300;
@@ -361,13 +418,13 @@ startBtn.addEventListener("click", () => {
     score = 0;
     gameSpeed = 6;
     obstacles = [];
+    particles = [];
     player.y = 300;
     player.vy = 0;
     player.isGrounded = true;
+    isThrusting = false;
     
     hasLifeActive = upgradeLife; 
-    
-    player.gravity = 1.2 + (upgradeGrav * 0.4); 
     
     bgm.currentTime = 0;
     bgm.play().catch(e => {
@@ -547,6 +604,15 @@ function drawBart(x, y, w, h, sliding) {
     }
     
     if (!sliding) {
+        // Draw Jetpack on Bart's back if owned
+        if (upgradeJetpack > 0) {
+            ctx.fillStyle = "#555";
+            ctx.fillRect(x - 12, y + 30, 12, 30);
+            ctx.fillStyle = "#777";
+            ctx.fillRect(x - 14, y + 35, 3, 20);
+            ctx.fillStyle = "#FFD90F"; // Reset Bart yellow
+        }
+
         ctx.beginPath();
         ctx.moveTo(x, y + 25);
         for (let i = 0; i < 9; i++) {
@@ -650,14 +716,56 @@ function drawSideshowBob(x, y, w, h) {
     ctx.restore();
 }
 
+function handleParticles() {
+    if (isThrusting) {
+        particles.push({
+            x: player.x - 8,
+            y: player.y + 55,
+            vx: -2 - Math.random() * 3,
+            vy: 2 + Math.random() * 4,
+            size: 4 + Math.random() * 6,
+            color: Math.random() > 0.4 ? "#FF5500" : "#FFCC00",
+            life: 25
+        });
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life--;
+        
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.life <= 0) {
+            particles.splice(i, 1);
+        }
+    }
+}
+
 function animate() {
     if (!gameActive) return;
 
     bgOffset += gameSpeed;
     drawBackground();
 
-    player.vy += player.gravity;
+    if (isThrusting && upgradeJetpack > 0) {
+        player.vy -= 1.8; // Stronger upforce
+        if (player.vy < -11) player.vy = -11; // Terminal upward velocity limit
+    } else {
+        player.vy += player.gravity;
+    }
+    
     player.y += player.vy;
+
+    // Roof limit so you don't fly off screen entirely
+    if (player.y < 15) {
+        player.y = 15;
+        player.vy = 0;
+    }
 
     const currentGround = 350 - player.height;
     if (player.y >= currentGround) {
@@ -670,6 +778,7 @@ function animate() {
 
     drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
     drawBart(player.x, player.y, player.width, player.height, player.isSliding);
+    handleParticles();
 
     spawnObstacle();
     for (let i = obstacles.length - 1; i >= 0; i--) {
