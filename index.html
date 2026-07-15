@@ -320,15 +320,16 @@ const safeStorage = {
 let bartLoaded = false;
 let bobLoaded = false;
 
+// Loads local sprites from repository folder
 const bartImg = new Image();
 bartImg.onload = () => { bartLoaded = true; };
 bartImg.onerror = () => { bartLoaded = false; };
-bartImg.src = "https://upload.wikimedia.org/wikipedia/en/a/aa/Bart_Simpson.png";
+bartImg.src = "bart.png";
 
 const bobImg = new Image();
 bobImg.onload = () => { bobLoaded = true; };
 bobImg.onerror = () => { bobLoaded = false; };
-bobImg.src = "https://upload.wikimedia.org/wikipedia/en/5/5a/Sideshow_Bob.png";
+bobImg.src = "bob.png";
 
 let gameActive = false;
 let score = 0;
@@ -924,25 +925,21 @@ function drawBart(x, y, w, h, sliding) {
             ctx.drawImage(bartImg, x, y, w, h);
         }
     } else {
-        // Fallback vector drawing if Wiki image is blocked
+        // Fallback vector drawing if Image fails to load
         ctx.translate(x + w/2, y + h/2);
         if (sliding) ctx.rotate(Math.PI / 2);
         
-        // Shirt (Red)
         ctx.fillStyle = "#ff3300";
         ctx.fillRect(-w/2, -h/6, w, h/2);
         
-        // Shorts (Blue)
         ctx.fillStyle = "#0055ff";
         ctx.fillRect(-w/2, h/3, w, h/6);
         
-        // Head & Legs (Yellow)
         ctx.fillStyle = "#ffd90f";
-        ctx.fillRect(-w/2 + 5, -h/2, w - 10, h/3); // Head
-        ctx.fillRect(-w/4, h/2, 8, h/8); // Leg L
-        ctx.fillRect(w/10, h/2, 8, h/8); // Leg R
+        ctx.fillRect(-w/2 + 5, -h/2, w - 10, h/3); 
+        ctx.fillRect(-w/4, h/2, 8, h/8); 
+        ctx.fillRect(w/10, h/2, 8, h/8); 
         
-        // Spiky Hair (Bart shape)
         ctx.beginPath();
         ctx.moveTo(-w/2 + 5, -h/2);
         for(let i=0; i<5; i++) {
@@ -971,25 +968,21 @@ function drawSideshowBob(x, y, w, h) {
         ctx.scale(-1, 1);
         ctx.drawImage(bobImg, 0, 0, w, h);
     } else {
-        // Fallback vector drawing for Bob
+        // Fallback vector drawing if Image fails to load
         ctx.translate(x + w/2, y + h/2);
         
-        // Pants (Blue)
         ctx.fillStyle = "#1133aa";
         ctx.fillRect(-w/3, h/4, w*0.66, h/4);
         
-        // Skin (Yellow)
         ctx.fillStyle = "#ffd90f";
-        ctx.fillRect(-w/3, -h/4, w*0.66, h/2); // Body
-        ctx.fillRect(-w/6, -h/3, w*0.33, h/10); // Neck
+        ctx.fillRect(-w/3, -h/4, w*0.66, h/2); 
+        ctx.fillRect(-w/6, -h/3, w*0.33, h/10); 
         
-        // Big Palm Tree Hair (Green)
         ctx.fillStyle = "#009944";
         ctx.beginPath();
         ctx.arc(0, -h/3, w/2, 0, Math.PI, true);
         ctx.fill();
         
-        // Hair spikes
         for(let i = 0; i < 6; i++) {
             ctx.beginPath();
             let angle = (Math.PI / 5) * i - Math.PI;
