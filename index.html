@@ -270,7 +270,7 @@
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my friend for making the music(with ai) <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            credits to my friend for making music (with ai)<a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
             made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
@@ -438,7 +438,7 @@ let upgradeDouble = parseInt(getCookie("bart_up_double")) || 0;
 let lastTime = 0;
 
 let jetpackState = 'ready'; 
-let jetpackFuel = 1500; 
+let jetpackFuel = 15000; 
 let jetpackCooldownTimer = 0;
 let jKeyPressed = false;
 const JETPACK_COOLDOWN_TIME = 5000; 
@@ -564,7 +564,7 @@ window.addEventListener("keydown", (e) => {
             upgradeJetpack--;
             setCookie("bart_up_jetpack", upgradeJetpack);
             updatePointsUI();
-            jetpackFuel = 1500;
+            jetpackFuel = 15000;
         }
     }
 });
@@ -628,7 +628,7 @@ jetpackBtn.addEventListener("touchstart", (e) => {
         upgradeJetpack--;
         setCookie("bart_up_jetpack", upgradeJetpack);
         updatePointsUI();
-        jetpackFuel = 1500;
+        jetpackFuel = 15000;
     }
 }, { passive: false });
 
