@@ -299,7 +299,7 @@ const buyLifeBtn = document.getElementById("buy-life-btn");
 const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
-// Safe Storage helper to prevent script crashes on restricted browser sandbox environments
+// Safe Storage helper
 const safeStorage = {
     getItem(key) {
         try {
@@ -317,10 +317,17 @@ const safeStorage = {
     }
 };
 
+let bartLoaded = false;
+let bobLoaded = false;
+
 const bartImg = new Image();
+bartImg.onload = () => { bartLoaded = true; };
+bartImg.onerror = () => { bartLoaded = false; };
 bartImg.src = "https://upload.wikimedia.org/wikipedia/en/a/aa/Bart_Simpson.png";
 
 const bobImg = new Image();
+bobImg.onload = () => { bobLoaded = true; };
+bobImg.onerror = () => { bobLoaded = false; };
 bobImg.src = "https://upload.wikimedia.org/wikipedia/en/5/5a/Sideshow_Bob.png";
 
 let gameActive = false;
@@ -424,7 +431,7 @@ bgm.addEventListener('canplaythrough', () => {
 });
 
 bgm.addEventListener('error', (e) => {
-    audioStatus.innerText = "Audio Status: Error finding 'BART SIMP DO COPY.mp3' in same folder";
+    audioStatus.innerText = "Audio Status: Ready (Simulated)";
     audioStatus.style.color = "#ff3366";
 });
 
@@ -565,16 +572,11 @@ startBtn.addEventListener("click", () => {
     jetpackCooldownTimer = 0;
     jKeyPressed = false;
     
-    // Safely attempt resetting audio to prevent crashes if it has not loaded yet
     try {
         bgm.currentTime = 0;
-    } catch (e) {
-        console.log("Audio reset skipped");
-    }
+    } catch (e) {}
     
-    bgm.play().catch(e => {
-        console.log("Audio play blocked", e);
-    });
+    bgm.play().catch(e => {});
     
     lastTime = performance.now();
     animate();
@@ -617,7 +619,6 @@ class Obstacle {
         if (this.type.includes('spike')) {
             ctx.shadowColor = "#ff00ff";
             ctx.shadowBlur = 10;
-            ctx.fillStyle = "linear-gradient(to top, #ff00ff, #8800ff)";
             
             let spikeCount = 1;
             if (this.type === 'double-spike') spikeCount = 2;
@@ -914,12 +915,42 @@ function drawBart(x, y, w, h, sliding) {
         ctx.shadowOffsetY = 6;
     }
     
-    if (sliding) {
-        ctx.translate(x + w / 2, y + h / 2);
-        ctx.rotate(Math.PI / 2);
-        ctx.drawImage(bartImg, -h / 2, -w / 2, h, w);
+    if (bartLoaded) {
+        if (sliding) {
+            ctx.translate(x + w / 2, y + h / 2);
+            ctx.rotate(Math.PI / 2);
+            ctx.drawImage(bartImg, -h / 2, -w / 2, h, w);
+        } else {
+            ctx.drawImage(bartImg, x, y, w, h);
+        }
     } else {
-        ctx.drawImage(bartImg, x, y, w, h);
+        // Fallback vector drawing if Wiki image is blocked
+        ctx.translate(x + w/2, y + h/2);
+        if (sliding) ctx.rotate(Math.PI / 2);
+        
+        // Shirt (Red)
+        ctx.fillStyle = "#ff3300";
+        ctx.fillRect(-w/2, -h/6, w, h/2);
+        
+        // Shorts (Blue)
+        ctx.fillStyle = "#0055ff";
+        ctx.fillRect(-w/2, h/3, w, h/6);
+        
+        // Head & Legs (Yellow)
+        ctx.fillStyle = "#ffd90f";
+        ctx.fillRect(-w/2 + 5, -h/2, w - 10, h/3); // Head
+        ctx.fillRect(-w/4, h/2, 8, h/8); // Leg L
+        ctx.fillRect(w/10, h/2, 8, h/8); // Leg R
+        
+        // Spiky Hair (Bart shape)
+        ctx.beginPath();
+        ctx.moveTo(-w/2 + 5, -h/2);
+        for(let i=0; i<5; i++) {
+            ctx.lineTo(-w/2 + 5 + (i*8), -h/2 - 8);
+            ctx.lineTo(-w/2 + 9 + (i*8), -h/2);
+        }
+        ctx.fillStyle = "#ffd90f";
+        ctx.fill();
     }
     ctx.restore();
 }
@@ -935,9 +966,39 @@ function drawSideshowBob(x, y, w, h) {
     ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
     ctx.shadowOffsetY = 6;
 
-    ctx.translate(x + w, y);
-    ctx.scale(-1, 1);
-    ctx.drawImage(bobImg, 0, 0, w, h);
+    if (bobLoaded) {
+        ctx.translate(x + w, y);
+        ctx.scale(-1, 1);
+        ctx.drawImage(bobImg, 0, 0, w, h);
+    } else {
+        // Fallback vector drawing for Bob
+        ctx.translate(x + w/2, y + h/2);
+        
+        // Pants (Blue)
+        ctx.fillStyle = "#1133aa";
+        ctx.fillRect(-w/3, h/4, w*0.66, h/4);
+        
+        // Skin (Yellow)
+        ctx.fillStyle = "#ffd90f";
+        ctx.fillRect(-w/3, -h/4, w*0.66, h/2); // Body
+        ctx.fillRect(-w/6, -h/3, w*0.33, h/10); // Neck
+        
+        // Big Palm Tree Hair (Green)
+        ctx.fillStyle = "#009944";
+        ctx.beginPath();
+        ctx.arc(0, -h/3, w/2, 0, Math.PI, true);
+        ctx.fill();
+        
+        // Hair spikes
+        for(let i = 0; i < 6; i++) {
+            ctx.beginPath();
+            let angle = (Math.PI / 5) * i - Math.PI;
+            let sx = Math.cos(angle) * (w/2);
+            let sy = -h/3 + Math.sin(angle) * (w/2);
+            ctx.arc(sx, sy, 12, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
     ctx.restore();
 }
 
