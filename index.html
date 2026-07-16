@@ -419,7 +419,7 @@
             <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
             <button id="open-admin-btn" style="background: linear-gradient(135deg, #22aa22 0%, #005500 100%); box-shadow: 0 6px 20px rgba(0, 255, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); padding: 12px 18px;">ADMIN</button>
         </div>
-        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | TAP S for Shield | TAP K for Slingshot</p>
+        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | ARROWS to Move (Bossfight) | TAP S for Shield | TAP K for Slingshot</p>
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
@@ -681,6 +681,7 @@ const player = {
     vy: 0,
     gravity: 1.2, 
     jumpForce: -19,
+    speed: 5,
     isGrounded: true,
     isSliding: false
 };
@@ -692,6 +693,14 @@ const bob = {
     height: 110,
     targetX: 30,
     targetY: 240
+};
+
+// strictly arrow keys only for physical movement
+const keys = {
+    ArrowUp: false,
+    ArrowDown: false,
+    ArrowLeft: false,
+    ArrowRight: false
 };
 
 const introDialogue = [
@@ -781,9 +790,10 @@ function triggerDirectBossFight() {
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
     
     player.height = player.originalHeight; 
-    player.y = 350 - player.height; 
+    player.x = 400;
+    player.y = 300; 
     player.vy = 0; 
-    player.isGrounded = true; 
+    player.isGrounded = false; 
     player.isSliding = false;
     
     bob.x = 450; 
@@ -851,12 +861,18 @@ let activeLives = 0;
 let isThrusting = false;
 
 window.addEventListener("keydown", (e) => {
-    if (!gameActive || cutsceneActive) return;
-    if (e.code === "Space" && player.isGrounded && !player.isSliding) {
-        player.vy = player.jumpForce; player.isGrounded = false;
+    if (e.key in keys) {
+        keys[e.key] = true;
     }
-    if (e.code === "ArrowDown" && player.isGrounded) {
-        player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
+    if (!gameActive || cutsceneActive) return;
+    if (!isBossMode) {
+        // Spacebar is allowed for jumps in normal run-mode
+        if (e.code === "Space" && player.isGrounded && !player.isSliding) {
+            player.vy = player.jumpForce; player.isGrounded = false;
+        }
+        if (e.key === "ArrowDown" && player.isGrounded) {
+            player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
+        }
     }
     if (e.code === "KeyJ") {
         jKeyPressed = true;
@@ -875,8 +891,14 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-    if (e.code === "ArrowDown" && player.isSliding) {
-        player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
+    if (e.key in keys) {
+        keys[e.key] = false;
+    }
+    if (!gameActive || cutsceneActive) return;
+    if (!isBossMode) {
+        if (e.key === "ArrowDown" && player.isSliding) {
+            player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
+        }
     }
     if (e.code === "KeyJ") jKeyPressed = false;
 });
@@ -890,13 +912,15 @@ window.addEventListener("touchstart", (e) => {
     
     const touch = e.changedTouches[0];
     activeTouchId = touch.identifier;
-    if (touch.clientX < window.innerWidth / 2) {
-        if (player.isGrounded) {
-            player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
-        }
-    } else {
-        if (player.isGrounded && !player.isSliding) {
-            player.vy = player.jumpForce; player.isGrounded = false;
+    if (!isBossMode) {
+        if (touch.clientX < window.innerWidth / 2) {
+            if (player.isGrounded) {
+                player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
+            }
+        } else {
+            if (player.isGrounded && !player.isSliding) {
+                player.vy = player.jumpForce; player.isGrounded = false;
+            }
         }
     }
 }, { passive: false });
@@ -908,7 +932,7 @@ window.addEventListener("touchend", (e) => {
     for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
             activeTouchId = null;
-            if (player.isSliding) {
+            if (!isBossMode && player.isSliding) {
                 player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
             }
         }
@@ -921,7 +945,7 @@ window.addEventListener("touchcancel", (e) => {
         for (let i = 0; i < e.changedTouches.length; i++) {
             if (e.changedTouches[i].identifier === activeTouchId) {
                 activeTouchId = null;
-                if (player.isSliding) {
+                if (!isBossMode && player.isSliding) {
                     player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
                 }
             }
@@ -1075,6 +1099,12 @@ function triggerBossCutscene() {
     shieldCooldownTimer = 0;
     obstacles = []; platforms = []; coins = [];
     
+    player.x = 400;
+    player.y = 300;
+    player.vy = 0;
+    player.isGrounded = false;
+    player.isSliding = false;
+
     cutsceneScreen.style.display = "flex";
     cutsceneActive = true;
     cutsceneMode = 'boss';
@@ -1109,7 +1139,7 @@ function runActualGame() {
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
     score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
-    player.height = player.originalHeight; player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; player.isSliding = false;
+    player.x = 180; player.y = 280; player.height = player.originalHeight; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
     activeLives = upgradeLife; updateLivesIndicator();
     jetpackState = 'ready'; jetpackCooldownTimer = 0; jKeyPressed = false;
@@ -1276,6 +1306,27 @@ function drawSideshowBob(x, y, w, h) {
     ctx.restore();
 }
 
+function handleBossMovement(timeScale) {
+    // Arrow keys only
+    if (keys.ArrowUp) {
+        player.y -= player.speed * timeScale;
+    }
+    if (keys.ArrowDown) {
+        player.y += player.speed * timeScale;
+    }
+    if (keys.ArrowLeft) {
+        player.x -= player.speed * timeScale;
+    }
+    if (keys.ArrowRight) {
+        player.x += player.speed * timeScale;
+    }
+
+    if (player.x < 0) player.x = 0;
+    if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+    if (player.y < 0) player.y = 0;
+    if (player.y + player.height > 350) player.y = 350 - player.height;
+}
+
 function animate(timestamp) {
     if (!gameActive || cutsceneActive || !isTabActive) return;
     if (!lastTime) lastTime = timestamp;
@@ -1333,34 +1384,38 @@ function animate(timestamp) {
         jetpackBtn.innerText = upgradeJetpack > 0 ? `JETPACK [J] (${upgradeJetpack})` : `NO CHARGES (0)`;
     }
 
-    if (jetpackState !== 'active' || !jKeyPressed) {
-        let currentPlatform = null;
-        if (player.vy >= 0) {
-            for (let plat of platforms) {
-                if (player.x + player.width > plat.x && player.x < plat.x + plat.width) {
-                    if (player.y + player.height <= plat.y + 8 && player.y + player.height + (player.vy * timeScale) >= plat.y) {
-                        currentPlatform = plat; break;
+    if (!isBossMode) {
+        if (jetpackState !== 'active' || !jKeyPressed) {
+            let currentPlatform = null;
+            if (player.vy >= 0) {
+                for (let plat of platforms) {
+                    if (player.x + player.width > plat.x && player.x < plat.x + plat.width) {
+                        if (player.y + player.height <= plat.y + 8 && player.y + player.height + (player.vy * timeScale) >= plat.y) {
+                            currentPlatform = plat; break;
+                        }
                     }
                 }
             }
-        }
-        if (currentPlatform) {
-            player.vy = 0; player.y = currentPlatform.y - player.height; player.isGrounded = true;
+            if (currentPlatform) {
+                player.vy = 0; player.y = currentPlatform.y - player.height; player.isGrounded = true;
+            } else {
+                player.vy += player.gravity * timeScale; 
+                player.y += player.vy * timeScale;
+                if (player.y >= 350 - player.height) {
+                    player.y = 350 - player.height; player.vy = 0; player.isGrounded = true;
+                } else {
+                    player.isGrounded = false;
+                }
+            }
         } else {
-            player.vy += player.gravity * timeScale; 
             player.y += player.vy * timeScale;
+            if (player.y <= 0) player.y = 0;
             if (player.y >= 350 - player.height) {
                 player.y = 350 - player.height; player.vy = 0; player.isGrounded = true;
-            } else {
-                player.isGrounded = false;
             }
         }
     } else {
-        player.y += player.vy * timeScale;
-        if (player.y <= 0) player.y = 0;
-        if (player.y >= 350 - player.height) {
-            player.y = 350 - player.height; player.vy = 0; player.isGrounded = true;
-        }
+        handleBossMovement(timeScale);
     }
 
     if (!isBossMode) {
