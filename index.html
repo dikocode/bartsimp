@@ -444,6 +444,8 @@ let playerRocks = [];
 let spawnTimer = 0;
 let bgOffset = 0;
 let particles = [];
+let runDurationTimer = 0;
+const TIME_TO_BOSS = 30000; 
 
 let playerPoints = parseInt(getCookie("bart_points")) || 0;
 let upgradeLife = parseInt(getCookie("bart_up_life")) || 0; 
@@ -657,11 +659,6 @@ function updateLivesIndicator() {
 }
 
 startBtn.addEventListener("click", () => {
-    try { 
-        bgm.pause(); 
-        bgm.currentTime = 0; 
-    } catch (e) {}
-    
     startScreen.style.display = "none";
     cutsceneScreen.style.display = "flex";
     cutsceneActive = true;
@@ -697,9 +694,10 @@ function showNextDialogue() {
         } else {
             cutsceneScreen.style.display = "none";
             cutsceneActive = false;
-            bossPhase = 'fighting';
+            bossPhase = 'entering';
             throwBtn.style.display = "block";
             lastTime = performance.now();
+            animate(lastTime);
         }
     }
 }
@@ -726,7 +724,7 @@ function runActualGame() {
     jetpackBtn.style.display = "block";
     throwBtn.style.display = "none";
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
-    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
+    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6; runDurationTimer = 0;
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
     player.height = player.originalHeight; player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
@@ -734,7 +732,7 @@ function runActualGame() {
     jetpackState = 'ready'; jetpackCooldownTimer = 0; jKeyPressed = false;
     
     lastTime = performance.now();
-    animate();
+    animate(lastTime);
 }
 
 class Obstacle {
@@ -887,7 +885,8 @@ function animate(timestamp) {
     drawBackground();
 
     if (!isBossMode) {
-        if (bgm.duration > 0 && bgm.currentTime >= bgm.duration - 0.5) {
+        runDurationTimer += dt;
+        if (runDurationTimer >= TIME_TO_BOSS || (bgm.duration > 0 && bgm.currentTime >= bgm.duration - 0.5)) {
             triggerBossCutscene();
             return;
         }
