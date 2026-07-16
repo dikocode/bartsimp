@@ -146,6 +146,35 @@
             box-shadow: 0 0 40px rgba(255, 0, 255, 0.25);
             touch-action: none;
         }
+        #cutscene-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 5, 20, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 25;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 16px;
+            touch-action: none;
+        }
+        #cutscene-text {
+            font-size: min(5vw, 24px);
+            line-height: 1.6;
+            max-width: 80%;
+            min-height: 80px;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+            margin-bottom: 20px;
+        }
         #powerup-screen {
             position: absolute;
             top: 0;
@@ -255,7 +284,7 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">snapshop 1.3BU boss update</div>
+    <div id="version-tag">snapshot 1.3csbu </div>
     <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
@@ -276,11 +305,16 @@
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my good friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
-            made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
+            credits to my good friend<a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            made by  <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
         <div id="audio-status">Audio Status: Standby</div>
+    </div>
+
+    <div id="cutscene-screen">
+        <div id="cutscene-text"></div>
+        <button id="cutscene-next-btn">TAP TO CONTINUE</button>
     </div>
 
     <div id="powerup-screen">
@@ -323,6 +357,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const startScreen = document.getElementById("start-screen");
+const cutsceneScreen = document.getElementById("cutscene-screen");
+const cutsceneText = document.getElementById("cutscene-text");
+const cutsceneNextBtn = document.getElementById("cutscene-next-btn");
 const powerupScreen = document.getElementById("powerup-screen");
 const startBtn = document.getElementById("start-btn");
 const openShopBtn = document.getElementById("open-shop-btn");
@@ -448,6 +485,15 @@ const bob = {
     targetY: 240
 };
 
+const dialogueLines = [
+    { text: '<span style="color:#ffd90f">bart:</span> hello sideshow bob?', triggerMusic: false },
+    { text: '<span style="color:#ff3366">bob:</span> i escaped the prison now im gonna get ya', triggerMusic: false },
+    { text: '<span style="color:#ffd90f">bart:</span> bet you cant get me while i play this song!', triggerMusic: true },
+    { text: '<span style="color:#ff3366">bob:</span> bart more like brat your bets are gonna fail', triggerMusic: false },
+    { text: '<span style="color:#ffd90f">bart:</span> better catch me!', triggerMusic: false }
+];
+let currentDialogueIndex = 0;
+
 function updatePointsUI() {
     menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
     shopPointsDisplay.innerText = "POINTS: " + playerPoints;
@@ -531,7 +577,7 @@ window.addEventListener("keyup", (e) => {
 let activeTouchId = null;
 window.addEventListener("touchstart", (e) => {
     if (!gameActive) return;
-    if (e.target.classList.contains('hud-btn')) return;
+    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
     e.preventDefault();
     if (activeTouchId !== null) return;
     
@@ -550,7 +596,7 @@ window.addEventListener("touchstart", (e) => {
 
 window.addEventListener("touchend", (e) => {
     if (!gameActive) return;
-    if (e.target.classList.contains('hud-btn')) return;
+    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
     e.preventDefault();
     for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
@@ -596,6 +642,36 @@ function updateLivesIndicator() {
 
 startBtn.addEventListener("click", () => {
     startScreen.style.display = "none";
+    cutsceneScreen.style.display = "flex";
+    currentDialogueIndex = 0;
+    showNextDialogue();
+});
+
+cutsceneNextBtn.addEventListener("click", () => {
+    currentDialogueIndex++;
+    showNextDialogue();
+});
+cutsceneNextBtn.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    currentDialogueIndex++;
+    showNextDialogue();
+}, { passive: false });
+
+function showNextDialogue() {
+    if (currentDialogueIndex < dialogueLines.length) {
+        const line = dialogueLines[currentDialogueIndex];
+        cutsceneText.innerHTML = line.text;
+        if (line.triggerMusic) {
+            try { bgm.currentTime = 0; } catch (e) {}
+            bgm.play().catch(e => {});
+        }
+    } else {
+        cutsceneScreen.style.display = "none";
+        runActualGame();
+    }
+}
+
+function runActualGame() {
     jetpackBtn.style.display = "block";
     throwBtn.style.display = "none";
     gameActive = true; isBossMode = false; bossWon = false; playerHasKnife = false;
@@ -606,11 +682,9 @@ startBtn.addEventListener("click", () => {
     activeLives = upgradeLife; updateLivesIndicator();
     jetpackState = 'ready'; jetpackCooldownTimer = 0; jKeyPressed = false;
     
-    try { bgm.currentTime = 0; } catch (e) {}
-    bgm.play().catch(e => {});
     lastTime = performance.now();
     animate();
-});
+}
 
 class Obstacle {
     constructor(type) {
