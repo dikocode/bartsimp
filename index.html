@@ -493,11 +493,10 @@ const bob = {
 };
 
 const introDialogue = [
-    { text: '<span style="color:#ffd90f">bart:</span> hello sideshow bob?', triggerMusic: false },
-    { text: '<span style="color:#ff3366">bob:</span> i escaped the prison now im gonna get ya', triggerMusic: false },
-    { text: '<span style="color:#ffd90f">bart:</span> bet you cant get me while i play this song!', triggerMusic: true },
-    { text: '<span style="color:#ff3366">bob:</span> bart more like brat your bets are gonna fail', triggerMusic: false },
-    { text: '<span style="color:#ffd90f">bart:</span> better catch me!', triggerMusic: false }
+    { text: '<span style="color:#ffd90f">bart:</span> hello sideshow bob?' },
+    { text: '<span style="color:#ff3366">bob:</span> i escaped the prison now im gonna get ya' },
+    { text: '<span style="color:#ff3366">bob:</span> bart more like brat your bets are gonna fail' },
+    { text: '<span style="color:#ffd90f">bart:</span> better catch me!' }
 ];
 
 const bossDialogue = [
@@ -686,10 +685,6 @@ function showNextDialogue() {
         if (currentDialogueIndex < introDialogue.length) {
             const line = introDialogue[currentDialogueIndex];
             cutsceneText.innerHTML = line.text;
-            if (line.triggerMusic) {
-                try { bgm.currentTime = 0; } catch (e) {}
-                bgm.play().catch(e => {});
-            }
         } else {
             cutsceneScreen.style.display = "none";
             cutsceneActive = false;
@@ -725,6 +720,9 @@ function triggerBossCutscene() {
 }
 
 function runActualGame() {
+    try { bgm.currentTime = 0; } catch (e) {}
+    bgm.play().catch(e => {});
+
     jetpackBtn.style.display = "block";
     throwBtn.style.display = "none";
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
