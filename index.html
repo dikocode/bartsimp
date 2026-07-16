@@ -95,23 +95,34 @@
             pointer-events: none;
             display: none;
         }
-        #jetpack-btn {
+        #controls-group {
             position: absolute;
-            bottom: 60px;
+            bottom: 30px;
             right: 20px;
-            padding: 12px 24px;
-            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 15;
+        }
+        .hud-btn {
+            padding: 10px 20px;
+            font-size: 13px;
             font-family: inherit;
-            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
             color: #fff;
             border: 1px solid rgba(255, 255, 255, 0.3);
             cursor: pointer;
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
-            z-index: 15;
             display: none;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             touch-action: none;
+        }
+        #jetpack-btn {
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
+        }
+        #throw-btn {
+            background: linear-gradient(135deg, #ffcc00 0%, #ff6600 100%);
+            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.4);
         }
         #start-screen {
             position: absolute;
@@ -197,12 +208,7 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            transition: border-color 0.3s, box-shadow 0.3s;
             touch-action: none;
-        }
-        .shop-item:hover {
-            border-color: rgba(255, 0, 255, 0.3);
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.05);
         }
         .shop-item button {
             padding: 8px 18px;
@@ -243,21 +249,21 @@
             text-decoration: none;
             border-bottom: 1px dashed rgba(0, 255, 255, 0.4);
             pointer-events: auto;
-            transition: color 0.2s;
-        }
-        .credits-box a:hover {
-            color: #ff00ff;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.2 the neon ages</div>
+    <div id="version-tag">snapshop 1.3BU boss update</div>
     <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
-    <button id="jetpack-btn">JETPACK [J] (0)</button>
+    
+    <div id="controls-group">
+        <button id="jetpack-btn" class="hud-btn">JETPACK [J] (0)</button>
+        <button id="throw-btn" class="hud-btn">THROWS UNLOCKED [K]</button>
+    </div>
     
     <div id="start-screen">
         <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6.5vw, 36px); margin-top: 10px; text-shadow: 0 0 15px rgba(255,217,15,0.4); letter-spacing: 1px;">BART SIMPSON RUN</h1>
@@ -266,11 +272,11 @@
             <button id="start-btn">START RUNNING</button>
             <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
         </div>
-        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J or HUD Button to Fly</p>
+        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | TAP K / HUD to Throw Knife</p>
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            credits to my good friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
             made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
@@ -284,7 +290,7 @@
         <div class="shop-item">
             <div style="text-align: left;">
                 <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 1: EXTRA LIVES</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="life-desc">Survive hits (Max 5 stacked)</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Survive hits (Max 5 stacked)</div>
             </div>
             <button id="buy-life-btn">COST: 50 PTS (0/5)</button>
         </div>
@@ -292,7 +298,7 @@
         <div class="shop-item">
             <div style="text-align: left;">
                 <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 2: BUY JETPACK</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="jetpack-desc">Buy stackable jetpack charges (Max 32)</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Buy stackable jetpack charges (Max 32)</div>
             </div>
             <button id="buy-jetpack-btn">COST: 30 PTS (0/32)</button>
         </div>
@@ -300,7 +306,7 @@
         <div class="shop-item">
             <div style="text-align: left;">
                 <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 3: DOUBLE POINTS</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" id="points-desc">Boost points gained per run</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Boost points gained per run</div>
             </div>
             <button id="buy-points-btn">COST: 35 PTS</button>
         </div>
@@ -324,6 +330,7 @@ const closeShopBtn = document.getElementById("close-shop-btn");
 const scoreBoard = document.getElementById("score-board");
 const livesIndicator = document.getElementById("lives-indicator");
 const jetpackBtn = document.getElementById("jetpack-btn");
+const throwBtn = document.getElementById("throw-btn");
 const bgm = document.getElementById("bgm");
 const audioStatus = document.getElementById("audio-status");
 
@@ -341,11 +348,6 @@ window.addEventListener("touchstart", (e) => {
 window.addEventListener("touchmove", (e) => {
     e.preventDefault();
 }, { passive: false });
-window.addEventListener("touchend", (e) => {
-    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-    }
-}, { passive: false });
 
 function setCookie(name, value, days = 365) {
     const d = new Date();
@@ -360,12 +362,8 @@ function getCookie(name) {
     const ca = decodedCookie.split(';');
     for(let i = 0; i < ca.length; i++) {
         let c = ca[i];
-        while (c.charAt(0) == ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(cname) == 0) {
-            return c.substring(cname.length, c.length);
-        }
+        while (c.charAt(0) == ' ') c = c.substring(1);
+        if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
     }
     return "";
 }
@@ -373,51 +371,29 @@ function getCookie(name) {
 let audioCtx = null;
 function playCoinSFX() {
     try {
-        if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        }
-        if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-        
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
         let osc1 = audioCtx.createOscillator();
-        let osc2 = audioCtx.createOscillator();
         let gainNode = audioCtx.createGain();
-        
         osc1.type = 'sine';
-        osc2.type = 'triangle';
-        
         osc1.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
         osc1.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); 
-        
-        osc2.frequency.setValueAtTime(587.33, audioCtx.currentTime);
-        osc2.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08);
-        
         gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
         gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        
         osc1.connect(gainNode);
-        osc2.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        
         osc1.start();
-        osc2.start();
         osc1.stop(audioCtx.currentTime + 0.3);
-        osc2.stop(audioCtx.currentTime + 0.3);
     } catch (err) {}
 }
 
-let bartLoaded = false;
-let bobLoaded = false;
-
+let bartLoaded = false, bobLoaded = false;
 const bartImg = new Image();
 bartImg.onload = () => { bartLoaded = true; };
-bartImg.onerror = () => { bartLoaded = false; };
 bartImg.src = "bart.png";
 
 const bobImg = new Image();
 bobImg.onload = () => { bobLoaded = true; };
-bobImg.onerror = () => { bobLoaded = false; };
 bobImg.src = "bob.jpg";
 
 let gameActive = false;
@@ -426,6 +402,8 @@ let gameSpeed = 6;
 let obstacles = [];
 let platforms = [];
 let coins = [];
+let bossKnives = [];
+let playerKnives = [];
 let spawnTimer = 0;
 let bgOffset = 0;
 let particles = [];
@@ -436,96 +414,17 @@ let upgradeJetpack = parseInt(getCookie("bart_up_jetpack")) || 0;
 let upgradeDouble = parseInt(getCookie("bart_up_double")) || 0; 
 
 let lastTime = 0;
-
 let jetpackState = 'ready'; 
 let jetpackFuel = 15000; 
 let jetpackCooldownTimer = 0;
 let jKeyPressed = false;
 const JETPACK_COOLDOWN_TIME = 5000; 
 
-function updatePointsUI() {
-    menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
-    shopPointsDisplay.innerText = "POINTS: " + playerPoints;
-    
-    if (upgradeLife >= 5) {
-        buyLifeBtn.innerText = "MAXED (5/5)";
-        buyLifeBtn.disabled = true;
-    } else {
-        buyLifeBtn.innerText = `COST: 50 PTS (${upgradeLife}/5)`;
-        buyLifeBtn.disabled = false;
-    }
-
-    if (upgradeJetpack >= 32) {
-        buyJetpackBtn.innerText = "MAXED (32/32)";
-        buyJetpackBtn.disabled = true;
-    } else {
-        buyJetpackBtn.innerText = `COST: 30 PTS (${upgradeJetpack}/32)`;
-        buyJetpackBtn.disabled = false;
-    }
-
-    if (upgradeDouble >= 3) {
-        buyPointsBtn.innerText = "MAXED";
-        buyPointsBtn.disabled = true;
-    } else {
-        buyPointsBtn.innerText = `LVL ${upgradeDouble}/3 (COST: ${(upgradeDouble+1)*35} PTS)`;
-    }
-}
-updatePointsUI();
-
-openShopBtn.addEventListener("click", () => {
-    startScreen.style.display = "none";
-    powerupScreen.style.display = "flex";
-    updatePointsUI();
-});
-
-closeShopBtn.addEventListener("click", () => {
-    powerupScreen.style.display = "none";
-    startScreen.style.display = "flex";
-});
-
-buyLifeBtn.addEventListener("click", () => {
-    if (playerPoints >= 50 && upgradeLife < 5) {
-        playerPoints -= 50;
-        upgradeLife++;
-        setCookie("bart_points", playerPoints);
-        setCookie("bart_up_life", upgradeLife);
-        updatePointsUI();
-    }
-});
-
-buyJetpackBtn.addEventListener("click", () => {
-    if (playerPoints >= 30 && upgradeJetpack < 32) {
-        playerPoints -= 30;
-        upgradeJetpack++;
-        setCookie("bart_points", playerPoints);
-        setCookie("bart_up_jetpack", upgradeJetpack);
-        updatePointsUI();
-    }
-});
-
-buyPointsBtn.addEventListener("click", () => {
-    let cost = (upgradeDouble + 1) * 35;
-    if (playerPoints >= cost && upgradeDouble < 3) {
-        playerPoints -= cost;
-        upgradeDouble++;
-        setCookie("bart_points", playerPoints);
-        setCookie("bart_up_double", upgradeDouble);
-        updatePointsUI();
-    }
-});
-
-bgm.addEventListener('canplaythrough', () => {
-    audioStatus.innerText = "Audio Status: Ready!";
-    audioStatus.style.color = "#00ffff";
-});
-
-bgm.addEventListener('error', (e) => {
-    audioStatus.innerText = "Audio Status: Ready (Simulated)";
-    audioStatus.style.color = "#ff3366";
-});
-
-let activeLives = 0;
-let isThrusting = false;
+let isBossMode = false;
+let bossPhase = 'entering'; 
+let bossTimer = 0;
+let playerHasKnife = false;
+let bossWon = false;
 
 const player = {
     x: 180,
@@ -544,238 +443,198 @@ const bob = {
     x: 30,
     y: 240,
     width: 60,
-    height: 110
+    height: 110,
+    targetX: 30,
+    targetY: 240
 };
 
+function updatePointsUI() {
+    menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
+    shopPointsDisplay.innerText = "POINTS: " + playerPoints;
+    buyLifeBtn.innerText = upgradeLife >= 5 ? "MAXED (5/5)" : `COST: 50 PTS (${upgradeLife}/5)`;
+    buyLifeBtn.disabled = upgradeLife >= 5;
+    buyJetpackBtn.innerText = upgradeJetpack >= 32 ? "MAXED (32/32)" : `COST: 30 PTS (${upgradeJetpack}/32)`;
+    buyJetpackBtn.disabled = upgradeJetpack >= 32;
+    buyPointsBtn.innerText = upgradeDouble >= 3 ? "MAXED" : `LVL ${upgradeDouble}/3 (COST: ${(upgradeDouble+1)*35} PTS)`;
+    buyPointsBtn.disabled = upgradeDouble >= 3;
+}
+updatePointsUI();
+
+openShopBtn.addEventListener("click", () => {
+    startScreen.style.display = "none";
+    powerupScreen.style.display = "flex";
+});
+closeShopBtn.addEventListener("click", () => {
+    powerupScreen.style.display = "none";
+    startScreen.style.display = "flex";
+});
+
+buyLifeBtn.addEventListener("click", () => {
+    if (playerPoints >= 50 && upgradeLife < 5) {
+        playerPoints -= 50; upgradeLife++;
+        setCookie("bart_points", playerPoints); setCookie("bart_up_life", upgradeLife);
+        updatePointsUI();
+    }
+});
+buyJetpackBtn.addEventListener("click", () => {
+    if (playerPoints >= 30 && upgradeJetpack < 32) {
+        playerPoints -= 30; upgradeJetpack++;
+        setCookie("bart_points", playerPoints); setCookie("bart_up_jetpack", upgradeJetpack);
+        updatePointsUI();
+    }
+});
+buyPointsBtn.addEventListener("click", () => {
+    let cost = (upgradeDouble + 1) * 35;
+    if (playerPoints >= cost && upgradeDouble < 3) {
+        playerPoints -= cost; upgradeDouble++;
+        setCookie("bart_points", playerPoints); setCookie("bart_up_double", upgradeDouble);
+        updatePointsUI();
+    }
+});
+
+bgm.addEventListener('canplaythrough', () => {
+    audioStatus.innerText = "Audio Status: Ready!";
+    audioStatus.style.color = "#00ffff";
+});
+
+let activeLives = 0;
+let isThrusting = false;
+
 window.addEventListener("keydown", (e) => {
+    if (!gameActive) return;
     if (e.code === "Space" && player.isGrounded && !player.isSliding) {
-        player.vy = player.jumpForce;
-        player.isGrounded = false;
+        player.vy = player.jumpForce; player.isGrounded = false;
     }
     if (e.code === "ArrowDown" && player.isGrounded) {
-        player.isSliding = true;
-        player.height = player.originalHeight / 2;
-        player.y = 350 - player.height;
+        player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
     }
     if (e.code === "KeyJ") {
         jKeyPressed = true;
         if (jetpackState === 'ready' && upgradeJetpack > 0) {
-            jetpackState = 'active';
-            upgradeJetpack--;
-            setCookie("bart_up_jetpack", upgradeJetpack);
-            updatePointsUI();
+            jetpackState = 'active'; upgradeJetpack--;
+            setCookie("bart_up_jetpack", upgradeJetpack); updatePointsUI();
             jetpackFuel = 15000;
         }
+    }
+    if (e.code === "KeyK") {
+        firePlayerKnife();
     }
 });
 
 window.addEventListener("keyup", (e) => {
-    if (e.code === "ArrowDown") {
-        if (player.isSliding) {
-            player.isSliding = false;
-            player.height = player.originalHeight;
-            player.y = 350 - player.height;
-        }
+    if (e.code === "ArrowDown" && player.isSliding) {
+        player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
     }
-    if (e.code === "KeyJ") {
-        jKeyPressed = false;
-    }
+    if (e.code === "KeyJ") jKeyPressed = false;
 });
 
+let activeTouchId = null;
 window.addEventListener("touchstart", (e) => {
     if (!gameActive) return;
-    if (e.target === jetpackBtn) return; 
-
-    e.preventDefault(); 
-    const touch = e.touches[0];
-    const screenWidth = window.innerWidth;
+    if (e.target.classList.contains('hud-btn')) return;
+    e.preventDefault();
+    if (activeTouchId !== null) return;
     
-    if (touch.clientX < screenWidth / 2) {
+    const touch = e.changedTouches[0];
+    activeTouchId = touch.identifier;
+    if (touch.clientX < window.innerWidth / 2) {
         if (player.isGrounded) {
-            player.isSliding = true;
-            player.height = player.originalHeight / 2;
-            player.y = 350 - player.height;
+            player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
         }
     } else {
         if (player.isGrounded && !player.isSliding) {
-            player.vy = player.jumpForce;
-            player.isGrounded = false;
+            player.vy = player.jumpForce; player.isGrounded = false;
         }
     }
-}, { passive: false });
-
-window.addEventListener("touchmove", (e) => {
-    e.preventDefault(); 
 }, { passive: false });
 
 window.addEventListener("touchend", (e) => {
     if (!gameActive) return;
-    if (e.target === jetpackBtn) return;
-    
-    e.preventDefault(); 
-    if (player.isSliding) {
-        player.isSliding = false;
-        player.height = player.originalHeight;
-        player.y = 350 - player.height;
+    if (e.target.classList.contains('hud-btn')) return;
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === activeTouchId) {
+            activeTouchId = null;
+            if (player.isSliding) {
+                player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
+            }
+        }
     }
 }, { passive: false });
 
 jetpackBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    jKeyPressed = true;
+    e.preventDefault(); jKeyPressed = true;
     if (jetpackState === 'ready' && upgradeJetpack > 0) {
-        jetpackState = 'active';
-        upgradeJetpack--;
-        setCookie("bart_up_jetpack", upgradeJetpack);
-        updatePointsUI();
+        jetpackState = 'active'; upgradeJetpack--;
+        setCookie("bart_up_jetpack", upgradeJetpack); updatePointsUI();
         jetpackFuel = 15000;
     }
 }, { passive: false });
+jetpackBtn.addEventListener("touchend", (e) => { e.preventDefault(); jKeyPressed = false; }, { passive: false });
 
-jetpackBtn.addEventListener("touchend", (e) => {
-    e.preventDefault();
-    jKeyPressed = false;
-}, { passive: false });
+throwBtn.addEventListener("touchstart", (e) => { e.preventDefault(); firePlayerKnife(); }, { passive: false });
+throwBtn.addEventListener("click", () => firePlayerKnife());
 
-window.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-});
+function firePlayerKnife() {
+    if (isBossMode && playerHasKnife) {
+        playerHasKnife = false;
+        throwBtn.style.display = "none";
+        playerKnives.push({
+            x: player.x + player.width,
+            y: player.y + player.height / 2 - 5,
+            width: 25,
+            height: 10,
+            speed: 14
+        });
+    }
+}
 
 function updateLivesIndicator() {
-    if (activeLives > 0) {
-        livesIndicator.style.display = "block";
-        livesIndicator.innerText = "LIVES: " + activeLives;
-    } else {
-        livesIndicator.style.display = "none";
-    }
+    livesIndicator.style.display = activeLives > 0 ? "block" : "none";
+    livesIndicator.innerText = "LIVES: " + activeLives;
 }
 
 startBtn.addEventListener("click", () => {
     startScreen.style.display = "none";
     jetpackBtn.style.display = "block";
-    gameActive = true;
-    score = 0;
-    scoreBoard.innerText = "POINTS: " + score;
-    gameSpeed = 6;
-    obstacles = [];
-    platforms = [];
-    coins = [];
-    particles = [];
-    player.height = player.originalHeight;
-    player.y = 350 - player.height;
-    player.vy = 0;
-    player.isGrounded = true;
-    player.isSliding = false;
-    isThrusting = false;
+    throwBtn.style.display = "none";
+    gameActive = true; isBossMode = false; bossWon = false; playerHasKnife = false;
+    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
+    obstacles = []; platforms = []; coins = []; bossKnives = []; playerKnives = []; particles = [];
+    player.height = player.originalHeight; player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; player.isSliding = false;
+    bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
+    activeLives = upgradeLife; updateLivesIndicator();
+    jetpackState = 'ready'; jetpackCooldownTimer = 0; jKeyPressed = false;
     
-    activeLives = upgradeLife; 
-    updateLivesIndicator();
-    
-    jetpackState = 'ready';
-    jetpackCooldownTimer = 0;
-    jKeyPressed = false;
-    
-    try {
-        bgm.currentTime = 0;
-    } catch (e) {}
-    
+    try { bgm.currentTime = 0; } catch (e) {}
     bgm.play().catch(e => {});
-    
     lastTime = performance.now();
     animate();
 });
 
 class Obstacle {
     constructor(type) {
-        this.type = type; 
-        this.x = canvas.width;
-        
-        if (type === 'spike') {
-            this.width = 40;
-            this.height = 40;
-            this.y = 310;
-        } else if (type === 'double-spike') {
-            this.width = 80;
-            this.height = 40;
-            this.y = 310;
-        } else if (type === 'triple-spike') {
-            this.width = 120;
-            this.height = 40;
-            this.y = 310;
-        } else if (type === 'double-block') {
-            this.width = 120;
-            this.height = 45;
-            this.y = 240;
-        } else { 
-            this.width = 60;
-            this.height = 45;
-            this.y = 240; 
-        }
+        this.type = type; this.x = canvas.width;
+        this.width = type.includes('double') ? 80 : type.includes('triple') ? 120 : 40;
+        this.height = type.includes('block') ? 45 : 40;
+        this.y = type.includes('block') ? 240 : 310;
     }
-
-    update() {
-        this.x -= gameSpeed;
-    }
-
+    update() { this.x -= gameSpeed; }
     draw() {
         ctx.save();
+        ctx.shadowBlur = 10;
         if (this.type.includes('spike')) {
             ctx.shadowColor = "#ff00ff";
-            ctx.shadowBlur = 10;
-            
-            let spikeCount = 1;
-            if (this.type === 'double-spike') spikeCount = 2;
-            if (this.type === 'triple-spike') spikeCount = 3;
-            
-            let singleSpikeWidth = this.width / spikeCount;
-            
-            for (let i = 0; i < spikeCount; i++) {
-                let startX = this.x + (i * singleSpikeWidth);
-                
-                let spikeGrad = ctx.createLinearGradient(startX, this.y + this.height, startX, this.y);
-                spikeGrad.addColorStop(0, "#7b009a");
-                spikeGrad.addColorStop(0.5, "#ff00ff");
-                spikeGrad.addColorStop(1, "#ffffff");
-                
-                ctx.fillStyle = spikeGrad;
-                ctx.beginPath();
-                ctx.moveTo(startX, this.y + this.height);
-                ctx.lineTo(startX + singleSpikeWidth / 2, this.y);
-                ctx.lineTo(startX + singleSpikeWidth, this.y + this.height);
-                ctx.closePath();
-                ctx.fill();
-                
-                ctx.strokeStyle = "#ffffff";
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(startX, this.y + this.height);
-                ctx.lineTo(startX + singleSpikeWidth / 2, this.y);
-                ctx.stroke();
+            let c = this.type === 'double-spike' ? 2 : this.type === 'triple-spike' ? 3 : 1;
+            let w = this.width / c;
+            for (let i = 0; i < c; i++) {
+                let sx = this.x + (i * w);
+                ctx.fillStyle = "#ff00ff";
+                ctx.beginPath(); ctx.moveTo(sx, this.y + this.height); ctx.lineTo(sx + w / 2, this.y); ctx.lineTo(sx + w, this.y + this.height); ctx.closePath(); ctx.fill();
             }
         } else {
-            ctx.shadowColor = "#00ffff";
-            ctx.shadowBlur = 10;
-            
-            let blockGrad = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
-            blockGrad.addColorStop(0, "rgba(0, 255, 255, 0.4)");
-            blockGrad.addColorStop(0.5, "rgba(0, 150, 255, 0.3)");
-            blockGrad.addColorStop(1, "rgba(0, 50, 150, 0.6)");
-            
-            ctx.fillStyle = blockGrad;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
-            
-            ctx.strokeStyle = "#00ffff";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(this.x, this.y, this.width, this.height);
-            
-            ctx.beginPath();
-            ctx.moveTo(this.x, this.y);
-            ctx.lineTo(this.x + this.width, this.y + this.height);
-            if (this.type === 'double-block') {
-                ctx.moveTo(this.x + this.width / 2, this.y);
-                ctx.lineTo(this.x + this.width / 2, this.y + this.height);
-            }
-            ctx.stroke();
+            ctx.shadowColor = "#00ffff"; ctx.fillStyle = "rgba(0, 255, 255, 0.4)"; ctx.strokeStyle = "#00ffff"; ctx.lineWidth = 3;
+            ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
         }
         ctx.restore();
     }
@@ -783,530 +642,273 @@ class Obstacle {
 
 class Platform {
     constructor() {
-        this.x = canvas.width;
-        this.y = 220 + Math.random() * 30; 
-        this.width = 170 + Math.random() * 80;
-        this.height = 24;
+        this.x = canvas.width; this.y = 220 + Math.random() * 30; this.width = 170 + Math.random() * 80; this.height = 24;
     }
-    update() {
-        this.x -= gameSpeed;
-    }
+    update() { this.x -= gameSpeed; }
     draw() {
-        ctx.save();
-        ctx.shadowColor = "#00ffcc";
-        ctx.shadowBlur = 12;
-
-        let grad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
-        grad.addColorStop(0, "#00ffcc");
-        grad.addColorStop(1, "#005588");
-        ctx.fillStyle = grad;
+        ctx.save(); ctx.shadowBlur = 12; ctx.shadowColor = "#00ffcc"; ctx.fillStyle = "#00ffcc";
         ctx.fillRect(this.x, this.y, this.width, this.height);
-        
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(this.x, this.y, this.width, this.height);
-
         ctx.fillStyle = "#ff0055";
-        ctx.shadowColor = "#ff0055";
-        ctx.shadowBlur = 8;
-        let spikeWidth = 20;
-        let spikeHeight = 15;
-        let numSpikes = Math.floor(this.width / spikeWidth);
-        for (let i = 0; i < numSpikes; i++) {
-            let sx = this.x + (i * spikeWidth);
-            let sy = this.y + this.height;
-            ctx.beginPath();
-            ctx.moveTo(sx, sy);
-            ctx.lineTo(sx + spikeWidth / 2, sy + spikeHeight);
-            ctx.lineTo(sx + spikeWidth, sy);
-            ctx.closePath();
-            ctx.fill();
+        let steps = Math.floor(this.width / 20);
+        for (let i = 0; i < steps; i++) {
+            ctx.beginPath(); ctx.moveTo(this.x + (i * 20), this.y + this.height); ctx.lineTo(this.x + (i * 20) + 10, this.y + this.height + 15); ctx.lineTo(this.x + (i * 20) + 20, this.y + this.height); ctx.closePath(); ctx.fill();
         }
         ctx.restore();
     }
 }
 
 class Coin {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.width = 24;
-        this.height = 24;
-        this.angle = 0;
-    }
-    update() {
-        this.x -= gameSpeed;
-        this.angle += 0.15;
-    }
+    constructor(x, y) { this.x = x; this.y = y; this.width = 24; this.height = 24; this.angle = 0; }
+    update() { this.x -= gameSpeed; this.angle += 0.15; }
     draw() {
-        ctx.save();
-        ctx.translate(this.x + 12, this.y + 12);
-        ctx.scale(Math.abs(Math.sin(this.angle)), 1); 
-        ctx.shadowColor = "#ffd700";
-        ctx.shadowBlur = 10;
-
-        let grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 12);
-        grad.addColorStop(0, "#fff5cc");
-        grad.addColorStop(0.8, "#ffd700");
-        grad.addColorStop(1, "#b8860b");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 12, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        
-        ctx.fillStyle = "#b8860b";
-        ctx.font = "bold 12px Arial";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText("$", 0, 0);
-        
+        ctx.save(); ctx.translate(this.x + 12, this.y + 12); ctx.scale(Math.abs(Math.sin(this.angle)), 1);
+        ctx.shadowColor = "#ffd700"; ctx.shadowBlur = 10; ctx.fillStyle = "#ffd700";
+        ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
 }
 
 function spawnObstacle() {
+    if (isBossMode) return;
     spawnTimer++;
-    
-    let minGap = Math.max(40, 120 - (score * 0.15) - (gameSpeed * 1.3));
-    let randomBuffer = Math.max(25, 90 - (score * 0.1));
-    
-    if (spawnTimer > minGap + Math.random() * randomBuffer) {
+    if (spawnTimer > 90 + Math.random() * 60) {
         let r = Math.random();
-        if (r < 0.45) { 
-            let plat = new Platform();
-            platforms.push(plat);
-            
-            let numCoins = 3 + Math.floor(Math.random() * 4); 
-            let spacing = plat.width / (numCoins + 1);
-            for (let i = 1; i <= numCoins; i++) {
-                coins.push(new Coin(plat.x + (i * spacing) - 12, plat.y - 35));
-            }
-        } else if (r < 0.72) { 
-            let numCoins = 4 + Math.floor(Math.random() * 5); 
-            let startY = 140 + Math.random() * 80;
-            for (let i = 0; i < numCoins; i++) {
-                coins.push(new Coin(canvas.width + (i * 35), startY + Math.sin(i * 0.6) * 35));
-            }
+        if (r < 0.4) {
+            let plat = new Platform(); platforms.push(plat);
+            coins.push(new Coin(plat.x + plat.width/2 - 12, plat.y - 35));
+        } else if (r < 0.7) {
+            coins.push(new Coin(canvas.width, 180 + Math.random() * 60));
         } else {
             let pool = ['spike', 'block'];
             if (score >= 15) pool.push('double-spike');
-            if (score >= 35) pool.push('double-block');
-            if (score >= 60) pool.push('triple-spike');
-            
-            const type = pool[Math.floor(Math.random() * pool.length)];
-            obstacles.push(new Obstacle(type));
-            
-            if (Math.random() < 0.65) {
-                coins.push(new Coin(canvas.width + 40, 160 + Math.random() * 50));
-            }
+            obstacles.push(new Obstacle(pool[Math.floor(Math.random() * pool.length)]));
         }
         spawnTimer = 0;
     }
 }
 
-function checkCollision(rect1, rect2) {
-    return rect1.x < rect2.x + rect2.width &&
-           rect1.x + rect1.width > rect2.x &&
-           rect1.y < rect2.y + rect2.height &&
-           rect1.y + rect1.height > rect2.y;
+function checkCollision(r1, r2) {
+    return r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y;
 }
 
-function gameOver() {
-    gameActive = false;
-    bgm.pause();
-    isThrusting = false;
-    jetpackBtn.style.display = "none";
-    livesIndicator.style.display = "none";
-    
-    let pointsEarned = score;
-    if (upgradeDouble > 0) {
-        pointsEarned = Math.floor(pointsEarned * (1 + (upgradeDouble * 0.5))); 
-    }
-    
-    playerPoints += pointsEarned;
-    setCookie("bart_points", playerPoints);
-    updatePointsUI();
+function gameOver(won = false) {
+    gameActive = false; bgm.pause(); jetpackBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none";
+    let earned = score;
+    if (won) earned += 100;
+    if (upgradeDouble > 0) earned = Math.floor(earned * (1 + (upgradeDouble * 0.5)));
+    playerPoints += earned; setCookie("bart_points", playerPoints); updatePointsUI();
     
     startScreen.style.display = "flex";
-    document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
-    document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff; font-size:14px;">(+${pointsEarned}!)</span>`;
-    startBtn.innerText = "TRY AGAIN";
+    if (won) {
+        document.querySelector("#start-screen h1").innerText = "YOU DEFEATED BOB!";
+        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff;">(+${earned} WIN!)</span>`;
+    } else {
+        document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
+        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff3366;">(+${earned})</span>`;
+    }
+    startBtn.innerText = "RUN AGAIN";
 }
 
 function drawBackground() {
     let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, "#120524"); 
-    grad.addColorStop(0.5, "#2e084c"); 
-    grad.addColorStop(1, "#54004e"); 
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
-    let starOffset = (bgOffset * 0.1) % 800;
-    for (let i = 0; i < 15; i++) {
-        let sx = (i * 85 - starOffset + 800) % 800;
-        let sy = (i * 23) % 200 + 30;
-        let size = (i % 3 === 0) ? 3 : 1.5;
-        ctx.beginPath();
-        ctx.arc(sx, sy, size, 0, Math.PI * 2);
-        ctx.fill();
-    }
-
-    ctx.save();
-    ctx.shadowColor = "#ff00ff";
-    ctx.shadowBlur = 25;
-    ctx.fillStyle = "#fffdf0";
-    ctx.beginPath();
-    ctx.arc(700, 80, 45, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.save();
-    ctx.shadowColor = "#ff00ff";
-    ctx.shadowBlur = 10;
-    ctx.fillStyle = "rgba(46, 8, 76, 0.7)";
-    let hillOffset = (bgOffset * 0.4) % 800;
-    ctx.beginPath();
-    ctx.moveTo(0 - hillOffset, 370);
-    ctx.quadraticCurveTo(200 - hillOffset, 220, 400 - hillOffset, 370);
-    ctx.quadraticCurveTo(600 - hillOffset, 190, 800 - hillOffset, 370);
-    ctx.quadraticCurveTo(1000 - hillOffset, 220, 1200 - hillOffset, 370);
-    ctx.lineTo(canvas.width, canvas.height);
-    ctx.lineTo(0, canvas.height);
-    ctx.fill();
-    ctx.restore();
-
-    ctx.fillStyle = "#0c021a";
-    ctx.fillRect(0, 350, canvas.width, 50);
-    
-    ctx.fillStyle = "#ff00ff";
-    ctx.fillRect(0, 350, canvas.width, 4); 
-}
-
-function drawPlayerShadow() {
-    const groundY = 350;
-    const distance = groundY - (player.y + player.height);
-    const maxDistance = 300;
-    const scale = Math.max(0.1, 1 - (distance / maxDistance));
-    const width = player.width * scale;
-    const height = 8 * scale;
-    
-    ctx.save();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-    ctx.beginPath();
-    ctx.ellipse(player.x + player.width/2, groundY, width/2, height/2, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
+    grad.addColorStop(0, "#120524"); grad.addColorStop(1, "#54004e");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#0c021a"; ctx.fillRect(0, 350, canvas.width, 50);
+    ctx.fillStyle = "#ff00ff"; ctx.fillRect(0, 350, canvas.width, 4);
 }
 
 function drawBart(x, y, w, h, sliding) {
     ctx.save();
-    
     if (jetpackState === 'active' && !sliding) {
-        ctx.fillStyle = "#444";
-        ctx.fillRect(x - 12, y + 25, 12, 25);
-        ctx.fillStyle = "#ff00ff";
-        ctx.fillRect(x - 14, y + 30, 3, 15);
+        ctx.fillStyle = "#444"; ctx.fillRect(x - 12, y + 25, 12, 25);
     }
-
-    if (activeLives > 0) {
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = "#00ffcc";
-    } else {
-        ctx.shadowBlur = 12;
-        ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-        ctx.shadowOffsetY = 6;
+    if (playerHasKnife) {
+        ctx.shadowBlur = 15; ctx.shadowColor = "#ffcc00";
+    } else if (activeLives > 0) {
+        ctx.shadowBlur = 15; ctx.shadowColor = "#00ffcc";
     }
-    
     if (bartLoaded) {
         if (sliding) {
-            ctx.translate(x + w / 2, y + h / 2);
-            ctx.rotate(Math.PI / 2);
+            ctx.translate(x + w / 2, y + h / 2); ctx.rotate(Math.PI / 2);
             ctx.drawImage(bartImg, -h / 2, -w / 2, h, w);
         } else {
             ctx.drawImage(bartImg, x, y, w, h);
         }
     } else {
-        ctx.translate(x + w/2, y + h/2);
-        if (sliding) ctx.rotate(Math.PI / 2);
-        
-        ctx.fillStyle = "#ff3300";
-        ctx.fillRect(-w/2, -h/6, w, h/2);
-        
-        ctx.fillStyle = "#0055ff";
-        ctx.fillRect(-w/2, h/3, w, h/6);
-        
-        ctx.fillStyle = "#ffd90f";
-        ctx.fillRect(-w/2 + 5, -h/2, w - 10, h/3); 
-        ctx.fillRect(-w/4, h/2, 8, h/8); 
-        ctx.fillRect(w/10, h/2, 8, h/8); 
-        
-        ctx.beginPath();
-        ctx.moveTo(-w/2 + 5, -h/2);
-        for(let i=0; i<5; i++) {
-            ctx.lineTo(-w/2 + 5 + (i*8), -h/2 - 8);
-            ctx.lineTo(-w/2 + 9 + (i*8), -h/2);
-        }
-        ctx.fillStyle = "#ffd90f";
-        ctx.fill();
+        ctx.fillStyle = "#ffd90f"; ctx.fillRect(x, y, w, h);
     }
     ctx.restore();
 }
 
 function drawSideshowBob(x, y, w, h) {
     ctx.save();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.4)";
-    ctx.beginPath();
-    ctx.ellipse(x + w/2, 350, w/2, 8, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.shadowBlur = 12;
-    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
-    ctx.shadowOffsetY = 6;
-
+    ctx.shadowBlur = 20; ctx.shadowColor = isBossMode ? "#ff0000" : "rgba(0, 0, 0, 0.6)";
     if (bobLoaded) {
-        ctx.translate(x + w, y);
-        ctx.scale(-1, 1);
+        ctx.translate(x + w, y); ctx.scale(-1, 1);
         ctx.drawImage(bobImg, 0, 0, w, h);
     } else {
-        ctx.translate(x + w/2, y + h/2);
-        
-        ctx.fillStyle = "#1133aa";
-        ctx.fillRect(-w/3, h/4, w*0.66, h/4);
-        
-        ctx.fillStyle = "#ffd90f";
-        ctx.fillRect(-w/3, -h/4, w*0.66, h/2); 
-        ctx.fillRect(-w/6, -h/3, w*0.33, h/10); 
-        
-        ctx.fillStyle = "#009944";
-        ctx.beginPath();
-        ctx.arc(0, -h/3, w/2, 0, Math.PI, true);
-        ctx.fill();
-        
-        for(let i = 0; i < 6; i++) {
-            ctx.beginPath();
-            let angle = (Math.PI / 5) * i - Math.PI;
-            let sx = Math.cos(angle) * (w/2);
-            let sy = -h/3 + Math.sin(angle) * (w/2);
-            ctx.arc(sx, sy, 12, 0, Math.PI*2);
-            ctx.fill();
-        }
+        ctx.fillStyle = "#009944"; ctx.fillRect(x, y, w, h);
     }
     ctx.restore();
 }
 
-function handleParticles() {
-    if (isThrusting && jetpackState === 'active') {
-        particles.push({
-            x: player.x - 8,
-            y: player.y + 55,
-            vx: -2 - Math.random() * 3,
-            vy: 2 + Math.random() * 4,
-            size: 4 + Math.random() * 6,
-            color: Math.random() > 0.4 ? "#ff00ff" : "#00ffff",
-            life: 25
-        });
+function handleBossLogic(dt) {
+    if (!isBossMode) {
+        if (bgm.currentTime >= bgm.duration - 0.5 || bgm.ended) {
+            isBossMode = true; bossPhase = 'entering'; bob.targetX = 650; bob.targetY = 240;
+            obstacles = []; platforms = []; coins = [];
+        }
+        return;
     }
 
-    for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-        p.life--;
-        
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+    gameSpeed = 0; 
+    bob.x += (bob.targetX - bob.x) * 0.05;
+    bob.y += (bob.targetY - bob.y) * 0.05;
 
-        if (p.life <= 0) {
-            particles.splice(i, 1);
+    if (bossPhase === 'entering') {
+        if (Math.abs(bob.x - 650) < 5) { bossPhase = 'fighting'; bossTimer = 0; }
+    } else if (bossPhase === 'fighting') {
+        bossTimer += dt;
+        bob.targetY = 160 + Math.sin(performance.now() * 0.003) * 100;
+        
+        let spawnRate = score > 40 ? 1200 : 1800;
+        if (bossTimer > spawnRate) {
+            bossTimer = 0;
+            bossKnives.push({
+                x: bob.x,
+                y: bob.y + bob.height / 3,
+                width: 30,
+                height: 12,
+                vx: -6 - (Math.random() * 3),
+                vy: (player.y - bob.y) * 0.01 
+            });
         }
     }
 }
 
 function animate(nowTime = performance.now()) {
     if (!gameActive) return;
+    const dt = Math.min(nowTime - lastTime, 100); lastTime = nowTime;
 
-    const dt = Math.min(nowTime - lastTime, 100); 
-    lastTime = nowTime;
+    handleBossLogic(dt);
 
     if (jetpackState === 'active') {
         if (jKeyPressed) {
-            player.vy -= 1.8; 
-            if (player.vy < -11) player.vy = -11; 
-            player.isGrounded = false;
-            isThrusting = true;
-            jetpackFuel -= dt;
-        } else {
-            isThrusting = false;
-        }
-        
+            player.vy -= 1.8; if (player.vy < -11) player.vy = -11;
+            player.isGrounded = false; isThrusting = true; jetpackFuel -= dt;
+        } else isThrusting = false;
         jetpackBtn.innerText = "FLYING! " + (jetpackFuel / 1000).toFixed(1) + "s";
-        jetpackBtn.style.background = "linear-gradient(135deg, #55ff55 0%, #00aa00 100%)";
-        jetpackBtn.style.boxShadow = "0 4px 15px rgba(85, 255, 85, 0.4)";
-
-        if (jetpackFuel <= 0) {
-            jetpackState = 'cooldown';
-            jetpackCooldownTimer = JETPACK_COOLDOWN_TIME;
-            isThrusting = false;
-        }
+        if (jetpackFuel <= 0) { jetpackState = 'cooldown'; jetpackCooldownTimer = 5000; isThrusting = false; }
     } else if (jetpackState === 'cooldown') {
-        isThrusting = false;
-        jetpackCooldownTimer -= dt;
+        isThrusting = false; jetpackCooldownTimer -= dt;
         jetpackBtn.innerText = "CD: " + (jetpackCooldownTimer / 1000).toFixed(1) + "s";
-        jetpackBtn.style.background = "linear-gradient(135deg, #ff3333 0%, #aa0000 100%)";
-        jetpackBtn.style.boxShadow = "0 4px 15px rgba(255, 51, 51, 0.4)";
-
-        if (jetpackCooldownTimer <= 0) {
-            jetpackState = 'ready';
-        }
+        if (jetpackCooldownTimer <= 0) jetpackState = 'ready';
     } else {
         isThrusting = false;
         jetpackBtn.innerText = `JETPACK [J] (${upgradeJetpack})`;
-        jetpackBtn.style.background = upgradeJetpack > 0 ? "linear-gradient(135deg, #00ffff 0%, #0088ff 100%)" : "#555";
-        jetpackBtn.style.boxShadow = upgradeJetpack > 0 ? "0 4px 15px rgba(0, 255, 255, 0.4)" : "none";
     }
 
-    bgOffset += gameSpeed;
+    if (!isBossMode) bgOffset += gameSpeed;
     drawBackground();
-    drawPlayerShadow();
 
-    if (!isThrusting) {
-        player.vy += player.gravity;
-    }
-    
+    if (!isThrusting) player.vy += player.gravity;
     player.y += player.vy;
-
-    if (player.y < 15) {
-        player.y = 15;
-        player.vy = 0;
-    }
+    if (player.y < 15) { player.y = 15; player.vy = 0; }
 
     let onPlatform = false;
     for (let i = platforms.length - 1; i >= 0; i--) {
-        platforms[i].update();
-        platforms[i].draw();
-
+        platforms[i].update(); platforms[i].draw();
         let plat = platforms[i];
-        
-        if (player.x + player.width - 12 > plat.x && 
-            player.x + 12 < plat.x + plat.width && 
-            player.y + player.height <= plat.y + 12 && 
-            player.y + player.height + player.vy >= plat.y) {
-            
-            if (player.vy >= 0) { 
-                player.y = plat.y - player.height;
-                player.vy = 0;
-                player.isGrounded = true;
-                onPlatform = true;
-            }
-        } else {
-            if (player.x < plat.x + plat.width &&
-                player.x + player.width > plat.x &&
-                player.y < plat.y + plat.height &&
-                player.y + player.height > plat.y) {
-                
-                if (player.x + 12 > plat.x + plat.width || player.x + player.width - 12 < plat.x) {
-                    continue; 
-                }
-
-                if (activeLives > 0) {
-                    activeLives--;
-                    updateLivesIndicator();
-                    platforms.splice(i, 1);
-                    continue;
-                } else {
-                    gameOver();
-                    return;
-                }
-            }
+        if (player.x + player.width - 12 > plat.x && player.x + 12 < plat.x + plat.width && player.y + player.height <= plat.y + 12 && player.y + player.height + player.vy >= plat.y) {
+            if (player.vy >= 0) { player.y = plat.y - player.height; player.vy = 0; player.isGrounded = true; onPlatform = true; }
         }
-
-        if (plat.x + plat.width < 0) {
-            platforms.splice(i, 1);
-        }
+        if (plat.x + plat.width < 0) platforms.splice(i, 1);
     }
 
-    const currentGround = 350 - player.height;
     if (!onPlatform) {
-        if (player.y >= currentGround) {
-            player.y = currentGround;
-            player.vy = 0;
-            player.isGrounded = true;
-        } else {
-            player.isGrounded = false;
-        }
+        if (player.y >= 350 - player.height) { player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; }
+        else player.isGrounded = false;
     }
 
-    bob.y = 240 + Math.sin(Date.now() * 0.015) * 8;
+    if (!isBossMode) {
+        bob.y = 240 + Math.sin(Date.now() * 0.015) * 8;
+    }
 
     drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
     drawBart(player.x, player.y, player.width, player.height, player.isSliding);
-    handleParticles();
 
     for (let i = coins.length - 1; i >= 0; i--) {
-        coins[i].update();
-        coins[i].draw();
-
-        let coinObj = coins[i];
-        if (player.x < coinObj.x + coinObj.width &&
-            player.x + player.width > coinObj.x &&
-            player.y < coinObj.y + coinObj.height &&
-            player.y + player.height > coinObj.y) {
-            
-            coins.splice(i, 1);
-            score += 1; 
-            playCoinSFX(); 
-            scoreBoard.innerText = "POINTS: " + score;
-
-            for (let c = 0; c < 8; c++) {
-                particles.push({
-                    x: coinObj.x + 12,
-                    y: coinObj.y + 12,
-                    vx: (Math.random() - 0.5) * 6,
-                    vy: (Math.random() - 0.5) * 6,
-                    size: 3 + Math.random() * 4,
-                    color: "#ffd700",
-                    life: 20
-                });
-            }
-            continue;
+        coins[i].update(); coins[i].draw();
+        if (checkCollision(player, coins[i])) {
+            coins.splice(i, 1); score += 1; playCoinSFX(); scoreBoard.innerText = "POINTS: " + score;
         }
-
-        if (coinObj.x + coinObj.width < 0) {
-            coins.splice(i, 1);
-        }
+        if (coins[i] && coins[i].x < 0) coins.splice(i, 1);
     }
 
     spawnObstacle();
     for (let i = obstacles.length - 1; i >= 0; i--) {
-        obstacles[i].update();
-        obstacles[i].draw();
-
+        obstacles[i].update(); obstacles[i].draw();
         if (checkCollision(player, obstacles[i])) {
-            if (activeLives > 0) {
-                activeLives--;
-                updateLivesIndicator();
-                obstacles.splice(i, 1);
-                continue;
-            } else {
-                gameOver();
-                return;
-            }
+            if (activeLives > 0) { activeLives--; updateLivesIndicator(); obstacles.splice(i, 1); }
+            else { gameOver(); return; }
         }
-
-        if (obstacles[i].x + obstacles[i].width < 0) {
-            obstacles.splice(i, 1);
-            gameSpeed += 0.35; 
-        }
+        if (obstacles[i] && obstacles[i].x < 0) { obstacles.splice(i, 1); gameSpeed += 0.35; }
     }
 
-    requestAnimationFrame(animate);
+    for (let i = bossKnives.length - 1; i >= 0; i--) {
+        let k = bossKnives[i];
+        k.x += k.vx; k.y += k.vy;
+        
+        ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = "#ff3300"; ctx.fillStyle = "#ffffff";
+        ctx.fillRect(k.x, k.y, k.width, k.height);
+        ctx.fillStyle = "#ff3300"; ctx.fillRect(k.x + k.width - 5, k.y - 2, 5, k.height + 4);
+        ctx.restore();
+
+        if (checkCollision(player, k)) {
+            bossKnives.splice(i, 1);
+            if (!playerHasKnife) {
+                playerHasKnife = true;
+                throwBtn.style.display = "block";
+                throwBtn.innerText = "THROW KNIFE [K]";
+            } else {
+                if (activeLives > 0) { activeLives--; updateLivesIndicator(); }
+                else { gameOver(); return; }
+            }
+            continue;
+        }
+        if (k.x < -50) bossKnives.splice(i, 1);
+    }
+
+    for (let i = playerKnives.length - 1; i >= 0; i--) {
+        let pk = playerKnives[i];
+        pk.x += pk.speed;
+
+        ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = "#00ffff"; ctx.fillStyle = "#00ffff";
+        ctx.fillRect(pk.x, pk.y, pk.width, pk.height); ctx.restore();
+
+        if (checkCollision(pk, bob)) {
+            playerKnives.splice(i, 1);
+            bossWon = true;
+            for (let c = 0; c < 25; c++) {
+                particles.push({
+                    x: bob.x + bob.width/2, y: bob.y + bob.height/2,
+                    vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12,
+                    size: 4 + Math.random() * 6, color: "#ff0000", life: 40
+                });
+            }
+            setTimeout(() => gameOver(true), 1000);
+            return;
+        }
+        if (pk.x > canvas.width + 50) playerKnives.splice(i, 1);
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+        let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life--;
+        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+        if (p.life <= 0) particles.splice(i, 1);
+    }
+
+    if (!bossWon) requestAnimationFrame(animate);
 }
 </script>
 
