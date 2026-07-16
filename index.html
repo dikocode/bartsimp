@@ -1390,18 +1390,25 @@ function spawnObstacle(timeScale) {
     const spawnGap = isHardMode ? (60 + Math.random() * 40) : (90 + Math.random() * 60);
     if (spawnTimer > spawnGap) {
         let r = Math.random();
-        if (r < 0.4) {
+        const platformChance = isHardMode ? 0.3 : 0.4;
+        const coinChance = isHardMode ? 0.45 : 0.7;
+        if (r < platformChance) {
             let plat = new Platform(); platforms.push(plat);
             coins.push(new Coin(plat.x + plat.width/2 - 12, plat.y - 35));
             if (isHardMode && Math.random() < 0.5) {
                 obstacles.push(new Obstacle('spike', plat.y - 40));
             }
-        } else if (r < 0.7) {
+        } else if (r < coinChance) {
             coins.push(new Coin(canvas.width, 180 + Math.random() * 60));
         } else {
-            let pool = ['spike', 'block'];
-            if (isHardMode || score >= 15) pool.push('double-spike');
-            if (isHardMode && score >= 8) pool.push('triple-spike');
+            let pool;
+            if (isHardMode) {
+                pool = ['spike', 'double-spike', 'double-spike', 'block', 'block'];
+                if (score >= 8) pool.push('triple-spike', 'triple-spike');
+            } else {
+                pool = ['spike', 'block'];
+                if (score >= 15) pool.push('double-spike');
+            }
             obstacles.push(new Obstacle(pool[Math.floor(Math.random() * pool.length)]));
         }
         spawnTimer = 0;
