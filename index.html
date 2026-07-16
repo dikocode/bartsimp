@@ -430,7 +430,7 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.4</div>
+    <div id="version-tag">v4.5 bart hp update</div>
     <div id="music-watermark">music by my friend dj limey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
@@ -612,6 +612,9 @@ document.addEventListener("visibilitychange", () => {
         lastTime = performance.now();
         if (gameActive && !cutsceneActive && isAudioPlayingBeforeTabOut) {
             bgm.play().catch(e => {});
+        }
+        if (gameActive && !cutsceneActive) {
+            requestAnimationFrame(animate);
         }
     }
 });
@@ -858,6 +861,12 @@ function processAdminCode() {
     if (entered === "dikosbossfight67()") {
         adminScreen.style.display = "none";
         triggerDirectBossFight();
+    } else if (entered === "8767wow8767Wotdiko") {
+        lvl1Beaten = true;
+        setCookie("bart_lvl1_beat", "1");
+        updatePointsUI();
+        adminScreen.style.display = "none";
+        levelScreen.style.display = "flex";
     } else {
         alert("INVALID CODE");
     }
@@ -1576,7 +1585,7 @@ function animate(timestamp) {
     }
 
     if (!isBossMode) {
-        if (jetpackState !== 'active' || !jKeyPressed) {
+        if (jetpackState !== 'active') {
             let currentPlatform = null;
             if (player.vy >= 0) {
                 for (let plat of platforms) {
@@ -1599,8 +1608,11 @@ function animate(timestamp) {
                 }
             }
         } else {
+            if (!jKeyPressed) {
+                player.vy += (player.gravity * 0.4) * timeScale;
+            }
             player.y += player.vy * timeScale;
-            if (player.y <= 0) player.y = 0;
+            if (player.y <= 0) { player.y = 0; player.vy = 0; }
             if (player.y >= 350 - player.height) {
                 player.y = 350 - player.height; player.vy = 0; player.isGrounded = true;
             }
