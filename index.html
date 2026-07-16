@@ -412,7 +412,7 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.3</div>
+    <div id="version-tag">v1.3.1</div>
     <div id="music-watermark">music by my friend dj limey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="hp-hud">
@@ -691,7 +691,8 @@ let cutsceneMode = 'intro';
 
 let bobHP = 100;
 let maxBobHP = 100;
-let bartHP = 100; // Updated: Bart now has 100 HP!
+let bartHP = 100; 
+let healTimer = 0; // tracking 2-second passive healing intervals
 
 let lastShotTime = 0;
 const SLINGSHOT_COOLDOWN = 500; 
@@ -719,7 +720,6 @@ const bob = {
     targetY: 240
 };
 
-// strictly arrow keys only for physical movement
 const keys = {
     ArrowUp: false,
     ArrowDown: false,
@@ -830,7 +830,8 @@ function triggerDirectBossFight() {
     bob.targetX = 450; 
     bob.targetY = 40;
     
-    bartHP = 100; // HP system set to 100
+    bartHP = 100; 
+    healTimer = 0;
     hpHud.style.display = "block";
     updateHpHUD();
     
@@ -1044,8 +1045,8 @@ function startGameplay() {
     player.x = 180; player.y = 280; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
     
-    // Normal level uses HP too, starts at 100
     bartHP = 100;
+    healTimer = 0;
     hpHud.style.display = "block";
     updateHpHUD();
     
@@ -1069,7 +1070,8 @@ function startBossFight() {
     player.x = 400; player.y = 300; player.vy = 0; player.isGrounded = false; player.isSliding = false;
     
     bobHP = 100;
-    bartHP = 100; // Reset Bart HP for Bossfight
+    bartHP = 100; 
+    healTimer = 0;
     hpHud.style.display = "block";
     updateHpHUD();
     
@@ -1143,7 +1145,17 @@ function animate(currentTime) {
     if (dt > 100) dt = 16.66; 
     lastTime = currentTime;
 
-    // Background scrolling (Speed increases up to 10 max)
+    // Passive Healing: every 2 seconds (2000ms) heal by 10 HP
+    healTimer += dt;
+    if (healTimer >= 2000) {
+        healTimer = 0;
+        if (bartHP < 100 && bartHP > 0) {
+            bartHP = Math.min(100, bartHP + 10);
+            updateHpHUD();
+            createParticleExplosion(player.x + player.width / 2, player.y + player.height / 2, "#00ff66");
+        }
+    }
+
     let currentSpeed = gameSpeed + Math.min(4, score / 1500);
     if (isBossMode) currentSpeed = 0;
     
@@ -1151,15 +1163,12 @@ function animate(currentTime) {
 
     ctx.clearRect(0, 0, 800, 400);
 
-    // BGM drawing scroll
     ctx.fillStyle = "#1b0a2a";
     ctx.fillRect(0, 0, 800, 400);
     
-    // Distant city silhouette helper line
     ctx.fillStyle = "#0c0415";
     ctx.fillRect(0, 200, 800, 200);
 
-    // Platforms and ground lines
     ctx.strokeStyle = "#32115c";
     ctx.lineWidth = 4;
     ctx.beginPath();
@@ -1167,11 +1176,9 @@ function animate(currentTime) {
     ctx.lineTo(800, 350);
     ctx.stroke();
 
-    // Cooldown management
     if (shieldCooldownTimer > 0) shieldCooldownTimer -= dt;
     if (jetpackCooldownTimer > 0) jetpackCooldownTimer -= dt;
 
-    // Jetpack updates
     if (upgradeJetpack > 0) {
         jetpackBtn.innerText = `JETPACK [J] (${upgradeJetpack})`;
     } else {
@@ -1186,7 +1193,6 @@ function animate(currentTime) {
         shieldBtn.disabled = false;
     }
 
-    // Jetpack physics state
     if (jetpackState === 'active') {
         if (jKeyPressed && jetpackFuel > 0) {
             player.vy = -7; 
@@ -1208,19 +1214,15 @@ function animate(currentTime) {
         }
     }
 
-    // Movement engine
     if (isBossMode) {
-        // Physical Movement strictly locked to Arrow Keys Only
         if (keys.ArrowLeft) player.x -= 6;
         if (keys.ArrowRight) player.x += 6;
         if (keys.ArrowUp) player.y -= 6;
         if (keys.ArrowDown) player.y += 6;
 
-        // Boundaries
         player.x = Math.max(0, Math.min(800 - player.width, player.x));
         player.y = Math.max(0, Math.min(350 - player.height, player.y));
     } else {
-        // Runner logic physics
         if (jetpackState !== 'active') {
             player.vy += player.gravity;
         }
@@ -1235,7 +1237,6 @@ function animate(currentTime) {
         }
     }
 
-    // Draw Bart
     if (bartLoaded) {
         ctx.save();
         if (isShieldActive) {
@@ -1254,39 +1255,31 @@ function animate(currentTime) {
         ctx.fillRect(player.x, player.y, player.width, player.height);
     }
 
-    // Normal Runner Mode Logic
     if (!isBossMode) {
         score += Math.floor(currentSpeed / 4);
         scoreBoard.innerText = "POINTS: " + score;
 
-        // Spawning obstacles/coins
         spawnTimer += dt;
         if (spawnTimer > 1500) {
             spawnTimer = 0;
             let roll = Math.random();
             if (roll < 0.4) {
-                // Spikes
                 obstacles.push({ x: 820, y: 310, w: 40, h: 40, type: 'spike' });
             } else if (roll < 0.7) {
-                // Laser fence
                 obstacles.push({ x: 820, y: 230, w: 30, h: 60, type: 'laser' });
             } else {
-                // Coin blocks
                 coins.push({ x: 820, y: 200 + Math.random() * 80, w: 25, h: 25, collected: false });
             }
         }
 
-        // Bob chasing visual updates
         bob.x += (bob.targetX - bob.x) * 0.05;
         bob.y += (bob.targetY - bob.y) * 0.05;
 
-        // Collision & Render Obstacles
         obstacles.forEach((obs, index) => {
             obs.x -= currentSpeed;
             ctx.fillStyle = obs.type === 'spike' ? '#ff3366' : '#00ffff';
             ctx.fillRect(obs.x, obs.y, obs.w, obs.h);
 
-            // Collisions
             if (obs.x < player.x + player.width && obs.x + obs.w > player.x &&
                 obs.y < player.y + player.height && obs.y + obs.h > player.y) {
                 
@@ -1297,7 +1290,7 @@ function animate(currentTime) {
                     shieldHealth--;
                     if (shieldHealth <= 0) isShieldActive = false;
                 } else {
-                    bartHP -= 20; // 20 HP damage from standard level obstacles
+                    bartHP -= 20; 
                     updateHpHUD();
                     if (bartHP <= 0) {
                         handleLoss();
@@ -1307,7 +1300,6 @@ function animate(currentTime) {
             if (obs.x < -100) obstacles.splice(index, 1);
         });
 
-        // Coins Processing
         coins.forEach((coin, index) => {
             coin.x -= currentSpeed;
             if (!coin.collected) {
@@ -1327,7 +1319,6 @@ function animate(currentTime) {
             if (coin.x < -100) coins.splice(index, 1);
         });
 
-        // Bob asset drawing
         if (bobLoaded) {
             ctx.drawImage(bobImg, bob.x, bob.y, bob.width, bob.height);
         } else {
@@ -1336,7 +1327,6 @@ function animate(currentTime) {
         }
     }
 
-    // Bossfight Engine
     if (isBossMode) {
         if (bossPhase === 'entering') {
             bob.x += (bob.targetX - bob.x) * 0.04;
@@ -1345,13 +1335,11 @@ function animate(currentTime) {
                 bossPhase = 'fighting';
             }
         } else if (bossPhase === 'fighting') {
-            // Hover movement calculations
             bob.targetX = 400 + Math.sin(currentTime / 600) * 250;
             bob.targetY = 40 + Math.cos(currentTime / 300) * 15;
             bob.x += (bob.targetX - bob.x) * 0.08;
             bob.y += (bob.targetY - bob.y) * 0.08;
 
-            // Random knife throws
             if (Math.random() < 0.045) {
                 bossKnives.push({
                     x: bob.x + bob.width / 2,
@@ -1362,7 +1350,6 @@ function animate(currentTime) {
             }
         }
 
-        // Draw Sideshow Bob health bar on Canvas
         ctx.fillStyle = "#333";
         ctx.fillRect(250, 15, 300, 15);
         ctx.fillStyle = "#00ff66";
@@ -1370,15 +1357,13 @@ function animate(currentTime) {
         ctx.strokeStyle = "#fff";
         ctx.strokeRect(250, 15, 300, 15);
 
-        // Process Boss Knives
         bossKnives.forEach((k, index) => {
             k.y += k.vy;
             k.x += k.vx;
 
             ctx.fillStyle = "#ff3366";
-            ctx.fillRect(k.x, k.y, 8, 18); // Drawing knife asset placeholder
+            ctx.fillRect(k.x, k.y, 8, 18); 
 
-            // Knife hitting Bart collision check
             if (k.x < player.x + player.width && k.x + 8 > player.x &&
                 k.y < player.y + player.height && k.y + 18 > player.y) {
                 
@@ -1389,7 +1374,7 @@ function animate(currentTime) {
                     shieldHealth--;
                     if (shieldHealth <= 0) isShieldActive = false;
                 } else {
-                    bartHP -= 10; // Knife takes away exactly 10 HP!
+                    bartHP -= 10; 
                     updateHpHUD();
                     if (bartHP <= 0) {
                         handleLoss();
@@ -1399,7 +1384,6 @@ function animate(currentTime) {
             if (k.y > 420) bossKnives.splice(index, 1);
         });
 
-        // Slingshot Rocks Processing
         playerRocks.forEach((rock, index) => {
             rock.y += rock.vy;
             ctx.fillStyle = "#ffd90f";
@@ -1407,12 +1391,11 @@ function animate(currentTime) {
             ctx.arc(rock.x, rock.y, 6, 0, Math.PI*2);
             ctx.fill();
 
-            // Hit Bob collision check
             if (rock.x > bob.x && rock.x < bob.x + bob.width &&
                 rock.y > bob.y && rock.y < bob.y + bob.height) {
                 
                 playerRocks.splice(index, 1);
-                bobHP -= 5; // Bob takes damage
+                bobHP -= 5; 
                 createParticleExplosion(bob.x + bob.width/2, bob.y + bob.height/2, "#00ff66");
                 
                 if (bobHP <= 0) {
@@ -1423,7 +1406,6 @@ function animate(currentTime) {
             if (rock.y < -20) playerRocks.splice(index, 1);
         });
 
-        // Draw Bob
         if (bobLoaded) {
             ctx.drawImage(bobImg, bob.x, bob.y, bob.width, bob.height);
         } else {
@@ -1432,7 +1414,6 @@ function animate(currentTime) {
         }
     }
 
-    // Particle rendering loop
     particles.forEach((p, idx) => {
         p.x += p.vx;
         p.y += p.vy;
