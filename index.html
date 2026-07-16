@@ -146,6 +146,28 @@
             box-shadow: 0 0 40px rgba(255, 0, 255, 0.25);
             touch-action: none;
         }
+        #level-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(15, 5, 30, 0.95) 0%, rgba(5, 2, 10, 0.98) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 22;
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+            border-radius: 16px;
+            border: 1px solid rgba(112, 0, 255, 0.3);
+            box-shadow: 0 0 40px rgba(112, 0, 255, 0.3);
+            touch-action: none;
+        }
         #cutscene-screen {
             position: absolute;
             top: 0;
@@ -224,6 +246,14 @@
             gap: 15px;
             margin-bottom: 5px;
         }
+        .level-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 90%;
+            max-width: 500px;
+            margin-bottom: 15px;
+        }
         button {
             padding: 12px 30px;
             font-size: 18px;
@@ -245,6 +275,26 @@
             box-shadow: 0 10px 25px rgba(0, 255, 255, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
             background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
             border-color: rgba(255, 255, 255, 0.6);
+        }
+        button:disabled {
+            background: #222 !important;
+            color: #555 !important;
+            border-color: #333 !important;
+            box-shadow: none !important;
+            transform: none !important;
+            cursor: not-allowed;
+        }
+        .level-btn {
+            font-size: 12px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .level-subtext {
+            font-size: 10px;
+            font-family: sans-serif;
+            color: #ffd90f;
         }
         .shop-item {
             background: rgba(255, 255, 255, 0.04);
@@ -333,7 +383,7 @@
         <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6.5vw, 36px); margin-top: 10px; text-shadow: 0 0 15px rgba(255,217,15,0.4); letter-spacing: 1px;">BART SIMPSON RUN</h1>
         <div class="points-display" id="menu-points">POINTS: 0</div>
         <div class="btn-group">
-            <button id="start-btn">START RUNNING</button>
+            <button id="start-btn">START GAME</button>
             <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
             <button id="open-admin-btn" style="background: linear-gradient(135deg, #22aa22 0%, #005500 100%); box-shadow: 0 6px 20px rgba(0, 255, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); padding: 12px 18px;">ADMIN</button>
         </div>
@@ -341,11 +391,34 @@
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my friend for making music <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            credits to my friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
             made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleesensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
         <div id="audio-status">Audio Status: Standby</div>
+    </div>
+
+    <div id="level-screen">
+        <h1 style="color: #FFD90F; margin-bottom: 15px; font-size: min(6vw, 32px); text-shadow: 0 0 15px rgba(255,217,15,0.4);">CHOOSE LEVEL</h1>
+        <div class="level-grid">
+            <button id="lvl1-btn" class="level-btn">
+                <span>LVL 1</span>
+                <span class="level-subtext">bobs prison escape</span>
+            </button>
+            <button id="lvl2-btn" class="level-btn">
+                <span>LVL 2</span>
+                <span class="level-subtext" style="color: #ff3366;">coming soon</span>
+            </button>
+            <button id="lvl3-btn" class="level-btn">
+                <span>LVL 3</span>
+                <span class="level-subtext" style="color: #ff3366;">coming soon</span>
+            </button>
+            <button id="lvl4-btn" class="level-btn">
+                <span>LVL 4</span>
+                <span class="level-subtext" style="color: #ff3366;">coming soon</span>
+            </button>
+        </div>
+        <button id="close-levels-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.3); font-size: 14px; padding: 10px 20px;">BACK</button>
     </div>
 
     <div id="cutscene-screen">
@@ -396,12 +469,13 @@
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
-<audio id="bgm" src="BART SIMP DO COPY.mp3" loop preload="auto"></audio>
+<audio id="bgm" src="BART SIMP DO COPY.mp3" preload="auto"></audio>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const startScreen = document.getElementById("start-screen");
+const levelScreen = document.getElementById("level-screen");
 const cutsceneScreen = document.getElementById("cutscene-screen");
 const cutsceneText = document.getElementById("cutscene-text");
 const cutsceneNextBtn = document.getElementById("cutscene-next-btn");
@@ -412,6 +486,11 @@ const openShopBtn = document.getElementById("open-shop-btn");
 const closeShopBtn = document.getElementById("close-shop-btn");
 const openAdminBtn = document.getElementById("open-admin-btn");
 const closeAdminBtn = document.getElementById("close-admin-btn");
+const closeLevelsBtn = document.getElementById("close-levels-btn");
+const lvl1Btn = document.getElementById("lvl1-btn");
+const lvl2Btn = document.getElementById("lvl2-btn");
+const lvl3Btn = document.getElementById("lvl3-btn");
+const lvl4Btn = document.getElementById("lvl4-btn");
 const submitCodeBtn = document.getElementById("submit-code-btn");
 const adminCodeInput = document.getElementById("admin-code-input");
 const scoreBoard = document.getElementById("score-board");
@@ -496,8 +575,6 @@ let playerRocks = [];
 let spawnTimer = 0;
 let bgOffset = 0;
 let particles = [];
-let runDurationTimer = 0;
-const TIME_TO_BOSS = 30000; 
 
 let playerPoints = parseInt(getCookie("bart_points")) || 0;
 let upgradeLife = parseInt(getCookie("bart_up_life")) || 0; 
@@ -524,7 +601,6 @@ let maxBobHP = 100;
 let bartHP = 1;
 let maxBartHP = 1;
 
-// Slingshot cooldown integration
 let lastShotTime = 0;
 const SLINGSHOT_COOLDOWN = 500; 
 
@@ -563,6 +639,16 @@ const bossDialogue = [
     { text: '<span style="color:#ffd90f">bart:</span> bet u cant kill me with my slingshots!' },
     { text: '<span style="color:#ff3366">bob:</span> arrogant brat! i will kill ya' },
     { text: '<span style="color:#ff00ff; font-weight:bold;">*bossfight start*</span>' }
+];
+
+const deathDialogue = [
+    { text: '<span style="color:#ff3366">bob:</span> bart... you won..' },
+    { text: '<span style="color:#ffd90f">bart:</span> hahah take that sucker' },
+    { text: '<span style="color:#ff3366">bob:</span> you got a lot ahead of you... i told your family who you really are...' },
+    { text: '<span style="color:#ffd90f">bart:</span> huh' },
+    { text: '<span style="color:#ff3366">bob:</span> who... you... really... are...' },
+    { text: '<span style="color:#ff3366; font-weight:bold;">*bob dead*</span>' },
+    { text: '<span style="color:#ffd90f">bart:</span> oh no...' }
 ];
 
 let currentDialogueIndex = 0;
@@ -615,7 +701,7 @@ function processAdminCode() {
 }
 
 function triggerDirectBossFight() {
-    try { bgm.currentTime = 0; } catch (e) {}
+    try { bgm.currentTime = 0; bgm.loop = true; } catch (e) {}
     bgm.play().catch(e => {});
 
     gameActive = true;
@@ -624,7 +710,6 @@ function triggerDirectBossFight() {
     cutsceneActive = false;
     score = 0;
     scoreBoard.innerText = "POINTS: 0";
-    runDurationTimer = 0;
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
     
     player.height = player.originalHeight; 
@@ -681,6 +766,13 @@ buyPointsBtn.addEventListener("click", () => {
 bgm.addEventListener('canplaythrough', () => {
     audioStatus.innerText = "Audio Status: Ready!";
     audioStatus.style.color = "#00ffff";
+});
+
+// TRIGGER BOSS EXACTLY WHEN BGM ENDS
+bgm.addEventListener('ended', () => {
+    if (gameActive && !isBossMode) {
+        triggerBossCutscene();
+    }
 });
 
 let activeLives = 0;
@@ -787,6 +879,16 @@ function updateLivesIndicator() {
 
 startBtn.addEventListener("click", () => {
     startScreen.style.display = "none";
+    levelScreen.style.display = "flex";
+});
+
+closeLevelsBtn.addEventListener("click", () => {
+    levelScreen.style.display = "none";
+    startScreen.style.display = "flex";
+});
+
+lvl1Btn.addEventListener("click", () => {
+    levelScreen.style.display = "none";
     cutsceneScreen.style.display = "flex";
     cutsceneActive = true;
     cutsceneMode = 'intro';
@@ -823,8 +925,21 @@ function showNextDialogue() {
             cutsceneActive = false;
             bossPhase = 'entering';
             throwBtn.style.display = "block";
+            
+            // Loop the BGM during the boss fight so it doesn't just stop
+            try { bgm.loop = true; bgm.play().catch(e => {}); } catch(e) {}
+            
             lastTime = performance.now();
             animate(lastTime);
+        }
+    } else if (cutsceneMode === 'death') {
+        if (currentDialogueIndex < deathDialogue.length) {
+            const line = deathDialogue[currentDialogueIndex];
+            cutsceneText.innerHTML = line.text;
+        } else {
+            cutsceneScreen.style.display = "none";
+            cutsceneActive = false;
+            gameOver(true);
         }
     }
 }
@@ -844,14 +959,30 @@ function triggerBossCutscene() {
     showNextDialogue();
 }
 
+function triggerDeathCutscene() {
+    gameActive = false;
+    bgm.pause();
+    jetpackBtn.style.display = "none";
+    throwBtn.style.display = "none";
+    
+    cutsceneScreen.style.display = "flex";
+    cutsceneActive = true;
+    cutsceneMode = 'death';
+    currentDialogueIndex = 0;
+    showNextDialogue();
+}
+
 function runActualGame() {
-    try { bgm.currentTime = 0; } catch (e) {}
+    try { 
+        bgm.currentTime = 0; 
+        bgm.loop = false; // Make sure loop is false during normal play so it can end and trigger the boss
+    } catch (e) {}
     bgm.play().catch(e => {});
 
     jetpackBtn.style.display = "block";
     throwBtn.style.display = "none";
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
-    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6; runDurationTimer = 0;
+    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
     player.height = player.originalHeight; player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
@@ -1011,14 +1142,6 @@ function animate(timestamp) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBackground();
 
-    if (!isBossMode) {
-        runDurationTimer += dt;
-        if (runDurationTimer >= TIME_TO_BOSS || (bgm.duration > 0 && bgm.currentTime >= bgm.duration - 0.5)) {
-            triggerBossCutscene();
-            return;
-        }
-    }
-
     if (jetpackState === 'active') {
         jetpackBtn.innerText = `FLYING! (${upgradeJetpack})`;
         if (jKeyPressed) {
@@ -1136,7 +1259,7 @@ function animate(timestamp) {
         let box = { x: r.x - r.radius, y: r.y - r.radius, width: r.radius * 2, height: r.radius * 2 };
         if (checkCollision(box, bob)) {
             bobHP -= 4; playerRocks.splice(i, 1);
-            if (bobHP <= 0) { gameOver(true); return; }
+            if (bobHP <= 0) { triggerDeathCutscene(); return; }
         } else if (r.x > canvas.width) {
             playerRocks.splice(i, 1);
         }
@@ -1165,7 +1288,6 @@ function animate(timestamp) {
         ctx.fillStyle = hpGrad; ctx.fillRect(200, 20, hpW, 14);
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 20, 400, 14);
         
-        // Show cooldown progress on HUD button
         const cur = Date.now();
         const diff = cur - lastShotTime;
         if (diff < SLINGSHOT_COOLDOWN) {
