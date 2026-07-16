@@ -363,20 +363,20 @@
             border-radius: 8px;
             margin-bottom: 15px;
             text-align: center;
-            /* allow mobile keyboard focus on the admin input */
-#admin-code-input {
-    touch-action: auto !important;
-    -webkit-user-select: text !important;
-    user-select: text !important;
-}
+        }
+        /* ALLOW MOBILE KEYBOARD INPUT ON FIELD */
+        #admin-code-input {
+            touch-action: auto !important;
+            -webkit-user-select: text !important;
+            user-select: text !important;
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.3 bossfight ages</div>
-    <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
+    <div id="version-tag">v4.1 select systems</div>
+    <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
     
@@ -397,7 +397,7 @@
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            credits to <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
             made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleesensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
@@ -512,11 +512,16 @@ const buyLifeBtn = document.getElementById("buy-life-btn");
 const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
+// FIX: EXPLICIT TOUCH EXCEPTION SO KEYBOARD TRIGGERS
 window.addEventListener("touchstart", (e) => {
-    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+    if (e.target.id === 'admin-code-input' || e.target.tagName === 'INPUT') {
+        return; 
+    }
+    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
         e.preventDefault();
     }
 }, { passive: false });
+
 window.addEventListener("touchmove", (e) => {
     if (e.target.tagName !== 'INPUT') {
         e.preventDefault();
