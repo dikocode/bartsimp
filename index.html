@@ -666,8 +666,9 @@ let cutsceneMode = 'intro';
 
 let bobHP = 100;
 let maxBobHP = 100;
-let bartHP = 1;
-let maxBartHP = 1;
+let bartHP = 100;
+let maxBartHP = 100;
+const KNIFE_DAMAGE = 10;
 
 let lastShotTime = 0;
 const SLINGSHOT_COOLDOWN = 500; 
@@ -818,6 +819,7 @@ function triggerDirectBossFight() {
     
     bossPhase = 'fighting';
     bobHP = 100;
+    bartHP = maxBartHP;
     
     lastTime = performance.now();
     animate(lastTime);
@@ -1092,7 +1094,7 @@ function triggerBossCutscene() {
     isBossMode = true;
     activeLives = 0;
     updateLivesIndicator();
-    bartHP = 1;
+    bartHP = maxBartHP;
     bobHP = 100;
     isShieldActive = false;
     shieldHealth = 5;
@@ -1535,7 +1537,10 @@ function animate(timestamp) {
         }
         
         if (checkCollision(knifeBox, player)) {
-            gameOver(false); return;
+            bartHP -= KNIFE_DAMAGE;
+            bossKnives.splice(i, 1);
+            if (bartHP <= 0) { gameOver(false); return; }
+            continue;
         } else if (k.y > 400 || k.x < 0 || k.x > 800) {
             bossKnives.splice(i, 1);
         }
@@ -1545,13 +1550,33 @@ function animate(timestamp) {
     drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
 
     if (isBossMode) {
+        // Bob HP bar (top)
         ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 20, 400, 14);
         let hpW = (bobHP / maxBobHP) * 400;
-        ctx.fillStyle = "linear-gradient(90deg, #ff0055, #ff00ff)";
         let hpGrad = ctx.createLinearGradient(200, 0, 600, 0);
         hpGrad.addColorStop(0, "#ff3300"); hpGrad.addColorStop(1, "#ff00ff");
         ctx.fillStyle = hpGrad; ctx.fillRect(200, 20, hpW, 14);
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 20, 400, 14);
+        ctx.save();
+        ctx.font = "11px sans-serif";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "center";
+        ctx.fillText("BOB", 400, 31);
+        ctx.restore();
+
+        // Bart HP bar (below Bob's)
+        ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 42, 400, 14);
+        let bartHpW = Math.max(0, (bartHP / maxBartHP)) * 400;
+        let bartHpGrad = ctx.createLinearGradient(200, 0, 600, 0);
+        bartHpGrad.addColorStop(0, "#00ff66"); bartHpGrad.addColorStop(1, "#00ffff");
+        ctx.fillStyle = bartHpGrad; ctx.fillRect(200, 42, bartHpW, 14);
+        ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 42, 400, 14);
+        ctx.save();
+        ctx.font = "11px sans-serif";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "center";
+        ctx.fillText("BART", 400, 53);
+        ctx.restore();
         
         const cur = Date.now();
         const diff = cur - lastShotTime;
