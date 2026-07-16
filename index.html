@@ -197,6 +197,28 @@
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
             touch-action: none;
         }
+        #admin-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(10, 30, 10, 0.92) 0%, rgba(2, 10, 2, 0.98) 100%);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            box-shadow: 0 0 40px rgba(0, 255, 0, 0.25);
+            touch-action: none;
+        }
         .btn-group {
             display: flex;
             gap: 15px;
@@ -279,13 +301,26 @@
             border-bottom: 1px dashed rgba(0, 255, 255, 0.4);
             pointer-events: auto;
         }
+        .admin-input {
+            width: 80%;
+            max-width: 300px;
+            padding: 12px;
+            font-size: 16px;
+            font-family: monospace;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v3.0 boss fight overhaul</div>
-    <div id="music-watermark">music made by https://www.youtube.com/@DJLimey</div>
+    <div id="version-tag">v1.3 release</div>
+    <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
     
@@ -300,12 +335,13 @@
         <div class="btn-group">
             <button id="start-btn">START RUNNING</button>
             <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
+            <button id="open-admin-btn" style="background: linear-gradient(135deg, #22aa22 0%, #005500 100%); box-shadow: 0 6px 20px rgba(0, 255, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); padding: 12px 18px;">ADMIN</button>
         </div>
         <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | TAP K / HUD to Use Slingshot</p>
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            credits to my friend for making music<a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
             made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
@@ -348,6 +384,15 @@
         <button id="close-shop-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); margin-top: 15px;">BACK TO MENU</button>
     </div>
 
+    <div id="admin-screen">
+        <h1 style="color: #00ff00; margin-bottom: 15px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 0, 0.4);">ADMIN CODES</h1>
+        <input type="text" id="admin-code-input" class="admin-input" placeholder="ENTER CODE HERE">
+        <div class="btn-group">
+            <button id="submit-code-btn" style="background: linear-gradient(135deg, #00ff00 0%, #005500 100%); border-color: #00ff00; box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);">SUBMIT</button>
+            <button id="close-admin-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);">BACK</button>
+        </div>
+    </div>
+
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 </div>
 
@@ -361,9 +406,14 @@ const cutsceneScreen = document.getElementById("cutscene-screen");
 const cutsceneText = document.getElementById("cutscene-text");
 const cutsceneNextBtn = document.getElementById("cutscene-next-btn");
 const powerupScreen = document.getElementById("powerup-screen");
+const adminScreen = document.getElementById("admin-screen");
 const startBtn = document.getElementById("start-btn");
 const openShopBtn = document.getElementById("open-shop-btn");
 const closeShopBtn = document.getElementById("close-shop-btn");
+const openAdminBtn = document.getElementById("open-admin-btn");
+const closeAdminBtn = document.getElementById("close-admin-btn");
+const submitCodeBtn = document.getElementById("submit-code-btn");
+const adminCodeInput = document.getElementById("admin-code-input");
 const scoreBoard = document.getElementById("score-board");
 const livesIndicator = document.getElementById("lives-indicator");
 const jetpackBtn = document.getElementById("jetpack-btn");
@@ -378,12 +428,14 @@ const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
 const buyPointsBtn = document.getElementById("buy-points-btn");
 
 window.addEventListener("touchstart", (e) => {
-    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
+    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
         e.preventDefault();
     }
 }, { passive: false });
 window.addEventListener("touchmove", (e) => {
-    e.preventDefault();
+    if (e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+    }
 }, { passive: false });
 
 function setCookie(name, value, days = 365) {
@@ -532,6 +584,73 @@ closeShopBtn.addEventListener("click", () => {
     startScreen.style.display = "flex";
 });
 
+openAdminBtn.addEventListener("click", () => {
+    startScreen.style.display = "none";
+    adminScreen.style.display = "flex";
+    adminCodeInput.value = "";
+    adminCodeInput.focus();
+});
+closeAdminBtn.addEventListener("click", () => {
+    adminScreen.style.display = "none";
+    startScreen.style.display = "flex";
+});
+
+submitCodeBtn.addEventListener("click", processAdminCode);
+adminCodeInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") processAdminCode();
+});
+
+function processAdminCode() {
+    const entered = adminCodeInput.value.trim();
+    if (entered === "dikosbossfight67()") {
+        adminScreen.style.display = "none";
+        triggerDirectBossFight();
+    } else {
+        alert("INVALID CODE");
+    }
+}
+
+function triggerDirectBossFight() {
+    try { bgm.currentTime = 0; } catch (e) {}
+    bgm.play().catch(e => {});
+
+    gameActive = true;
+    isBossMode = true;
+    bossWon = false;
+    cutsceneActive = false;
+    score = 0;
+    scoreBoard.innerText = "POINTS: 0";
+    runDurationTimer = 0;
+    obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
+    
+    player.height = player.originalHeight; 
+    player.y = 350 - player.height; 
+    player.vy = 0; 
+    player.isGrounded = true; 
+    player.isSliding = false;
+    
+    bob.x = 620; 
+    bob.y = 160; 
+    bob.targetX = 620; 
+    bob.targetY = 160;
+    
+    activeLives = upgradeLife; 
+    updateLivesIndicator();
+    
+    jetpackState = 'ready'; 
+    jetpackCooldownTimer = 0; 
+    jKeyPressed = false;
+    
+    jetpackBtn.style.display = "block";
+    throwBtn.style.display = "block";
+    
+    bossPhase = 'fighting';
+    bobHP = 100;
+    
+    lastTime = performance.now();
+    animate(lastTime);
+}
+
 buyLifeBtn.addEventListener("click", () => {
     if (playerPoints >= 50 && upgradeLife < 5) {
         playerPoints -= 50; upgradeLife++;
@@ -594,7 +713,7 @@ window.addEventListener("keyup", (e) => {
 let activeTouchId = null;
 window.addEventListener("touchstart", (e) => {
     if (!gameActive || cutsceneActive) return;
-    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
+    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn' || e.target.tagName === 'INPUT') return;
     e.preventDefault();
     if (activeTouchId !== null) return;
     
@@ -613,7 +732,7 @@ window.addEventListener("touchstart", (e) => {
 
 window.addEventListener("touchend", (e) => {
     if (!gameActive || cutsceneActive) return;
-    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
+    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn' || e.target.tagName === 'INPUT') return;
     e.preventDefault();
     for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
