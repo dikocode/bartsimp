@@ -284,14 +284,14 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">snapshot 1.3csbu </div>
+    <div id="version-tag">snapshot 1.3busbsh</div>
     <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
     
     <div id="controls-group">
         <button id="jetpack-btn" class="hud-btn">JETPACK [J] (0)</button>
-        <button id="throw-btn" class="hud-btn">THROWS UNLOCKED [K]</button>
+        <button id="throw-btn" class="hud-btn">SLINGSHOT [K]</button>
     </div>
     
     <div id="start-screen">
@@ -301,12 +301,12 @@
             <button id="start-btn">START RUNNING</button>
             <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
         </div>
-        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | TAP K / HUD to Throw Knife</p>
+        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | TAP K / HUD to Use Slingshot</p>
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my good friend<a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
-            made by  <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
+            credits to my friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
         <div id="audio-status">Audio Status: Standby</div>
@@ -440,7 +440,7 @@ let obstacles = [];
 let platforms = [];
 let coins = [];
 let bossKnives = [];
-let playerKnives = [];
+let playerRocks = [];
 let spawnTimer = 0;
 let bgOffset = 0;
 let particles = [];
@@ -460,8 +460,15 @@ const JETPACK_COOLDOWN_TIME = 5000;
 let isBossMode = false;
 let bossPhase = 'entering'; 
 let bossTimer = 0;
-let playerHasKnife = false;
 let bossWon = false;
+
+let cutsceneActive = false;
+let cutsceneMode = 'intro'; 
+
+let bobHP = 100;
+let maxBobHP = 100;
+let bartHP = 1;
+let maxBartHP = 1;
 
 const player = {
     x: 180,
@@ -485,13 +492,22 @@ const bob = {
     targetY: 240
 };
 
-const dialogueLines = [
+const introDialogue = [
     { text: '<span style="color:#ffd90f">bart:</span> hello sideshow bob?', triggerMusic: false },
     { text: '<span style="color:#ff3366">bob:</span> i escaped the prison now im gonna get ya', triggerMusic: false },
     { text: '<span style="color:#ffd90f">bart:</span> bet you cant get me while i play this song!', triggerMusic: true },
     { text: '<span style="color:#ff3366">bob:</span> bart more like brat your bets are gonna fail', triggerMusic: false },
     { text: '<span style="color:#ffd90f">bart:</span> better catch me!', triggerMusic: false }
 ];
+
+const bossDialogue = [
+    { text: '<span style="color:#ffd90f">bart:</span> the song ended you didnt catch me!' },
+    { text: '<span style="color:#ff3366">bob:</span> well i will kill ya i got knives' },
+    { text: '<span style="color:#ffd90f">bart:</span> bet u cant kill me with my slingshots!' },
+    { text: '<span style="color:#ff3366">bob:</span> arrogant brat! i will kill ya' },
+    { text: '<span style="color:#ff00ff; font-weight:bold;">*bossfight start*</span>' }
+];
+
 let currentDialogueIndex = 0;
 
 function updatePointsUI() {
@@ -547,7 +563,7 @@ let activeLives = 0;
 let isThrusting = false;
 
 window.addEventListener("keydown", (e) => {
-    if (!gameActive) return;
+    if (!gameActive || cutsceneActive) return;
     if (e.code === "Space" && player.isGrounded && !player.isSliding) {
         player.vy = player.jumpForce; player.isGrounded = false;
     }
@@ -563,7 +579,7 @@ window.addEventListener("keydown", (e) => {
         }
     }
     if (e.code === "KeyK") {
-        firePlayerKnife();
+        fireSlingshot();
     }
 });
 
@@ -576,7 +592,7 @@ window.addEventListener("keyup", (e) => {
 
 let activeTouchId = null;
 window.addEventListener("touchstart", (e) => {
-    if (!gameActive) return;
+    if (!gameActive || cutsceneActive) return;
     if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
     e.preventDefault();
     if (activeTouchId !== null) return;
@@ -595,7 +611,7 @@ window.addEventListener("touchstart", (e) => {
 }, { passive: false });
 
 window.addEventListener("touchend", (e) => {
-    if (!gameActive) return;
+    if (!gameActive || cutsceneActive) return;
     if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
     e.preventDefault();
     for (let i = 0; i < e.changedTouches.length; i++) {
@@ -618,31 +634,39 @@ jetpackBtn.addEventListener("touchstart", (e) => {
 }, { passive: false });
 jetpackBtn.addEventListener("touchend", (e) => { e.preventDefault(); jKeyPressed = false; }, { passive: false });
 
-throwBtn.addEventListener("touchstart", (e) => { e.preventDefault(); firePlayerKnife(); }, { passive: false });
-throwBtn.addEventListener("click", () => firePlayerKnife());
+throwBtn.addEventListener("touchstart", (e) => { e.preventDefault(); fireSlingshot(); }, { passive: false });
+throwBtn.addEventListener("click", () => fireSlingshot());
 
-function firePlayerKnife() {
-    if (isBossMode && playerHasKnife) {
-        playerHasKnife = false;
-        throwBtn.style.display = "none";
-        playerKnives.push({
+function fireSlingshot() {
+    if (isBossMode && !cutsceneActive) {
+        playerRocks.push({
             x: player.x + player.width,
-            y: player.y + player.height / 2 - 5,
-            width: 25,
-            height: 10,
-            speed: 14
+            y: player.y + 20,
+            radius: 6,
+            speed: 15
         });
     }
 }
 
 function updateLivesIndicator() {
-    livesIndicator.style.display = activeLives > 0 ? "block" : "none";
-    livesIndicator.innerText = "LIVES: " + activeLives;
+    if (isBossMode) {
+        livesIndicator.style.display = "none";
+    } else {
+        livesIndicator.style.display = activeLives > 0 ? "block" : "none";
+        livesIndicator.innerText = "LIVES: " + activeLives;
+    }
 }
 
 startBtn.addEventListener("click", () => {
+    try { 
+        bgm.pause(); 
+        bgm.currentTime = 0; 
+    } catch (e) {}
+    
     startScreen.style.display = "none";
     cutsceneScreen.style.display = "flex";
+    cutsceneActive = true;
+    cutsceneMode = 'intro';
     currentDialogueIndex = 0;
     showNextDialogue();
 });
@@ -658,25 +682,54 @@ cutsceneNextBtn.addEventListener("touchstart", (e) => {
 }, { passive: false });
 
 function showNextDialogue() {
-    if (currentDialogueIndex < dialogueLines.length) {
-        const line = dialogueLines[currentDialogueIndex];
-        cutsceneText.innerHTML = line.text;
-        if (line.triggerMusic) {
-            try { bgm.currentTime = 0; } catch (e) {}
-            bgm.play().catch(e => {});
+    if (cutsceneMode === 'intro') {
+        if (currentDialogueIndex < introDialogue.length) {
+            const line = introDialogue[currentDialogueIndex];
+            cutsceneText.innerHTML = line.text;
+            if (line.triggerMusic) {
+                try { bgm.currentTime = 0; } catch (e) {}
+                bgm.play().catch(e => {});
+            }
+        } else {
+            cutsceneScreen.style.display = "none";
+            cutsceneActive = false;
+            runActualGame();
         }
-    } else {
-        cutsceneScreen.style.display = "none";
-        runActualGame();
+    } else if (cutsceneMode === 'boss') {
+        if (currentDialogueIndex < bossDialogue.length) {
+            const line = bossDialogue[currentDialogueIndex];
+            cutsceneText.innerHTML = line.text;
+        } else {
+            cutsceneScreen.style.display = "none";
+            cutsceneActive = false;
+            bossPhase = 'fighting';
+            throwBtn.style.display = "block";
+            lastTime = performance.now();
+        }
     }
+}
+
+function triggerBossCutscene() {
+    isBossMode = true;
+    activeLives = 0;
+    updateLivesIndicator();
+    bartHP = 1;
+    bobHP = 100;
+    obstacles = []; platforms = []; coins = [];
+    
+    cutsceneScreen.style.display = "flex";
+    cutsceneActive = true;
+    cutsceneMode = 'boss';
+    currentDialogueIndex = 0;
+    showNextDialogue();
 }
 
 function runActualGame() {
     jetpackBtn.style.display = "block";
     throwBtn.style.display = "none";
-    gameActive = true; isBossMode = false; bossWon = false; playerHasKnife = false;
+    gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
     score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
-    obstacles = []; platforms = []; coins = []; bossKnives = []; playerKnives = []; particles = [];
+    obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
     player.height = player.originalHeight; player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
     activeLives = upgradeLife; updateLivesIndicator();
@@ -796,8 +849,8 @@ function drawBart(x, y, w, h, sliding) {
     if (jetpackState === 'active' && !sliding) {
         ctx.fillStyle = "#444"; ctx.fillRect(x - 12, y + 25, 12, 25);
     }
-    if (playerHasKnife) {
-        ctx.shadowBlur = 15; ctx.shadowColor = "#ffcc00";
+    if (isBossMode) {
+        ctx.shadowBlur = 15; ctx.shadowColor = "#ff00ff";
     } else if (activeLives > 0) {
         ctx.shadowBlur = 15; ctx.shadowColor = "#00ffcc";
     }
@@ -826,26 +879,52 @@ function drawSideshowBob(x, y, w, h) {
     ctx.restore();
 }
 
+function drawHealthBars() {
+    if (!isBossMode) return;
+
+    ctx.save();
+    
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(40, 60, 200, 16);
+    let bartWidth = (bartHP / maxBartHP) * 200;
+    ctx.fillStyle = "#ff3366";
+    ctx.fillRect(40, 60, bartWidth, 16);
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; ctx.strokeRect(40, 60, 200, 16);
+    ctx.font = "11px sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("BART", 45, 72);
+
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillRect(canvas.width - 240, 60, 200, 16);
+    let bobWidth = (bobHP / maxBobHP) * 200;
+    ctx.fillStyle = "#00ffcc";
+    ctx.fillRect(canvas.width - 240, 60, bobWidth, 16);
+    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; ctx.strokeRect(canvas.width - 240, 60, 200, 16);
+    ctx.font = "11px sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("BOB", canvas.width - 235, 72);
+    
+    ctx.restore();
+}
+
 function handleBossLogic(dt) {
     if (!isBossMode) {
         if (bgm.currentTime >= bgm.duration - 0.5 || bgm.ended) {
-            isBossMode = true; bossPhase = 'entering'; bob.targetX = 650; bob.targetY = 240;
-            obstacles = []; platforms = []; coins = [];
+            triggerBossCutscene();
         }
         return;
     }
+
+    if (cutsceneActive) return;
 
     gameSpeed = 0; 
     bob.x += (bob.targetX - bob.x) * 0.05;
     bob.y += (bob.targetY - bob.y) * 0.05;
 
     if (bossPhase === 'entering') {
+        bob.targetX = 650; bob.targetY = 240;
         if (Math.abs(bob.x - 650) < 5) { bossPhase = 'fighting'; bossTimer = 0; }
     } else if (bossPhase === 'fighting') {
         bossTimer += dt;
         bob.targetY = 160 + Math.sin(performance.now() * 0.003) * 100;
         
-        let spawnRate = score > 40 ? 1200 : 1800;
+        let spawnRate = 1400;
         if (bossTimer > spawnRate) {
             bossTimer = 0;
             bossKnives.push({
@@ -853,8 +932,8 @@ function handleBossLogic(dt) {
                 y: bob.y + bob.height / 3,
                 width: 30,
                 height: 12,
-                vx: -6 - (Math.random() * 3),
-                vy: (player.y - bob.y) * 0.01 
+                vx: -7 - (Math.random() * 3),
+                vy: (player.y - bob.y) * 0.012 
             });
         }
     }
@@ -866,114 +945,133 @@ function animate(nowTime = performance.now()) {
 
     handleBossLogic(dt);
 
-    if (jetpackState === 'active') {
-        if (jKeyPressed) {
-            player.vy -= 1.8; if (player.vy < -11) player.vy = -11;
-            player.isGrounded = false; isThrusting = true; jetpackFuel -= dt;
-        } else isThrusting = false;
-        jetpackBtn.innerText = "FLYING! " + (jetpackFuel / 1000).toFixed(1) + "s";
-        if (jetpackFuel <= 0) { jetpackState = 'cooldown'; jetpackCooldownTimer = 5000; isThrusting = false; }
-    } else if (jetpackState === 'cooldown') {
-        isThrusting = false; jetpackCooldownTimer -= dt;
-        jetpackBtn.innerText = "CD: " + (jetpackCooldownTimer / 1000).toFixed(1) + "s";
-        if (jetpackCooldownTimer <= 0) jetpackState = 'ready';
-    } else {
-        isThrusting = false;
-        jetpackBtn.innerText = `JETPACK [J] (${upgradeJetpack})`;
+    if (!cutsceneActive) {
+        if (jetpackState === 'active') {
+            if (jKeyPressed) {
+                player.vy -= 1.8; if (player.vy < -11) player.vy = -11;
+                player.isGrounded = false; isThrusting = true; jetpackFuel -= dt;
+            } else isThrusting = false;
+            jetpackBtn.innerText = "FLYING! " + (jetpackFuel / 1000).toFixed(1) + "s";
+            if (jetpackFuel <= 0) { jetpackState = 'cooldown'; jetpackCooldownTimer = 5000; isThrusting = false; }
+        } else if (jetpackState === 'cooldown') {
+            isThrusting = false; jetpackCooldownTimer -= dt;
+            jetpackBtn.innerText = "CD: " + (jetpackCooldownTimer / 1000).toFixed(1) + "s";
+            if (jetpackCooldownTimer <= 0) jetpackState = 'ready';
+        } else {
+            isThrusting = false;
+            jetpackBtn.innerText = `JETPACK [J] (${upgradeJetpack})`;
+        }
+
+        if (!isBossMode) bgOffset += gameSpeed;
+        
+        if (!isThrusting) player.vy += player.gravity;
+        player.y += player.vy;
+        if (player.y < 15) { player.y = 15; player.vy = 0; }
+
+        let onPlatform = false;
+        for (let i = platforms.length - 1; i >= 0; i--) {
+            platforms[i].update();
+            let plat = platforms[i];
+            if (player.x + player.width - 12 > plat.x && player.x + 12 < plat.x + plat.width && player.y + player.height <= plat.y + 12 && player.y + player.height + player.vy >= plat.y) {
+                if (player.vy >= 0) { player.y = plat.y - player.height; player.vy = 0; player.isGrounded = true; onPlatform = true; }
+            }
+        }
+
+        if (!onPlatform) {
+            if (player.y >= 350 - player.height) { player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; }
+            else player.isGrounded = false;
+        }
+
+        if (!isBossMode) {
+            bob.y = 240 + Math.sin(Date.now() * 0.015) * 8;
+        }
     }
 
-    if (!isBossMode) bgOffset += gameSpeed;
     drawBackground();
 
-    if (!isThrusting) player.vy += player.gravity;
-    player.y += player.vy;
-    if (player.y < 15) { player.y = 15; player.vy = 0; }
-
-    let onPlatform = false;
     for (let i = platforms.length - 1; i >= 0; i--) {
-        platforms[i].update(); platforms[i].draw();
-        let plat = platforms[i];
-        if (player.x + player.width - 12 > plat.x && player.x + 12 < plat.x + plat.width && player.y + player.height <= plat.y + 12 && player.y + player.height + player.vy >= plat.y) {
-            if (player.vy >= 0) { player.y = plat.y - player.height; player.vy = 0; player.isGrounded = true; onPlatform = true; }
-        }
-        if (plat.x + plat.width < 0) platforms.splice(i, 1);
-    }
-
-    if (!onPlatform) {
-        if (player.y >= 350 - player.height) { player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; }
-        else player.isGrounded = false;
-    }
-
-    if (!isBossMode) {
-        bob.y = 240 + Math.sin(Date.now() * 0.015) * 8;
+        platforms[i].draw();
+        if (platforms[i].x + platforms[i].width < 0) platforms.splice(i, 1);
     }
 
     drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
     drawBart(player.x, player.y, player.width, player.height, player.isSliding);
+    drawHealthBars();
 
-    for (let i = coins.length - 1; i >= 0; i--) {
-        coins[i].update(); coins[i].draw();
-        if (checkCollision(player, coins[i])) {
-            coins.splice(i, 1); score += 1; playCoinSFX(); scoreBoard.innerText = "POINTS: " + score;
+    if (!cutsceneActive) {
+        for (let i = coins.length - 1; i >= 0; i--) {
+            coins[i].update(); coins[i].draw();
+            if (checkCollision(player, coins[i])) {
+                coins.splice(i, 1); score += 1; playCoinSFX(); scoreBoard.innerText = "POINTS: " + score;
+            }
+            if (coins[i] && coins[i].x < 0) coins.splice(i, 1);
         }
-        if (coins[i] && coins[i].x < 0) coins.splice(i, 1);
-    }
 
-    spawnObstacle();
-    for (let i = obstacles.length - 1; i >= 0; i--) {
-        obstacles[i].update(); obstacles[i].draw();
-        if (checkCollision(player, obstacles[i])) {
-            if (activeLives > 0) { activeLives--; updateLivesIndicator(); obstacles.splice(i, 1); }
-            else { gameOver(); return; }
-        }
-        if (obstacles[i] && obstacles[i].x < 0) { obstacles.splice(i, 1); gameSpeed += 0.35; }
-    }
-
-    for (let i = bossKnives.length - 1; i >= 0; i--) {
-        let k = bossKnives[i];
-        k.x += k.vx; k.y += k.vy;
-        
-        ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = "#ff3300"; ctx.fillStyle = "#ffffff";
-        ctx.fillRect(k.x, k.y, k.width, k.height);
-        ctx.fillStyle = "#ff3300"; ctx.fillRect(k.x + k.width - 5, k.y - 2, 5, k.height + 4);
-        ctx.restore();
-
-        if (checkCollision(player, k)) {
-            bossKnives.splice(i, 1);
-            if (!playerHasKnife) {
-                playerHasKnife = true;
-                throwBtn.style.display = "block";
-                throwBtn.innerText = "THROW KNIFE [K]";
-            } else {
-                if (activeLives > 0) { activeLives--; updateLivesIndicator(); }
+        spawnObstacle();
+        for (let i = obstacles.length - 1; i >= 0; i--) {
+            obstacles[i].update(); obstacles[i].draw();
+            if (checkCollision(player, obstacles[i])) {
+                if (activeLives > 0) { activeLives--; updateLivesIndicator(); obstacles.splice(i, 1); }
                 else { gameOver(); return; }
             }
-            continue;
+            if (obstacles[i] && obstacles[i].x < 0) { obstacles.splice(i, 1); gameSpeed += 0.35; }
         }
-        if (k.x < -50) bossKnives.splice(i, 1);
-    }
 
-    for (let i = playerKnives.length - 1; i >= 0; i--) {
-        let pk = playerKnives[i];
-        pk.x += pk.speed;
+        for (let i = bossKnives.length - 1; i >= 0; i--) {
+            let k = bossKnives[i];
+            k.x += k.vx; k.y += k.vy;
+            
+            ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = "#ff3300"; ctx.fillStyle = "#ffffff";
+            ctx.fillRect(k.x, k.y, k.width, k.height);
+            ctx.fillStyle = "#ff3300"; ctx.fillRect(k.x + k.width - 5, k.y - 2, 5, k.height + 4);
+            ctx.restore();
 
-        ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = "#00ffff"; ctx.fillStyle = "#00ffff";
-        ctx.fillRect(pk.x, pk.y, pk.width, pk.height); ctx.restore();
-
-        if (checkCollision(pk, bob)) {
-            playerKnives.splice(i, 1);
-            bossWon = true;
-            for (let c = 0; c < 25; c++) {
-                particles.push({
-                    x: bob.x + bob.width/2, y: bob.y + bob.height/2,
-                    vx: (Math.random() - 0.5) * 12, vy: (Math.random() - 0.5) * 12,
-                    size: 4 + Math.random() * 6, color: "#ff0000", life: 40
-                });
+            let knifeBox = { x: k.x, y: k.y, width: k.width, height: k.height };
+            if (checkCollision(player, knifeBox)) {
+                bossKnives.splice(i, 1);
+                bartHP = 0;
+                gameOver(false);
+                return;
             }
-            setTimeout(() => gameOver(true), 1000);
-            return;
+            if (k.x < -50) bossKnives.splice(i, 1);
         }
-        if (pk.x > canvas.width + 50) playerKnives.splice(i, 1);
+
+        for (let i = playerRocks.length - 1; i >= 0; i--) {
+            let pr = playerRocks[i];
+            pr.x += pr.speed;
+
+            ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = "#ffcc00"; ctx.fillStyle = "#ffea00";
+            ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+
+            let rockBox = { x: pr.x - pr.radius, y: pr.y - pr.radius, width: pr.radius * 2, height: pr.radius * 2 };
+            if (checkCollision(rockBox, bob)) {
+                playerRocks.splice(i, 1);
+                bobHP -= 20; 
+                
+                for (let c = 0; c < 8; c++) {
+                    particles.push({
+                        x: bob.x + bob.width/2, y: bob.y + bob.height/2,
+                        vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10,
+                        size: 3 + Math.random() * 4, color: "#ffea00", life: 25
+                    });
+                }
+
+                if (bobHP <= 0) {
+                    bobHP = 0;
+                    bossWon = true;
+                    for (let c = 0; c < 30; c++) {
+                        particles.push({
+                            x: bob.x + bob.width/2, y: bob.y + bob.height/2,
+                            vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15,
+                            size: 4 + Math.random() * 6, color: "#ff0000", life: 40
+                        });
+                    }
+                    setTimeout(() => gameOver(true), 1000);
+                    return;
+                }
+            }
+            if (pr.x > canvas.width + 50) playerRocks.splice(i, 1);
+        }
     }
 
     for (let i = particles.length - 1; i >= 0; i--) {
