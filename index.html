@@ -395,6 +395,36 @@
             -webkit-user-select: text !important;
             user-select: text !important;
         }
+        #joystick-zone {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            width: 130px;
+            height: 130px;
+            z-index: 15;
+            display: none;
+            touch-action: none;
+        }
+        #joystick-base {
+            position: absolute;
+            top: 0; left: 0;
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.15);
+        }
+        #joystick-stick {
+            position: absolute;
+            top: 35px; left: 35px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.5);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
@@ -409,6 +439,11 @@
         <button id="jetpack-btn" class="hud-btn">JETPACK [J] (0)</button>
         <button id="shield-btn" class="hud-btn">SHIELD [S] (5/5)</button>
         <button id="throw-btn" class="hud-btn">SLINGSHOT [K]</button>
+    </div>
+
+    <div id="joystick-zone">
+        <div id="joystick-base"></div>
+        <div id="joystick-stick"></div>
     </div>
     
     <div id="start-screen">
@@ -534,6 +569,8 @@ const livesIndicator = document.getElementById("lives-indicator");
 const jetpackBtn = document.getElementById("jetpack-btn");
 const shieldBtn = document.getElementById("shield-btn");
 const throwBtn = document.getElementById("throw-btn");
+const joystickZone = document.getElementById("joystick-zone");
+const joystickStick = document.getElementById("joystick-stick");
 const bgm = document.getElementById("bgm");
 const audioStatus = document.getElementById("audio-status");
 
@@ -864,6 +901,7 @@ function triggerDirectBossFight() {
     jetpackBtn.style.display = "block";
     shieldBtn.style.display = "block";
     throwBtn.style.display = "block";
+    joystickZone.style.display = "block";
     
     bossPhase = 'fighting';
     bobHP = 100;
@@ -1019,6 +1057,62 @@ shieldBtn.addEventListener("click", () => activateShield());
 throwBtn.addEventListener("touchstart", (e) => { e.preventDefault(); fireSlingshot(); }, { passive: false });
 throwBtn.addEventListener("click", () => fireSlingshot());
 
+let joystickTouchId = null;
+const JOYSTICK_MAX = 45;
+const JOYSTICK_DEADZONE = 12;
+
+function resetJoystick() {
+    keys.ArrowUp = false; keys.ArrowDown = false; keys.ArrowLeft = false; keys.ArrowRight = false;
+    joystickStick.style.transform = "translate(0px, 0px)";
+}
+
+function handleJoystickMove(clientX, clientY) {
+    const rect = joystickZone.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    let dx = clientX - centerX;
+    let dy = clientY - centerY;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    if (dist > JOYSTICK_MAX) {
+        dx = (dx / dist) * JOYSTICK_MAX;
+        dy = (dy / dist) * JOYSTICK_MAX;
+    }
+    joystickStick.style.transform = `translate(${dx}px, ${dy}px)`;
+
+    keys.ArrowLeft = dx < -JOYSTICK_DEADZONE;
+    keys.ArrowRight = dx > JOYSTICK_DEADZONE;
+    keys.ArrowUp = dy < -JOYSTICK_DEADZONE;
+    keys.ArrowDown = dy > JOYSTICK_DEADZONE;
+}
+
+joystickZone.addEventListener("touchstart", (e) => {
+    e.preventDefault();
+    if (joystickTouchId !== null) return;
+    const touch = e.changedTouches[0];
+    joystickTouchId = touch.identifier;
+    handleJoystickMove(touch.clientX, touch.clientY);
+}, { passive: false });
+
+joystickZone.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === joystickTouchId) {
+            handleJoystickMove(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+        }
+    }
+}, { passive: false });
+
+function endJoystickTouch(e) {
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        if (e.changedTouches[i].identifier === joystickTouchId) {
+            joystickTouchId = null;
+            resetJoystick();
+        }
+    }
+}
+joystickZone.addEventListener("touchend", (e) => { e.preventDefault(); endJoystickTouch(e); }, { passive: false });
+joystickZone.addEventListener("touchcancel", (e) => { e.preventDefault(); endJoystickTouch(e); }, { passive: false });
+
 function activateShield() {
     if (!gameActive || cutsceneActive) return;
     if (!isShieldActive && shieldCooldownTimer <= 0 && shieldHealth > 0) {
@@ -1121,6 +1215,7 @@ function showNextDialogue() {
             bossPhase = 'entering';
             shieldBtn.style.display = "block";
             throwBtn.style.display = "block";
+            joystickZone.style.display = "block";
             
             try { bgm.loop = true; bgm.play().catch(e => {}); } catch(e) {}
             
@@ -1189,6 +1284,8 @@ function triggerDeathCutscene() {
     jetpackBtn.style.display = "none";
     shieldBtn.style.display = "none";
     throwBtn.style.display = "none";
+    joystickZone.style.display = "none";
+    resetJoystick();
     
     cutsceneScreen.style.display = "flex";
     cutsceneActive = true;
@@ -1207,6 +1304,8 @@ function runActualGame() {
     jetpackBtn.style.display = "block";
     shieldBtn.style.display = "none";
     throwBtn.style.display = "none";
+    joystickZone.style.display = "none";
+    resetJoystick();
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
     score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
@@ -1299,7 +1398,7 @@ function checkCollision(r1, r2) {
 }
 
 function gameOver(won = false) {
-    gameActive = false; bgm.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none";
+    gameActive = false; bgm.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none"; joystickZone.style.display = "none"; resetJoystick();
     if (won && currentLevel === 1) {
         lvl1Beaten = true;
         setCookie("bart_lvl1_beat", "1");
