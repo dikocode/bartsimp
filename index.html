@@ -363,6 +363,12 @@
             border-radius: 8px;
             margin-bottom: 15px;
             text-align: center;
+            /* allow mobile keyboard focus on the admin input */
+#admin-code-input {
+    touch-action: auto !important;
+    -webkit-user-select: text !important;
+    user-select: text !important;
+}
         }
     </style>
 </head>
