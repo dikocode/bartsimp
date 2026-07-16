@@ -400,7 +400,7 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.3</div>
+    <div id="version-tag">v1.4</div>
     <div id="music-watermark">music by my friend dj limey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
@@ -439,7 +439,7 @@
             </button>
             <button id="lvl2-btn" class="level-btn">
                 <span>LVL 2</span>
-                <span class="level-subtext" style="color: #ff3366;">coming soon</span>
+                <span class="level-subtext" id="lvl2-subtext" style="color: #ff3366;">beat lvl 1 first</span>
             </button>
             <button id="lvl3-btn" class="level-btn">
                 <span>LVL 3</span>
@@ -626,6 +626,11 @@ const bobImg = new Image();
 bobImg.onload = () => { bobLoaded = true; };
 bobImg.src = "bob.jpg";
 
+let lisaLoaded = false;
+const lisaImg = new Image();
+lisaImg.onload = () => { lisaLoaded = true; };
+lisaImg.src = "lisa.png";
+
 let gameActive = false;
 let score = 0;
 let gameSpeed = 6;
@@ -671,6 +676,11 @@ let maxBartHP = 100;
 const KNIFE_DAMAGE = 10;
 let bartRegenTimer = 0;
 const BART_REGEN_INTERVAL = 2000;
+
+let currentLevel = 1;
+let lisaHP = 70;
+let maxLisaHP = 70;
+let lvl1Beaten = getCookie("bart_lvl1_beat") === "1";
 
 let lastShotTime = 0;
 const SLINGSHOT_COOLDOWN = 500; 
@@ -733,6 +743,29 @@ const deathDialogue = [
 
 let currentDialogueIndex = 0;
 
+const lisaIntroDialogue = [
+    { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> sideshow bob told me who you really are you are an annoying wimp that only has a stupid friend that secretly hates you!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> w- what m- millhouse hates me?' },
+    { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> yeah he does now i will chase you down!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> like you can defeat me' },
+    { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> i borrowed nuclear rods from the power plant and made a nuclear machine now really run!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> ahhhh FUCK' }
+];
+
+const lisaBossDialogue = [
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> the song ended you didnt catch me!' },
+    { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> doesnt matter i still got my nuclear machine!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> bet u cant kill me with my slingshots!' },
+    { speaker: 'lisa', text: '<span style="color:#00ff88; font-weight:bold;">*bossfight start*</span>' }
+];
+
+const lisaDeathDialogue = [
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> take that nerd now i wont kill ya!' },
+    { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> bart... you annoying wimp...  bet you cant dodge millhouse' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> millhouse is my friend he- oh shi-' },
+    { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> yeah...' }
+];
+
 function updatePointsUI() {
     menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
     shopPointsDisplay.innerText = "POINTS: " + playerPoints;
@@ -742,6 +775,19 @@ function updatePointsUI() {
     buyJetpackBtn.disabled = upgradeJetpack >= 32;
     buyPointsBtn.innerText = upgradeDouble >= 3 ? "MAXED" : `LVL ${upgradeDouble}/3 (COST: ${(upgradeDouble+1)*35} PTS)`;
     buyPointsBtn.disabled = upgradeDouble >= 3;
+    updateLvl2Lock();
+}
+
+function updateLvl2Lock() {
+    if (lvl1Beaten) {
+        lvl2Btn.disabled = false;
+        document.getElementById("lvl2-subtext").innerText = "lisas nuclear chase";
+        document.getElementById("lvl2-subtext").style.color = "#00ff88";
+    } else {
+        lvl2Btn.disabled = true;
+        document.getElementById("lvl2-subtext").innerText = "beat lvl 1 first";
+        document.getElementById("lvl2-subtext").style.color = "#ff3366";
+    }
 }
 updatePointsUI();
 
@@ -1021,6 +1067,18 @@ closeLevelsBtn.addEventListener("click", () => {
 });
 
 lvl1Btn.addEventListener("click", () => {
+    currentLevel = 1;
+    levelScreen.style.display = "none";
+    cutsceneScreen.style.display = "flex";
+    cutsceneActive = true;
+    cutsceneMode = 'intro';
+    currentDialogueIndex = 0;
+    showNextDialogue();
+});
+
+lvl2Btn.addEventListener("click", () => {
+    if (!lvl1Beaten) return;
+    currentLevel = 2;
     levelScreen.style.display = "none";
     cutsceneScreen.style.display = "flex";
     cutsceneActive = true;
@@ -1041,9 +1099,13 @@ cutsceneNextBtn.addEventListener("touchstart", (e) => {
 
 function showNextDialogue() {
     let currentLine = null;
+    const introArr = currentLevel === 2 ? lisaIntroDialogue : introDialogue;
+    const bossArr = currentLevel === 2 ? lisaBossDialogue : bossDialogue;
+    const deathArr = currentLevel === 2 ? lisaDeathDialogue : deathDialogue;
+
     if (cutsceneMode === 'intro') {
-        if (currentDialogueIndex < introDialogue.length) {
-            currentLine = introDialogue[currentDialogueIndex];
+        if (currentDialogueIndex < introArr.length) {
+            currentLine = introArr[currentDialogueIndex];
         } else {
             cutsceneScreen.style.display = "none";
             cutsceneActive = false;
@@ -1051,8 +1113,8 @@ function showNextDialogue() {
             return;
         }
     } else if (cutsceneMode === 'boss') {
-        if (currentDialogueIndex < bossDialogue.length) {
-            currentLine = bossDialogue[currentDialogueIndex];
+        if (currentDialogueIndex < bossArr.length) {
+            currentLine = bossArr[currentDialogueIndex];
         } else {
             cutsceneScreen.style.display = "none";
             cutsceneActive = false;
@@ -1067,8 +1129,8 @@ function showNextDialogue() {
             return;
         }
     } else if (cutsceneMode === 'death') {
-        if (currentDialogueIndex < deathDialogue.length) {
-            currentLine = deathDialogue[currentDialogueIndex];
+        if (currentDialogueIndex < deathArr.length) {
+            currentLine = deathArr[currentDialogueIndex];
         } else {
             cutsceneScreen.style.display = "none";
             cutsceneActive = false;
@@ -1087,6 +1149,10 @@ function showNextDialogue() {
             cutsceneImg.src = "bob.jpg";
             cutsceneImg.style.borderColor = "#ff3366";
             cutsceneImg.style.boxShadow = "0 0 15px rgba(255, 51, 102, 0.5)";
+        } else if (currentLine.speaker === 'lisa') {
+            cutsceneImg.src = "lisa.png";
+            cutsceneImg.style.borderColor = "#00ff88";
+            cutsceneImg.style.boxShadow = "0 0 15px rgba(0, 255, 136, 0.5)";
         }
     }
 }
@@ -1098,6 +1164,7 @@ function triggerBossCutscene() {
     bartHP = maxBartHP;
     bartRegenTimer = 0;
     bobHP = 100;
+    lisaHP = maxLisaHP;
     isShieldActive = false;
     shieldHealth = 5;
     shieldCooldownTimer = 0;
@@ -1233,6 +1300,10 @@ function checkCollision(r1, r2) {
 
 function gameOver(won = false) {
     gameActive = false; bgm.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none";
+    if (won && currentLevel === 1) {
+        lvl1Beaten = true;
+        setCookie("bart_lvl1_beat", "1");
+    }
     let earned = score;
     if (won) earned += 100;
     if (upgradeDouble > 0) earned = Math.floor(earned * (1 + (upgradeDouble * 0.5)));
@@ -1301,11 +1372,20 @@ function drawSideshowBob(x, y, w, h) {
         ctx.fillRect(x - 10, y + h - 5, w + 20, 10);
         ctx.strokeRect(x - 10, y + h - 5, w + 20, 10);
     }
-    ctx.shadowBlur = 20; ctx.shadowColor = "#ff3366";
-    if (bobLoaded) {
-        ctx.drawImage(bobImg, x, y, w, h);
+    if (currentLevel === 2) {
+        ctx.shadowBlur = 20; ctx.shadowColor = "#00ff88";
+        if (lisaLoaded) {
+            ctx.drawImage(lisaImg, x, y, w, h);
+        } else {
+            ctx.fillStyle = "#00ff88"; ctx.fillRect(x, y, w, h);
+        }
     } else {
-        ctx.fillStyle = "#ff3366"; ctx.fillRect(x, y, w, h);
+        ctx.shadowBlur = 20; ctx.shadowColor = "#ff3366";
+        if (bobLoaded) {
+            ctx.drawImage(bobImg, x, y, w, h);
+        } else {
+            ctx.fillStyle = "#ff3366"; ctx.fillRect(x, y, w, h);
+        }
     }
     ctx.restore();
 }
@@ -1507,8 +1587,13 @@ function animate(timestamp) {
         ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.fill();
         let box = { x: r.x - r.radius, y: r.y - r.radius, width: r.radius * 2, height: r.radius * 2 };
         if (checkCollision(box, bob)) {
-            bobHP -= 4; playerRocks.splice(i, 1);
-            if (bobHP <= 0) { triggerDeathCutscene(); return; }
+            if (currentLevel === 2) {
+                lisaHP -= 4; playerRocks.splice(i, 1);
+                if (lisaHP <= 0) { triggerDeathCutscene(); return; }
+            } else {
+                bobHP -= 4; playerRocks.splice(i, 1);
+                if (bobHP <= 0) { triggerDeathCutscene(); return; }
+            }
         } else if (r.y < 0) {
             playerRocks.splice(i, 1);
         }
@@ -1520,8 +1605,13 @@ function animate(timestamp) {
         k.y += k.vy * timeScale;
         
         ctx.save(); 
-        ctx.fillStyle = "#ff3366"; 
-        ctx.shadowColor = "#ff3366"; 
+        if (currentLevel === 2) {
+            ctx.fillStyle = "#aaff00"; 
+            ctx.shadowColor = "#aaff00"; 
+        } else {
+            ctx.fillStyle = "#ff3366"; 
+            ctx.shadowColor = "#ff3366"; 
+        }
         ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(k.x, k.y, k.width / 2, 0, Math.PI * 2);
@@ -1560,18 +1650,24 @@ function animate(timestamp) {
     drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
 
     if (isBossMode) {
-        // Bob HP bar (top)
+        const bossHPVal = currentLevel === 2 ? lisaHP : bobHP;
+        const bossHPMax = currentLevel === 2 ? maxLisaHP : maxBobHP;
+        const bossName = currentLevel === 2 ? "LISA" : "BOB";
+        const bossColorA = currentLevel === 2 ? "#00ff88" : "#ff3300";
+        const bossColorB = currentLevel === 2 ? "#00ffcc" : "#ff00ff";
+
+        // Boss HP bar (top)
         ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 20, 400, 14);
-        let hpW = (bobHP / maxBobHP) * 400;
+        let hpW = Math.max(0, (bossHPVal / bossHPMax)) * 400;
         let hpGrad = ctx.createLinearGradient(200, 0, 600, 0);
-        hpGrad.addColorStop(0, "#ff3300"); hpGrad.addColorStop(1, "#ff00ff");
+        hpGrad.addColorStop(0, bossColorA); hpGrad.addColorStop(1, bossColorB);
         ctx.fillStyle = hpGrad; ctx.fillRect(200, 20, hpW, 14);
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 20, 400, 14);
         ctx.save();
         ctx.font = "11px sans-serif";
         ctx.fillStyle = "#fff";
         ctx.textAlign = "center";
-        ctx.fillText("BOB", 400, 31);
+        ctx.fillText(bossName, 400, 31);
         ctx.restore();
 
         // Bart HP bar (below Bob's)
