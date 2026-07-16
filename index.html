@@ -1,1088 +1,176 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bart Escape</title>
-    <style>
-        * {
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-            outline: none;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: none;
-        }
-        body {
-            margin: 0;
-            background: radial-gradient(circle at center, #1b0a2a 0%, #08030d 100%);
-            color: #fff;
-            font-family: 'Arial Black', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            touch-action: none;
-        }
-        #game-container {
-            position: relative;
-            width: 95vw;
-            max-width: 800px;
-            aspect-ratio: 2 / 1;
-            touch-action: none;
-        }
-        canvas {
-            background: #0f051d;
-            border: 4px solid #ff00ff;
-            display: block;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            border-radius: 16px;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.4), inset 0 0 20px rgba(255, 0, 255, 0.2);
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-        #version-tag {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            font-size: 14px;
-            color: #00ffff;
-            text-shadow: 0 0 8px rgba(0, 255, 255, 0.6);
-            z-index: 15;
-            font-family: monospace;
-            pointer-events: none;
-        }
-        #music-watermark {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
-            text-shadow: 1px 1px #000;
-            z-index: 15;
-            font-family: sans-serif;
-            pointer-events: none;
-        }
-        #score-board {
-            position: absolute;
-            top: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 26px;
-            text-shadow: 0 0 10px rgba(255, 217, 15, 0.5);
-            z-index: 10;
-            color: #FFD90F;
-            letter-spacing: 1px;
-            pointer-events: none;
-        }
-        #lives-indicator {
-            position: absolute;
-            bottom: 15px;
-            left: 20px;
-            font-size: 16px;
-            color: #ff3366;
-            text-shadow: 0 0 8px rgba(255, 51, 102, 0.6);
-            z-index: 15;
-            font-family: inherit;
-            pointer-events: none;
-            display: none;
-        }
-        #controls-group {
-            position: absolute;
-            bottom: 30px;
-            right: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 15;
-        }
-        .hud-btn {
-            padding: 10px 20px;
-            font-size: 13px;
-            font-family: inherit;
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            border-radius: 12px;
-            display: none;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
-            touch-action: none;
-        }
-        #jetpack-btn {
-            background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
-        }
-        #throw-btn {
-            background: linear-gradient(135deg, #ffcc00 0%, #ff6600 100%);
-            box-shadow: 0 4px 15px rgba(255, 102, 0, 0.4);
-        }
-        #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(20, 10, 35, 0.85) 0%, rgba(8, 4, 16, 0.95) 100%);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 20;
-            text-align: center;
-            padding: 15px;
-            box-sizing: border-box;
-            border-radius: 16px;
-            border: 1px solid rgba(255, 0, 255, 0.2);
-            box-shadow: 0 0 40px rgba(255, 0, 255, 0.25);
-            touch-action: none;
-        }
-        #cutscene-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(10, 5, 20, 0.95);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 25;
-            text-align: center;
-            padding: 20px;
-            box-sizing: border-box;
-            border-radius: 16px;
-            touch-action: none;
-        }
-        #cutscene-text {
-            font-size: min(5vw, 24px);
-            line-height: 1.6;
-            max-width: 80%;
-            min-height: 80px;
-            color: #fff;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            margin-bottom: 20px;
-        }
-        #powerup-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(15, 5, 30, 0.9) 0%, rgba(5, 2, 10, 0.98) 100%);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 30;
-            text-align: center;
-            padding: 15px;
-            box-sizing: border-box;
-            border-radius: 16px;
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
-            touch-action: none;
-        }
-        .btn-group {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 5px;
-        }
-        button {
-            padding: 12px 30px;
-            font-size: 18px;
-            font-family: inherit;
-            background: linear-gradient(135deg, #ff00ff 0%, #7000ff 100%);
-            color: #fff;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            cursor: pointer;
-            border-radius: 14px;
-            box-shadow: 0 6px 20px rgba(255, 0, 255, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none;
-        }
-        button:hover {
-            transform: scale(1.05) translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.6), inset 0 2px 4px rgba(255, 255, 255, 0.6);
-            background: linear-gradient(135deg, #00ffff 0%, #ff00ff 100%);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-        .shop-item {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            border-radius: 12px;
-            padding: 12px;
-            margin: 6px;
-            width: 85%;
-            max-width: 420px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
-            touch-action: none;
-        }
-        .shop-item button {
-            padding: 8px 18px;
-            font-size: 13px;
-            border-radius: 10px;
-        }
-        #audio-status {
-            font-size: 11px;
-            color: #ff55bb;
-            margin-top: 8px;
-            opacity: 0.8;
-            pointer-events: none;
-        }
-        .points-display {
-            color: #00ffff;
-            font-size: 22px;
-            margin-bottom: 8px;
-            text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
-            letter-spacing: 1px;
-            pointer-events: none;
-        }
-        .credits-box {
-            margin-top: 12px;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            border-radius: 8px;
-            font-size: 10px;
-            color: #aaa;
-            font-family: sans-serif;
-            line-height: 1.5;
-            max-width: 90%;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        .credits-box a {
-            color: #00ffff;
-            text-decoration: none;
-            border-bottom: 1px dashed rgba(0, 255, 255, 0.4);
-            pointer-events: auto;
-        }
-    </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    body { margin: 0; background: #111; overflow: hidden; font-family: sans-serif; }
+    canvas { display: block; margin: 0 auto; background: #222; }
+    
+    /* UI Layout */
+    #mobile-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 20px;
+      pointer-events: none; /* lets clicks pass through wrapper */
+    }
+    
+    .btn-group { display: flex; gap: 15px; }
+    
+    .ctrl-btn {
+      width: 70px;
+      height: 70px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      color: #fff;
+      font-size: 24px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation; /* stops zoom delay */
+      pointer-events: auto;
+    }
+    
+    .ctrl-btn:active { background: rgba(255, 255, 255, 0.5); }
+    
+    /* hide mobile ui on desktop layout */
+    @media (pointer: fine) {
+      #mobile-controls { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-<div id="game-container">
-    <div id="version-tag">snapshot 1.3busbsh</div>
-    <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
-    <div id="score-board">POINTS: 0</div>
-    <div id="lives-indicator">LIVES: 0</div>
-    
-    <div id="controls-group">
-        <button id="jetpack-btn" class="hud-btn">JETPACK [J] (0)</button>
-        <button id="throw-btn" class="hud-btn">SLINGSHOT [K]</button>
+  <canvas id="gameCanvas"></canvas>
+
+  <!-- Mobile Overlay -->
+  <div id="mobile-controls">
+    <div class="btn-group">
+      <div id="btn-left" class="ctrl-btn">◀</div>
+      <div id="btn-right" class="ctrl-btn">▶</div>
     </div>
-    
-    <div id="start-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6.5vw, 36px); margin-top: 10px; text-shadow: 0 0 15px rgba(255,217,15,0.4); letter-spacing: 1px;">BART SIMPSON RUN</h1>
-        <div class="points-display" id="menu-points">POINTS: 0</div>
-        <div class="btn-group">
-            <button id="start-btn">START RUNNING</button>
-            <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
-        </div>
-        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | TAP K / HUD to Use Slingshot</p>
-        
-        <div class="credits-box" id="credits-pane">
-            credits to walt disney<br>
-            credits to my friend <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
-            made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
-        </div>
-        
-        <div id="audio-status">Audio Status: Standby</div>
-    </div>
+    <div id="btn-jump" class="ctrl-btn">▲</div>
+  </div>
 
-    <div id="cutscene-screen">
-        <div id="cutscene-text"></div>
-        <button id="cutscene-next-btn">TAP TO CONTINUE</button>
-    </div>
+  <script>
+    const canvas = document.getElementById('gameCanvas')
+    const ctx = canvas.getContext('2d')
 
-    <div id="powerup-screen">
-        <h1 style="color: #00ffff; margin-bottom: 8px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);">UPGRADES</h1>
-        <div class="points-display" id="shop-points">POINTS: 0</div>
-        
-        <div class="shop-item">
-            <div style="text-align: left;">
-                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 1: EXTRA LIVES</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Survive hits (Max 5 stacked)</div>
-            </div>
-            <button id="buy-life-btn">COST: 50 PTS (0/5)</button>
-        </div>
+    canvas.width = 800
+    canvas.height = 400
 
-        <div class="shop-item">
-            <div style="text-align: left;">
-                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 2: BUY JETPACK</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Buy stackable jetpack charges (Max 32)</div>
-            </div>
-            <button id="buy-jetpack-btn">COST: 30 PTS (0/32)</button>
-        </div>
+    // State setup
+    const input = { left: false, right: false, jump: false }
+    const gravity = 0.5
 
-        <div class="shop-item">
-            <div style="text-align: left;">
-                <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 3: DOUBLE POINTS</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Boost points gained per run</div>
-            </div>
-            <button id="buy-points-btn">COST: 35 PTS</button>
-        </div>
-
-        <button id="close-shop-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); margin-top: 15px;">BACK TO MENU</button>
-    </div>
-
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
-</div>
-
-<audio id="bgm" src="BART SIMP DO COPY.mp3" loop preload="auto"></audio>
-
-<script>
-const canvas = document.getElementById("gameCanvas");
-const ctx = canvas.getContext("2d");
-const startScreen = document.getElementById("start-screen");
-const cutsceneScreen = document.getElementById("cutscene-screen");
-const cutsceneText = document.getElementById("cutscene-text");
-const cutsceneNextBtn = document.getElementById("cutscene-next-btn");
-const powerupScreen = document.getElementById("powerup-screen");
-const startBtn = document.getElementById("start-btn");
-const openShopBtn = document.getElementById("open-shop-btn");
-const closeShopBtn = document.getElementById("close-shop-btn");
-const scoreBoard = document.getElementById("score-board");
-const livesIndicator = document.getElementById("lives-indicator");
-const jetpackBtn = document.getElementById("jetpack-btn");
-const throwBtn = document.getElementById("throw-btn");
-const bgm = document.getElementById("bgm");
-const audioStatus = document.getElementById("audio-status");
-
-const menuPointsDisplay = document.getElementById("menu-points");
-const shopPointsDisplay = document.getElementById("shop-points");
-const buyLifeBtn = document.getElementById("buy-life-btn");
-const buyJetpackBtn = document.getElementById("buy-jetpack-btn");
-const buyPointsBtn = document.getElementById("buy-points-btn");
-
-window.addEventListener("touchstart", (e) => {
-    if (e.target.tagName !== 'A' && e.target.tagName !== 'BUTTON') {
-        e.preventDefault();
-    }
-}, { passive: false });
-window.addEventListener("touchmove", (e) => {
-    e.preventDefault();
-}, { passive: false });
-
-function setCookie(name, value, days = 365) {
-    const d = new Date();
-    d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
-    const expires = "expires=" + d.toUTCString();
-    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
-}
-
-function getCookie(name) {
-    const cname = name + "=";
-    const decodedCookie = decodeURIComponent(document.cookie);
-    const ca = decodedCookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') c = c.substring(1);
-        if (c.indexOf(cname) == 0) return c.substring(cname.length, c.length);
-    }
-    return "";
-}
-
-let audioCtx = null;
-function playCoinSFX() {
-    try {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        let osc1 = audioCtx.createOscillator();
-        let gainNode = audioCtx.createGain();
-        osc1.type = 'sine';
-        osc1.frequency.setValueAtTime(587.33, audioCtx.currentTime); 
-        osc1.frequency.setValueAtTime(880, audioCtx.currentTime + 0.08); 
-        gainNode.gain.setValueAtTime(0.12, audioCtx.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
-        osc1.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-        osc1.start();
-        osc1.stop(audioCtx.currentTime + 0.3);
-    } catch (err) {}
-}
-
-let bartLoaded = false, bobLoaded = false;
-const bartImg = new Image();
-bartImg.onload = () => { bartLoaded = true; };
-bartImg.src = "bart.png";
-
-const bobImg = new Image();
-bobImg.onload = () => { bobLoaded = true; };
-bobImg.src = "bob.jpg";
-
-let gameActive = false;
-let score = 0;
-let gameSpeed = 6;
-let obstacles = [];
-let platforms = [];
-let coins = [];
-let bossKnives = [];
-let playerRocks = [];
-let spawnTimer = 0;
-let bgOffset = 0;
-let particles = [];
-
-let playerPoints = parseInt(getCookie("bart_points")) || 0;
-let upgradeLife = parseInt(getCookie("bart_up_life")) || 0; 
-let upgradeJetpack = parseInt(getCookie("bart_up_jetpack")) || 0; 
-let upgradeDouble = parseInt(getCookie("bart_up_double")) || 0; 
-
-let lastTime = 0;
-let jetpackState = 'ready'; 
-let jetpackFuel = 15000; 
-let jetpackCooldownTimer = 0;
-let jKeyPressed = false;
-const JETPACK_COOLDOWN_TIME = 5000; 
-
-let isBossMode = false;
-let bossPhase = 'entering'; 
-let bossTimer = 0;
-let bossWon = false;
-
-let cutsceneActive = false;
-let cutsceneMode = 'intro'; 
-
-let bobHP = 100;
-let maxBobHP = 100;
-let bartHP = 1;
-let maxBartHP = 1;
-
-const player = {
-    x: 180,
-    y: 280,
-    width: 45,
-    height: 70,
-    originalHeight: 70,
-    vy: 0,
-    gravity: 1.2, 
-    jumpForce: -19,
-    isGrounded: true,
-    isSliding: false
-};
-
-const bob = {
-    x: 30,
-    y: 240,
-    width: 60,
-    height: 110,
-    targetX: 30,
-    targetY: 240
-};
-
-const introDialogue = [
-    { text: '<span style="color:#ffd90f">bart:</span> hello sideshow bob?', triggerMusic: false },
-    { text: '<span style="color:#ff3366">bob:</span> i escaped the prison now im gonna get ya', triggerMusic: false },
-    { text: '<span style="color:#ffd90f">bart:</span> bet you cant get me while i play this song!', triggerMusic: true },
-    { text: '<span style="color:#ff3366">bob:</span> bart more like brat your bets are gonna fail', triggerMusic: false },
-    { text: '<span style="color:#ffd90f">bart:</span> better catch me!', triggerMusic: false }
-];
-
-const bossDialogue = [
-    { text: '<span style="color:#ffd90f">bart:</span> the song ended you didnt catch me!' },
-    { text: '<span style="color:#ff3366">bob:</span> well i will kill ya i got knives' },
-    { text: '<span style="color:#ffd90f">bart:</span> bet u cant kill me with my slingshots!' },
-    { text: '<span style="color:#ff3366">bob:</span> arrogant brat! i will kill ya' },
-    { text: '<span style="color:#ff00ff; font-weight:bold;">*bossfight start*</span>' }
-];
-
-let currentDialogueIndex = 0;
-
-function updatePointsUI() {
-    menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
-    shopPointsDisplay.innerText = "POINTS: " + playerPoints;
-    buyLifeBtn.innerText = upgradeLife >= 5 ? "MAXED (5/5)" : `COST: 50 PTS (${upgradeLife}/5)`;
-    buyLifeBtn.disabled = upgradeLife >= 5;
-    buyJetpackBtn.innerText = upgradeJetpack >= 32 ? "MAXED (32/32)" : `COST: 30 PTS (${upgradeJetpack}/32)`;
-    buyJetpackBtn.disabled = upgradeJetpack >= 32;
-    buyPointsBtn.innerText = upgradeDouble >= 3 ? "MAXED" : `LVL ${upgradeDouble}/3 (COST: ${(upgradeDouble+1)*35} PTS)`;
-    buyPointsBtn.disabled = upgradeDouble >= 3;
-}
-updatePointsUI();
-
-openShopBtn.addEventListener("click", () => {
-    startScreen.style.display = "none";
-    powerupScreen.style.display = "flex";
-});
-closeShopBtn.addEventListener("click", () => {
-    powerupScreen.style.display = "none";
-    startScreen.style.display = "flex";
-});
-
-buyLifeBtn.addEventListener("click", () => {
-    if (playerPoints >= 50 && upgradeLife < 5) {
-        playerPoints -= 50; upgradeLife++;
-        setCookie("bart_points", playerPoints); setCookie("bart_up_life", upgradeLife);
-        updatePointsUI();
-    }
-});
-buyJetpackBtn.addEventListener("click", () => {
-    if (playerPoints >= 30 && upgradeJetpack < 32) {
-        playerPoints -= 30; upgradeJetpack++;
-        setCookie("bart_points", playerPoints); setCookie("bart_up_jetpack", upgradeJetpack);
-        updatePointsUI();
-    }
-});
-buyPointsBtn.addEventListener("click", () => {
-    let cost = (upgradeDouble + 1) * 35;
-    if (playerPoints >= cost && upgradeDouble < 3) {
-        playerPoints -= cost; upgradeDouble++;
-        setCookie("bart_points", playerPoints); setCookie("bart_up_double", upgradeDouble);
-        updatePointsUI();
-    }
-});
-
-bgm.addEventListener('canplaythrough', () => {
-    audioStatus.innerText = "Audio Status: Ready!";
-    audioStatus.style.color = "#00ffff";
-});
-
-let activeLives = 0;
-let isThrusting = false;
-
-window.addEventListener("keydown", (e) => {
-    if (!gameActive || cutsceneActive) return;
-    if (e.code === "Space" && player.isGrounded && !player.isSliding) {
-        player.vy = player.jumpForce; player.isGrounded = false;
-    }
-    if (e.code === "ArrowDown" && player.isGrounded) {
-        player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
-    }
-    if (e.code === "KeyJ") {
-        jKeyPressed = true;
-        if (jetpackState === 'ready' && upgradeJetpack > 0) {
-            jetpackState = 'active'; upgradeJetpack--;
-            setCookie("bart_up_jetpack", upgradeJetpack); updatePointsUI();
-            jetpackFuel = 15000;
-        }
-    }
-    if (e.code === "KeyK") {
-        fireSlingshot();
-    }
-});
-
-window.addEventListener("keyup", (e) => {
-    if (e.code === "ArrowDown" && player.isSliding) {
-        player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
-    }
-    if (e.code === "KeyJ") jKeyPressed = false;
-});
-
-let activeTouchId = null;
-window.addEventListener("touchstart", (e) => {
-    if (!gameActive || cutsceneActive) return;
-    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
-    e.preventDefault();
-    if (activeTouchId !== null) return;
-    
-    const touch = e.changedTouches[0];
-    activeTouchId = touch.identifier;
-    if (touch.clientX < window.innerWidth / 2) {
-        if (player.isGrounded) {
-            player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
-        }
-    } else {
-        if (player.isGrounded && !player.isSliding) {
-            player.vy = player.jumpForce; player.isGrounded = false;
-        }
-    }
-}, { passive: false });
-
-window.addEventListener("touchend", (e) => {
-    if (!gameActive || cutsceneActive) return;
-    if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn') return;
-    e.preventDefault();
-    for (let i = 0; i < e.changedTouches.length; i++) {
-        if (e.changedTouches[i].identifier === activeTouchId) {
-            activeTouchId = null;
-            if (player.isSliding) {
-                player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
-            }
-        }
-    }
-}, { passive: false });
-
-jetpackBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault(); jKeyPressed = true;
-    if (jetpackState === 'ready' && upgradeJetpack > 0) {
-        jetpackState = 'active'; upgradeJetpack--;
-        setCookie("bart_up_jetpack", upgradeJetpack); updatePointsUI();
-        jetpackFuel = 15000;
-    }
-}, { passive: false });
-jetpackBtn.addEventListener("touchend", (e) => { e.preventDefault(); jKeyPressed = false; }, { passive: false });
-
-throwBtn.addEventListener("touchstart", (e) => { e.preventDefault(); fireSlingshot(); }, { passive: false });
-throwBtn.addEventListener("click", () => fireSlingshot());
-
-function fireSlingshot() {
-    if (isBossMode && !cutsceneActive) {
-        playerRocks.push({
-            x: player.x + player.width,
-            y: player.y + 20,
-            radius: 6,
-            speed: 15
-        });
-    }
-}
-
-function updateLivesIndicator() {
-    if (isBossMode) {
-        livesIndicator.style.display = "none";
-    } else {
-        livesIndicator.style.display = activeLives > 0 ? "block" : "none";
-        livesIndicator.innerText = "LIVES: " + activeLives;
-    }
-}
-
-startBtn.addEventListener("click", () => {
-    try { 
-        bgm.pause(); 
-        bgm.currentTime = 0; 
-    } catch (e) {}
-    
-    startScreen.style.display = "none";
-    cutsceneScreen.style.display = "flex";
-    cutsceneActive = true;
-    cutsceneMode = 'intro';
-    currentDialogueIndex = 0;
-    showNextDialogue();
-});
-
-cutsceneNextBtn.addEventListener("click", () => {
-    currentDialogueIndex++;
-    showNextDialogue();
-});
-cutsceneNextBtn.addEventListener("touchstart", (e) => {
-    e.preventDefault();
-    currentDialogueIndex++;
-    showNextDialogue();
-}, { passive: false });
-
-function showNextDialogue() {
-    if (cutsceneMode === 'intro') {
-        if (currentDialogueIndex < introDialogue.length) {
-            const line = introDialogue[currentDialogueIndex];
-            cutsceneText.innerHTML = line.text;
-            if (line.triggerMusic) {
-                try { bgm.currentTime = 0; } catch (e) {}
-                bgm.play().catch(e => {});
-            }
-        } else {
-            cutsceneScreen.style.display = "none";
-            cutsceneActive = false;
-            runActualGame();
-        }
-    } else if (cutsceneMode === 'boss') {
-        if (currentDialogueIndex < bossDialogue.length) {
-            const line = bossDialogue[currentDialogueIndex];
-            cutsceneText.innerHTML = line.text;
-        } else {
-            cutsceneScreen.style.display = "none";
-            cutsceneActive = false;
-            bossPhase = 'fighting';
-            throwBtn.style.display = "block";
-            lastTime = performance.now();
-        }
-    }
-}
-
-function triggerBossCutscene() {
-    isBossMode = true;
-    activeLives = 0;
-    updateLivesIndicator();
-    bartHP = 1;
-    bobHP = 100;
-    obstacles = []; platforms = []; coins = [];
-    
-    cutsceneScreen.style.display = "flex";
-    cutsceneActive = true;
-    cutsceneMode = 'boss';
-    currentDialogueIndex = 0;
-    showNextDialogue();
-}
-
-function runActualGame() {
-    jetpackBtn.style.display = "block";
-    throwBtn.style.display = "none";
-    gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
-    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
-    obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
-    player.height = player.originalHeight; player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; player.isSliding = false;
-    bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
-    activeLives = upgradeLife; updateLivesIndicator();
-    jetpackState = 'ready'; jetpackCooldownTimer = 0; jKeyPressed = false;
-    
-    lastTime = performance.now();
-    animate();
-}
-
-class Obstacle {
-    constructor(type) {
-        this.type = type; this.x = canvas.width;
-        this.width = type.includes('double') ? 80 : type.includes('triple') ? 120 : 40;
-        this.height = type.includes('block') ? 45 : 40;
-        this.y = type.includes('block') ? 240 : 310;
-    }
-    update() { this.x -= gameSpeed; }
-    draw() {
-        ctx.save();
-        ctx.shadowBlur = 10;
-        if (this.type.includes('spike')) {
-            ctx.shadowColor = "#ff00ff";
-            let c = this.type === 'double-spike' ? 2 : this.type === 'triple-spike' ? 3 : 1;
-            let w = this.width / c;
-            for (let i = 0; i < c; i++) {
-                let sx = this.x + (i * w);
-                ctx.fillStyle = "#ff00ff";
-                ctx.beginPath(); ctx.moveTo(sx, this.y + this.height); ctx.lineTo(sx + w / 2, this.y); ctx.lineTo(sx + w, this.y + this.height); ctx.closePath(); ctx.fill();
-            }
-        } else {
-            ctx.shadowColor = "#00ffff"; ctx.fillStyle = "rgba(0, 255, 255, 0.4)"; ctx.strokeStyle = "#00ffff"; ctx.lineWidth = 3;
-            ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
-        }
-        ctx.restore();
-    }
-}
-
-class Platform {
-    constructor() {
-        this.x = canvas.width; this.y = 220 + Math.random() * 30; this.width = 170 + Math.random() * 80; this.height = 24;
-    }
-    update() { this.x -= gameSpeed; }
-    draw() {
-        ctx.save(); ctx.shadowBlur = 12; ctx.shadowColor = "#00ffcc"; ctx.fillStyle = "#00ffcc";
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-        ctx.fillStyle = "#ff0055";
-        let steps = Math.floor(this.width / 20);
-        for (let i = 0; i < steps; i++) {
-            ctx.beginPath(); ctx.moveTo(this.x + (i * 20), this.y + this.height); ctx.lineTo(this.x + (i * 20) + 10, this.y + this.height + 15); ctx.lineTo(this.x + (i * 20) + 20, this.y + this.height); ctx.closePath(); ctx.fill();
-        }
-        ctx.restore();
-    }
-}
-
-class Coin {
-    constructor(x, y) { this.x = x; this.y = y; this.width = 24; this.height = 24; this.angle = 0; }
-    update() { this.x -= gameSpeed; this.angle += 0.15; }
-    draw() {
-        ctx.save(); ctx.translate(this.x + 12, this.y + 12); ctx.scale(Math.abs(Math.sin(this.angle)), 1);
-        ctx.shadowColor = "#ffd700"; ctx.shadowBlur = 10; ctx.fillStyle = "#ffd700";
-        ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-    }
-}
-
-function spawnObstacle() {
-    if (isBossMode) return;
-    spawnTimer++;
-    if (spawnTimer > 90 + Math.random() * 60) {
-        let r = Math.random();
-        if (r < 0.4) {
-            let plat = new Platform(); platforms.push(plat);
-            coins.push(new Coin(plat.x + plat.width/2 - 12, plat.y - 35));
-        } else if (r < 0.7) {
-            coins.push(new Coin(canvas.width, 180 + Math.random() * 60));
-        } else {
-            let pool = ['spike', 'block'];
-            if (score >= 15) pool.push('double-spike');
-            obstacles.push(new Obstacle(pool[Math.floor(Math.random() * pool.length)]));
-        }
-        spawnTimer = 0;
-    }
-}
-
-function checkCollision(r1, r2) {
-    return r1.x < r2.x + r2.width && r1.x + r1.width > r2.x && r1.y < r2.y + r2.height && r1.y + r1.height > r2.y;
-}
-
-function gameOver(won = false) {
-    gameActive = false; bgm.pause(); jetpackBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none";
-    let earned = score;
-    if (won) earned += 100;
-    if (upgradeDouble > 0) earned = Math.floor(earned * (1 + (upgradeDouble * 0.5)));
-    playerPoints += earned; setCookie("bart_points", playerPoints); updatePointsUI();
-    
-    startScreen.style.display = "flex";
-    if (won) {
-        document.querySelector("#start-screen h1").innerText = "YOU DEFEATED BOB!";
-        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff;">(+${earned} WIN!)</span>`;
-    } else {
-        document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
-        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff3366;">(+${earned})</span>`;
-    }
-    startBtn.innerText = "RUN AGAIN";
-}
-
-function drawBackground() {
-    let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, "#120524"); grad.addColorStop(1, "#54004e");
-    ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#0c021a"; ctx.fillRect(0, 350, canvas.width, 50);
-    ctx.fillStyle = "#ff00ff"; ctx.fillRect(0, 350, canvas.width, 4);
-}
-
-function drawBart(x, y, w, h, sliding) {
-    ctx.save();
-    if (jetpackState === 'active' && !sliding) {
-        ctx.fillStyle = "#444"; ctx.fillRect(x - 12, y + 25, 12, 25);
-    }
-    if (isBossMode) {
-        ctx.shadowBlur = 15; ctx.shadowColor = "#ff00ff";
-    } else if (activeLives > 0) {
-        ctx.shadowBlur = 15; ctx.shadowColor = "#00ffcc";
-    }
-    if (bartLoaded) {
-        if (sliding) {
-            ctx.translate(x + w / 2, y + h / 2); ctx.rotate(Math.PI / 2);
-            ctx.drawImage(bartImg, -h / 2, -w / 2, h, w);
-        } else {
-            ctx.drawImage(bartImg, x, y, w, h);
-        }
-    } else {
-        ctx.fillStyle = "#ffd90f"; ctx.fillRect(x, y, w, h);
-    }
-    ctx.restore();
-}
-
-function drawSideshowBob(x, y, w, h) {
-    ctx.save();
-    ctx.shadowBlur = 20; ctx.shadowColor = isBossMode ? "#ff0000" : "rgba(0, 0, 0, 0.6)";
-    if (bobLoaded) {
-        ctx.translate(x + w, y); ctx.scale(-1, 1);
-        ctx.drawImage(bobImg, 0, 0, w, h);
-    } else {
-        ctx.fillStyle = "#009944"; ctx.fillRect(x, y, w, h);
-    }
-    ctx.restore();
-}
-
-function drawHealthBars() {
-    if (!isBossMode) return;
-
-    ctx.save();
-    
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(40, 60, 200, 16);
-    let bartWidth = (bartHP / maxBartHP) * 200;
-    ctx.fillStyle = "#ff3366";
-    ctx.fillRect(40, 60, bartWidth, 16);
-    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; ctx.strokeRect(40, 60, 200, 16);
-    ctx.font = "11px sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("BART", 45, 72);
-
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
-    ctx.fillRect(canvas.width - 240, 60, 200, 16);
-    let bobWidth = (bobHP / maxBobHP) * 200;
-    ctx.fillStyle = "#00ffcc";
-    ctx.fillRect(canvas.width - 240, 60, bobWidth, 16);
-    ctx.strokeStyle = "#fff"; ctx.lineWidth = 1; ctx.strokeRect(canvas.width - 240, 60, 200, 16);
-    ctx.font = "11px sans-serif"; ctx.fillStyle = "#fff"; ctx.fillText("BOB", canvas.width - 235, 72);
-    
-    ctx.restore();
-}
-
-function handleBossLogic(dt) {
-    if (!isBossMode) {
-        if (bgm.currentTime >= bgm.duration - 0.5 || bgm.ended) {
-            triggerBossCutscene();
-        }
-        return;
+    const player = {
+      x: 100,
+      y: 300,
+      width: 32,
+      height: 32,
+      speed: 5,
+      jumpForce: 12,
+      velocityY: 0,
+      grounded: false
     }
 
-    if (cutsceneActive) return;
-
-    gameSpeed = 0; 
-    bob.x += (bob.targetX - bob.x) * 0.05;
-    bob.y += (bob.targetY - bob.y) * 0.05;
-
-    if (bossPhase === 'entering') {
-        bob.targetX = 650; bob.targetY = 240;
-        if (Math.abs(bob.x - 650) < 5) { bossPhase = 'fighting'; bossTimer = 0; }
-    } else if (bossPhase === 'fighting') {
-        bossTimer += dt;
-        bob.targetY = 160 + Math.sin(performance.now() * 0.003) * 100;
-        
-        let spawnRate = 1400;
-        if (bossTimer > spawnRate) {
-            bossTimer = 0;
-            bossKnives.push({
-                x: bob.x,
-                y: bob.y + bob.height / 3,
-                width: 30,
-                height: 12,
-                vx: -7 - (Math.random() * 3),
-                vy: (player.y - bob.y) * 0.012 
-            });
-        }
-    }
-}
-
-function animate(nowTime = performance.now()) {
-    if (!gameActive) return;
-    const dt = Math.min(nowTime - lastTime, 100); lastTime = nowTime;
-
-    handleBossLogic(dt);
-
-    if (!cutsceneActive) {
-        if (jetpackState === 'active') {
-            if (jKeyPressed) {
-                player.vy -= 1.8; if (player.vy < -11) player.vy = -11;
-                player.isGrounded = false; isThrusting = true; jetpackFuel -= dt;
-            } else isThrusting = false;
-            jetpackBtn.innerText = "FLYING! " + (jetpackFuel / 1000).toFixed(1) + "s";
-            if (jetpackFuel <= 0) { jetpackState = 'cooldown'; jetpackCooldownTimer = 5000; isThrusting = false; }
-        } else if (jetpackState === 'cooldown') {
-            isThrusting = false; jetpackCooldownTimer -= dt;
-            jetpackBtn.innerText = "CD: " + (jetpackCooldownTimer / 1000).toFixed(1) + "s";
-            if (jetpackCooldownTimer <= 0) jetpackState = 'ready';
-        } else {
-            isThrusting = false;
-            jetpackBtn.innerText = `JETPACK [J] (${upgradeJetpack})`;
-        }
-
-        if (!isBossMode) bgOffset += gameSpeed;
-        
-        if (!isThrusting) player.vy += player.gravity;
-        player.y += player.vy;
-        if (player.y < 15) { player.y = 15; player.vy = 0; }
-
-        let onPlatform = false;
-        for (let i = platforms.length - 1; i >= 0; i--) {
-            platforms[i].update();
-            let plat = platforms[i];
-            if (player.x + player.width - 12 > plat.x && player.x + 12 < plat.x + plat.width && player.y + player.height <= plat.y + 12 && player.y + player.height + player.vy >= plat.y) {
-                if (player.vy >= 0) { player.y = plat.y - player.height; player.vy = 0; player.isGrounded = true; onPlatform = true; }
-            }
-        }
-
-        if (!onPlatform) {
-            if (player.y >= 350 - player.height) { player.y = 350 - player.height; player.vy = 0; player.isGrounded = true; }
-            else player.isGrounded = false;
-        }
-
-        if (!isBossMode) {
-            bob.y = 240 + Math.sin(Date.now() * 0.015) * 8;
-        }
+    const boss = {
+      x: 600,
+      y: 250,
+      width: 80,
+      height: 80,
+      hp: 100
     }
 
-    drawBackground();
+    // PC Inputs
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'a' || e.key === 'ArrowLeft') input.left = true
+      if (e.key === 'd' || e.key === 'ArrowRight') input.right = true
+      if (e.key === 'w' || e.key === 'ArrowUp' || e.key === ' ') input.jump = true
+    })
 
-    for (let i = platforms.length - 1; i >= 0; i--) {
-        platforms[i].draw();
-        if (platforms[i].x + platforms[i].width < 0) platforms.splice(i, 1);
+    window.addEventListener('keyup', (e) => {
+      if (e.key === 'a' || e.key === 'ArrowLeft') input.left = false
+      if (e.key === 'd' || e.key === 'ArrowRight') input.right = false
+      if (e.key === 'w' || e.key === 'ArrowUp' || e.key === ' ') input.jump = false
+    })
+
+    // Mobile Inputs split into functions to map listeners fast
+    function bindTouch(elementId, inputProperty) {
+      const el = document.getElementById(elementId)
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault()
+        input[inputProperty] = true
+      })
+      el.addEventListener('touchend', (e) => {
+        e.preventDefault()
+        input[inputProperty] = false
+      })
     }
 
-    drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
-    drawBart(player.x, player.y, player.width, player.height, player.isSliding);
-    drawHealthBars();
+    bindTouch('btn-left', 'left')
+    bindTouch('btn-right', 'right')
+    bindTouch('btn-jump', 'jump')
 
-    if (!cutsceneActive) {
-        for (let i = coins.length - 1; i >= 0; i--) {
-            coins[i].update(); coins[i].draw();
-            if (checkCollision(player, coins[i])) {
-                coins.splice(i, 1); score += 1; playCoinSFX(); scoreBoard.innerText = "POINTS: " + score;
-            }
-            if (coins[i] && coins[i].x < 0) coins.splice(i, 1);
-        }
+    // Physics + Loop
+    function update() {
+      // Horizontal motion
+      if (input.left) player.x -= player.speed
+      if (input.right) player.x += player.speed
 
-        spawnObstacle();
-        for (let i = obstacles.length - 1; i >= 0; i--) {
-            obstacles[i].update(); obstacles[i].draw();
-            if (checkCollision(player, obstacles[i])) {
-                if (activeLives > 0) { activeLives--; updateLivesIndicator(); obstacles.splice(i, 1); }
-                else { gameOver(); return; }
-            }
-            if (obstacles[i] && obstacles[i].x < 0) { obstacles.splice(i, 1); gameSpeed += 0.35; }
-        }
+      // Vertical motion
+      player.velocityY += gravity
+      player.y += player.velocityY
 
-        for (let i = bossKnives.length - 1; i >= 0; i--) {
-            let k = bossKnives[i];
-            k.x += k.vx; k.y += k.vy;
-            
-            ctx.save(); ctx.shadowBlur = 10; ctx.shadowColor = "#ff3300"; ctx.fillStyle = "#ffffff";
-            ctx.fillRect(k.x, k.y, k.width, k.height);
-            ctx.fillStyle = "#ff3300"; ctx.fillRect(k.x + k.width - 5, k.y - 2, 5, k.height + 4);
-            ctx.restore();
+      // Screen boundary constraints
+      if (player.x < 0) player.x = 0
+      if (player.x > canvas.width - player.width) player.x = canvas.width - player.width
 
-            let knifeBox = { x: k.x, y: k.y, width: k.width, height: k.height };
-            if (checkCollision(player, knifeBox)) {
-                bossKnives.splice(i, 1);
-                bartHP = 0;
-                gameOver(false);
-                return;
-            }
-            if (k.x < -50) bossKnives.splice(i, 1);
-        }
+      // Floor collision check
+      const floorLevel = canvas.height - 50
+      if (player.y + player.height >= floorLevel) {
+        player.y = floorLevel - player.height
+        player.velocityY = 0
+        player.grounded = true
+      }
 
-        for (let i = playerRocks.length - 1; i >= 0; i--) {
-            let pr = playerRocks[i];
-            pr.x += pr.speed;
-
-            ctx.save(); ctx.shadowBlur = 15; ctx.shadowColor = "#ffcc00"; ctx.fillStyle = "#ffea00";
-            ctx.beginPath(); ctx.arc(pr.x, pr.y, pr.radius, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-
-            let rockBox = { x: pr.x - pr.radius, y: pr.y - pr.radius, width: pr.radius * 2, height: pr.radius * 2 };
-            if (checkCollision(rockBox, bob)) {
-                playerRocks.splice(i, 1);
-                bobHP -= 20; 
-                
-                for (let c = 0; c < 8; c++) {
-                    particles.push({
-                        x: bob.x + bob.width/2, y: bob.y + bob.height/2,
-                        vx: (Math.random() - 0.5) * 10, vy: (Math.random() - 0.5) * 10,
-                        size: 3 + Math.random() * 4, color: "#ffea00", life: 25
-                    });
-                }
-
-                if (bobHP <= 0) {
-                    bobHP = 0;
-                    bossWon = true;
-                    for (let c = 0; c < 30; c++) {
-                        particles.push({
-                            x: bob.x + bob.width/2, y: bob.y + bob.height/2,
-                            vx: (Math.random() - 0.5) * 15, vy: (Math.random() - 0.5) * 15,
-                            size: 4 + Math.random() * 6, color: "#ff0000", life: 40
-                        });
-                    }
-                    setTimeout(() => gameOver(true), 1000);
-                    return;
-                }
-            }
-            if (pr.x > canvas.width + 50) playerRocks.splice(i, 1);
-        }
+      // Execute jump triggered from keys or touch overlay
+      if (input.jump && player.grounded) {
+        player.velocityY = -player.jumpForce
+        player.grounded = false
+      }
     }
 
-    for (let i = particles.length - 1; i >= 0; i--) {
-        let p = particles[i]; p.x += p.vx; p.y += p.vy; p.life--;
-        ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
-        if (p.life <= 0) particles.splice(i, 1);
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      // Floor
+      ctx.fillStyle = '#444'
+      ctx.fillRect(0, canvas.height - 50, canvas.width, 50)
+
+      // Player
+      ctx.fillStyle = '#00ffcc'
+      ctx.fillRect(player.x, player.y, player.width, player.height)
+
+      // Boss
+      ctx.fillStyle = '#ff3333'
+      ctx.fillRect(boss.x, boss.y, boss.width, boss.height)
     }
 
-    if (!bossWon) requestAnimationFrame(animate);
-}
-</script>
+    function loop() {
+      update()
+      draw()
+      requestAnimationFrame(loop)
+    }
 
+    loop()
+  </script>
 </body>
 </html>
