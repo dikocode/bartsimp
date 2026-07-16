@@ -319,7 +319,7 @@
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.3 release</div>
+    <div id="version-tag">v1.3 bossfight ages</div>
     <div id="music-watermark">music made by my friend https://www.youtube.com/@DJLimey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
@@ -341,8 +341,8 @@
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
-            credits to my friend for making music<a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
-            made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleeseensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
+            credits to my friend for making music <a href="https://www.youtube.com/@DJLimey" target="_blank">https://www.youtube.com/@DJLimey</a><br>
+            made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleesensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
         <div id="audio-status">Audio Status: Standby</div>
@@ -523,6 +523,10 @@ let bobHP = 100;
 let maxBobHP = 100;
 let bartHP = 1;
 let maxBartHP = 1;
+
+// Slingshot cooldown integration
+let lastShotTime = 0;
+const SLINGSHOT_COOLDOWN = 500; 
 
 const player = {
     x: 180,
@@ -759,12 +763,16 @@ throwBtn.addEventListener("click", () => fireSlingshot());
 
 function fireSlingshot() {
     if (isBossMode && !cutsceneActive) {
-        playerRocks.push({
-            x: player.x + player.width,
-            y: player.y + 20,
-            radius: 6,
-            speed: 15
-        });
+        const currentTime = Date.now();
+        if (currentTime - lastShotTime >= SLINGSHOT_COOLDOWN) {
+            playerRocks.push({
+                x: player.x + player.width,
+                y: player.y + 20,
+                radius: 6,
+                speed: 15
+            });
+            lastShotTime = currentTime;
+        }
     }
 }
 
@@ -1156,6 +1164,18 @@ function animate(timestamp) {
         hpGrad.addColorStop(0, "#ff3300"); hpGrad.addColorStop(1, "#ff00ff");
         ctx.fillStyle = hpGrad; ctx.fillRect(200, 20, hpW, 14);
         ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 20, 400, 14);
+        
+        // Show cooldown progress on HUD button
+        const cur = Date.now();
+        const diff = cur - lastShotTime;
+        if (diff < SLINGSHOT_COOLDOWN) {
+            const pct = Math.ceil(((SLINGSHOT_COOLDOWN - diff) / SLINGSHOT_COOLDOWN) * 10) / 10;
+            throwBtn.innerText = `READY IN ${pct}s`;
+            throwBtn.style.opacity = "0.5";
+        } else {
+            throwBtn.innerText = "SLINGSHOT [K]";
+            throwBtn.style.opacity = "1";
+        }
     }
 
     requestAnimationFrame(animate);
