@@ -1316,7 +1316,7 @@ function runActualGame() {
     joystickZone.style.display = "none";
     resetJoystick();
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
-    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = 6;
+    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = currentLevel === 2 ? 7 : 6;
     obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
     player.x = 180; player.y = 280; player.height = player.originalHeight; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
@@ -1328,11 +1328,11 @@ function runActualGame() {
 }
 
 class Obstacle {
-    constructor(type) {
+    constructor(type, overrideY = null) {
         this.type = type; this.x = canvas.width;
         this.width = type.includes('double') ? 80 : type.includes('triple') ? 120 : 40;
         this.height = type.includes('block') ? 45 : 40;
-        this.y = type.includes('block') ? 240 : 310;
+        this.y = overrideY !== null ? overrideY : (type.includes('block') ? 240 : 310);
     }
     update(timeScale) { this.x -= gameSpeed * timeScale; }
     draw() {
@@ -1386,16 +1386,22 @@ class Coin {
 function spawnObstacle(timeScale) {
     if (isBossMode) return;
     spawnTimer += timeScale;
-    if (spawnTimer > 90 + Math.random() * 60) {
+    const isHardMode = currentLevel === 2;
+    const spawnGap = isHardMode ? (60 + Math.random() * 40) : (90 + Math.random() * 60);
+    if (spawnTimer > spawnGap) {
         let r = Math.random();
         if (r < 0.4) {
             let plat = new Platform(); platforms.push(plat);
             coins.push(new Coin(plat.x + plat.width/2 - 12, plat.y - 35));
+            if (isHardMode && Math.random() < 0.5) {
+                obstacles.push(new Obstacle('spike', plat.y - 40));
+            }
         } else if (r < 0.7) {
             coins.push(new Coin(canvas.width, 180 + Math.random() * 60));
         } else {
             let pool = ['spike', 'block'];
-            if (score >= 15) pool.push('double-spike');
+            if (isHardMode || score >= 15) pool.push('double-spike');
+            if (isHardMode && score >= 8) pool.push('triple-spike');
             obstacles.push(new Obstacle(pool[Math.floor(Math.random() * pool.length)]));
         }
         spawnTimer = 0;
@@ -1419,10 +1425,10 @@ function gameOver(won = false) {
     
     startScreen.style.display = "flex";
     if (won) {
-        document.querySelector("#start-screen h1").innerText = "YOU DEFEATED BOB!";
+        document.querySelector("#start-screen h1").innerText = currentLevel === 2 ? "YOU GOT LISA!" : "YOU DEFEATED BOB!";
         document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff;">(+${earned} WIN!)</span>`;
     } else {
-        document.querySelector("#start-screen h1").innerText = "BOB CAUGHT YOU!";
+        document.querySelector("#start-screen h1").innerText = currentLevel === 2 ? "LISA KILLED YOU!" : "BOB CAUGHT YOU!";
         document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff3366;">(+${earned})</span>`;
     }
     startBtn.innerText = "RUN AGAIN";
