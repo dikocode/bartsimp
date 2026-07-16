@@ -940,6 +940,12 @@ function animate(timestamp) {
                 player.isGrounded = false;
             }
         }
+    } else {
+        player.y += player.vy;
+        if (player.y <= 0) player.y = 0;
+        if (player.y >= 350 - player.height) {
+            player.y = 350 - player.height; player.vy = 0; player.isGrounded = true;
+        }
     }
 
     if (!isBossMode) {
