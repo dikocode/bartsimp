@@ -28,6 +28,7 @@
             height: 100vh;
             overflow: hidden;
             touch-action: none;
+            transition: background 0.3s ease;
         }
         #game-container {
             position: relative;
@@ -48,6 +49,7 @@
             user-select: none;
             -webkit-user-select: none;
             touch-action: none;
+            transition: border 0.3s, box-shadow 0.3s, background 0.3s;
         }
         #version-tag {
             position: absolute;
@@ -59,6 +61,7 @@
             z-index: 15;
             font-family: monospace;
             pointer-events: none;
+            transition: color 0.3s, text-shadow 0.3s;
         }
         #music-watermark {
             position: absolute;
@@ -82,6 +85,7 @@
             color: #FFD90F;
             letter-spacing: 1px;
             pointer-events: none;
+            transition: text-shadow 0.3s, color 0.3s;
         }
         #lives-indicator {
             position: absolute;
@@ -94,6 +98,7 @@
             font-family: inherit;
             pointer-events: none;
             display: none;
+            transition: color 0.3s, text-shadow 0.3s;
         }
         #controls-group {
             position: absolute;
@@ -115,6 +120,7 @@
             display: none;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             touch-action: none;
+            transition: background 0.3s, box-shadow 0.3s;
         }
         #jetpack-btn {
             background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
@@ -149,6 +155,7 @@
             border: 1px solid rgba(255, 0, 255, 0.2);
             box-shadow: 0 0 40px rgba(255, 0, 255, 0.25);
             touch-action: none;
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s;
         }
         #level-screen {
             position: absolute;
@@ -171,6 +178,7 @@
             border: 1px solid rgba(112, 0, 255, 0.3);
             box-shadow: 0 0 40px rgba(112, 0, 255, 0.3);
             touch-action: none;
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s;
         }
         #cutscene-screen {
             position: absolute;
@@ -178,7 +186,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 5, 20, 0.95);
+            background: linear-gradient(135deg, rgba(20, 5, 35, 0.96) 0%, rgba(5, 2, 12, 0.98) 100%);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             display: none;
@@ -190,7 +198,10 @@
             padding: 20px;
             box-sizing: border-box;
             border-radius: 16px;
+            border: 2px solid rgba(255, 0, 255, 0.35);
+            box-shadow: 0 0 60px rgba(255, 0, 255, 0.25), inset 0 0 40px rgba(255, 0, 255, 0.08);
             touch-action: none;
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s;
         }
         #cutscene-layout {
             display: flex;
@@ -202,13 +213,19 @@
             margin-bottom: 20px;
         }
         .cutscene-portrait {
-            width: 100px;
-            height: 100px;
-            border-radius: 12px;
+            width: 110px;
+            height: 110px;
+            border-radius: 14px;
             border: 3px solid #ff00ff;
             object-fit: cover;
-            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
             background: #111;
+            animation: portraitPop 0.35s ease-out;
+            transition: border 0.3s, box-shadow 0.3s;
+        }
+        @keyframes portraitPop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
         }
         #cutscene-text {
             font-size: min(4.5vw, 20px);
@@ -222,6 +239,7 @@
             padding: 15px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: color 0.3s, text-shadow 0.3s, background 0.3s, border 0.3s;
         }
         #powerup-screen {
             position: absolute;
@@ -244,6 +262,7 @@
             border: 1px solid rgba(0, 255, 255, 0.2);
             box-shadow: 0 0 40px rgba(0, 255, 255, 0.2);
             touch-action: none;
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s;
         }
         #admin-screen {
             position: absolute;
@@ -266,6 +285,7 @@
             border: 1px solid rgba(0, 255, 0, 0.2);
             box-shadow: 0 0 40px rgba(0, 255, 0, 0.25);
             touch-action: none;
+            transition: background 0.3s, border 0.3s, box-shadow 0.3s;
         }
         .btn-group {
             display: flex;
@@ -336,6 +356,7 @@
             align-items: center;
             box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
             touch-action: none;
+            transition: background 0.3s, border 0.3s;
         }
         .shop-item button {
             padding: 8px 18px;
@@ -348,6 +369,7 @@
             margin-top: 8px;
             opacity: 0.8;
             pointer-events: none;
+            transition: color 0.3s;
         }
         .points-display {
             color: #00ffff;
@@ -356,6 +378,7 @@
             text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
             letter-spacing: 1px;
             pointer-events: none;
+            transition: color 0.3s, text-shadow 0.3s;
         }
         .credits-box {
             margin-top: 12px;
@@ -370,12 +393,14 @@
             max-width: 90%;
             user-select: none;
             -webkit-user-select: none;
+            transition: background 0.3s, border 0.3s, color 0.3s;
         }
         .credits-box a {
             color: #00ffff;
             text-decoration: none;
             border-bottom: 1px dashed rgba(0, 255, 255, 0.4);
             pointer-events: auto;
+            transition: color 0.3s;
         }
         .admin-input {
             width: 80%;
@@ -414,6 +439,7 @@
             background: rgba(255, 255, 255, 0.08);
             border: 2px solid rgba(0, 255, 255, 0.3);
             box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.15);
+            transition: border 0.3s, box-shadow 0.3s;
         }
         #joystick-stick {
             position: absolute;
@@ -424,13 +450,184 @@
             background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);
             box-shadow: 0 4px 15px rgba(0, 255, 255, 0.5);
             pointer-events: none;
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+        #theme-screen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1b0a2a 0%, #08030d 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+            border-radius: 16px;
+            touch-action: none;
+            transition: background 0.3s;
+        }
+        .theme-choice {
+            width: 85%;
+            max-width: 380px;
+            margin: 10px 0;
+            padding: 20px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-size: 20px;
+            font-family: inherit;
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+            touch-action: none;
+        }
+        #theme-night-btn {
+            background: linear-gradient(135deg, #ff00ff 0%, #7000ff 100%);
+            box-shadow: 0 6px 25px rgba(255, 0, 255, 0.4);
+        }
+        #theme-morning-btn {
+            background: linear-gradient(135deg, #ffd93d 0%, #6ec6ff 100%);
+            box-shadow: 0 6px 25px rgba(110, 198, 255, 0.4);
+            color: #1a1a2e;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.4);
+        }
+
+        /* ================= MORNING THEME CLEAN OVERRIDES ================= */
+        body.morning-theme {
+            background: radial-gradient(circle at center, #e3f2fd 0%, #bbdefb 100%);
+            color: #1a1a2e;
+        }
+        body.morning-theme canvas {
+            background: #ffffff;
+            border: 4px solid #4a90e2;
+            box-shadow: 0 10px 30px rgba(74, 144, 226, 0.2), inset 0 0 10px rgba(74, 144, 226, 0.1);
+        }
+        body.morning-theme #version-tag {
+            color: #1d60b3;
+            text-shadow: none;
+        }
+        body.morning-theme #music-watermark {
+            color: rgba(0, 0, 0, 0.6);
+            text-shadow: none;
+        }
+        body.morning-theme #score-board {
+            color: #e65100;
+            text-shadow: none;
+        }
+        body.morning-theme #lives-indicator {
+            color: #d32f2f;
+            text-shadow: none;
+        }
+        body.morning-theme .hud-btn {
+            text-shadow: none;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        body.morning-theme #jetpack-btn {
+            background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%);
+            box-shadow: 0 4px 10px rgba(2, 136, 209, 0.2);
+        }
+        body.morning-theme #shield-btn {
+            background: linear-gradient(135deg, #81c784 0%, #388e3c 100%);
+            box-shadow: 0 4px 10px rgba(56, 142, 60, 0.2);
+        }
+        body.morning-theme #throw-btn {
+            background: linear-gradient(135deg, #ffb74d 0%, #f57c00 100%);
+            box-shadow: 0 4px 10px rgba(245, 124, 0, 0.2);
+        }
+        body.morning-theme #start-screen {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(240, 244, 248, 0.95) 100%);
+            border: 1px solid rgba(74, 144, 226, 0.2);
+            box-shadow: 0 15px 45px rgba(74, 144, 226, 0.15);
+        }
+        body.morning-theme #level-screen {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(236, 240, 245, 0.98) 100%);
+            border: 1px solid rgba(74, 144, 226, 0.3);
+            box-shadow: 0 15px 45px rgba(74, 144, 226, 0.2);
+        }
+        body.morning-theme #cutscene-screen {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(244, 246, 249, 0.98) 100%);
+            border: 2px solid rgba(74, 144, 226, 0.3);
+            box-shadow: 0 20px 50px rgba(74, 144, 226, 0.15);
+        }
+        body.morning-theme .cutscene-portrait {
+            border: 3px solid #4a90e2;
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+            background: #eee;
+        }
+        body.morning-theme #cutscene-text {
+            color: #2c3e50;
+            text-shadow: none;
+            background: rgba(0, 0, 0, 0.03);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+        }
+        body.morning-theme #powerup-screen {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 244, 248, 0.98) 100%);
+            border: 1px solid rgba(74, 144, 226, 0.25);
+            box-shadow: 0 15px 45px rgba(74, 144, 226, 0.15);
+        }
+        body.morning-theme #admin-screen {
+            background: linear-gradient(135deg, rgba(232, 245, 233, 0.95) 0%, rgba(200, 230, 201, 0.98) 100%);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            box-shadow: 0 15px 45px rgba(76, 175, 80, 0.15);
+        }
+        body.morning-theme button {
+            background: linear-gradient(135deg, #4fc3f7 0%, #1565c0 100%);
+            box-shadow: 0 5px 15px rgba(21, 101, 192, 0.25);
+            text-shadow: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        body.morning-theme button:hover {
+            box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+            background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%);
+        }
+        body.morning-theme .shop-item {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: none;
+        }
+        body.morning-theme #audio-status {
+            color: #7b1fa2;
+        }
+        body.morning-theme .points-display {
+            color: #0288d1;
+            text-shadow: none;
+        }
+        body.morning-theme .credits-box {
+            background: rgba(0, 0, 0, 0.02);
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            color: #555;
+        }
+        body.morning-theme .credits-box a {
+            color: #1565c0;
+            border-bottom: 1px dashed rgba(21, 101, 192, 0.4);
+        }
+        body.morning-theme #joystick-base {
+            background: rgba(0, 0, 0, 0.04);
+            border: 2px solid rgba(74, 144, 226, 0.4);
+            box-shadow: none;
+        }
+        body.morning-theme #joystick-stick {
+            background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%);
+            box-shadow: 0 4px 10px rgba(2, 136, 209, 0.3);
+        }
+        body.morning-theme #theme-screen {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
         }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <div id="version-tag">v1.5</div>
+    <div id="theme-screen">
+        <h1 style="color: #e65100; margin-bottom: 10px; font-size: min(6.5vw, 32px); text-shadow: none;" class="theme-title">CHOOSE YOUR VIBE</h1>
+        <p style="font-size: 12px; color: #555; font-family: sans-serif; margin-bottom: 15px;" class="theme-subtitle">You can change this later from the main menu</p>
+        <button id="theme-night-btn" class="theme-choice">🌃 NIGHT NEON</button>
+        <button id="theme-morning-btn" class="theme-choice">☀️ MORNING</button>
+    </div>
+
+    <div id="version-tag">v1.6</div>
     <div id="music-watermark">music by my friend dj limey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
@@ -447,18 +644,22 @@
     </div>
     
     <div id="start-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6.5vw, 36px); margin-top: 10px; text-shadow: 0 0 15px rgba(255,217,15,0.4); letter-spacing: 1px;">BART SIMPSON RUN</h1>
+        <h1 style="color: #FFD90F; margin-bottom: 5px; font-size: min(6.5vw, 36px); margin-top: 10px; text-shadow: 0 0 15px rgba(255,217,15,0.4); letter-spacing: 1px;" class="menu-title">BART SIMPSON RUN</h1>
         <div class="points-display" id="menu-points">POINTS: 0</div>
         <div class="btn-group">
-            <button id="start-btn">START GAME</button>
-            <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);">POWER UPS</button>
-            <button id="open-admin-btn" style="background: linear-gradient(135deg, #22aa22 0%, #005500 100%); box-shadow: 0 6px 20px rgba(0, 255, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); padding: 12px 18px;">ADMIN</button>
+            <button id="start-btn" style="background: linear-gradient(135deg, #ff3b7d 0%, #ff8a00 100%); box-shadow: 0 6px 20px rgba(255, 59, 125, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.4);" class="menu-start-btn">START GAME</button>
+            <button id="open-shop-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%); box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4);" class="menu-shop-btn">POWER UPS</button>
+            <button id="open-admin-btn" style="background: linear-gradient(135deg, #22aa22 0%, #005500 100%); box-shadow: 0 6px 20px rgba(0, 255, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); padding: 12px 18px;" class="menu-admin-btn">ADMIN</button>
         </div>
-        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | ARROWS to Move (Bossfight) | TAP S for Shield | TAP K for Slingshot</p>
+        <div class="btn-group">
+            <button id="open-theme-btn" style="background: linear-gradient(135deg, #ffd93d 0%, #a06cff 100%); box-shadow: 0 6px 20px rgba(160, 108, 255, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.4); font-size: 14px; padding: 10px 20px;" class="menu-theme-btn">🎨 CHANGE THEME</button>
+        </div>
+        <p style="margin-bottom: 5px; font-size: min(3vw, 13px); color: #bbb; font-family: sans-serif;" class="menu-instructions">TAP LEFT to Slide | TAP RIGHT to Jump | HOLD J to Fly | ARROWS to Move (Bossfight) | TAP S for Shield | TAP K for Slingshot</p>
         
         <div class="credits-box" id="credits-pane">
             credits to walt disney<br>
             music by my friend dj limey <a href="https://www.youtube.com/@DJLimey" target="_blank">link</a><br>
+            boss music is an instrumental remix of my friend DJLimey's song Bart simp do copy<br>
             made by <a href="https://www.youtube.com/@deadleeseensei" target="_blank">https://www.youtube.com/@deadleesensei</a> or on tt <a href="https://www.tiktok.com/@deadleesensei" target="_blank">@deadleesensei</a>
         </div>
         
@@ -466,13 +667,13 @@
     </div>
 
     <div id="level-screen">
-        <h1 style="color: #FFD90F; margin-bottom: 15px; font-size: min(6vw, 32px); text-shadow: 0 0 15px rgba(255,217,15,0.4);">CHOOSE LEVEL</h1>
+        <h1 style="color: #FFD90F; margin-bottom: 15px; font-size: min(6vw, 32px); text-shadow: 0 0 15px rgba(255,217,15,0.4);" class="lvl-title">CHOOSE LEVEL</h1>
         <div class="level-grid">
-            <button id="lvl1-btn" class="level-btn">
+            <button id="lvl1-btn" class="level-btn" style="background: linear-gradient(135deg, #ff8a00 0%, #ff3b7d 100%); box-shadow: 0 6px 18px rgba(255, 59, 125, 0.35);">
                 <span>LVL 1</span>
                 <span class="level-subtext">bobs prison escape</span>
             </button>
-            <button id="lvl2-btn" class="level-btn">
+            <button id="lvl2-btn" class="level-btn" style="background: linear-gradient(135deg, #00ff88 0%, #00b3b3 100%); box-shadow: 0 6px 18px rgba(0, 255, 136, 0.35);">
                 <span>LVL 2</span>
                 <span class="level-subtext" id="lvl2-subtext" style="color: #ff3366;">beat lvl 1 first</span>
             </button>
@@ -497,38 +698,38 @@
     </div>
 
     <div id="powerup-screen">
-        <h1 style="color: #00ffff; margin-bottom: 8px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);">UPGRADES</h1>
+        <h1 style="color: #00ffff; margin-bottom: 8px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 255, 0.4);" class="powerup-title">UPGRADES</h1>
         <div class="points-display" id="shop-points">POINTS: 0</div>
         
         <div class="shop-item">
             <div style="text-align: left;">
                 <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 1: EXTRA LIVES</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Survive hits (Max 5 stacked)</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" class="shop-desc">Survive hits (Max 5 stacked)</div>
             </div>
-            <button id="buy-life-btn">COST: 50 PTS (0/5)</button>
+            <button id="buy-life-btn" style="background: linear-gradient(135deg, #ff3b7d 0%, #ff8a00 100%);">COST: 50 PTS (0/5)</button>
         </div>
 
         <div class="shop-item">
             <div style="text-align: left;">
                 <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 2: BUY JETPACK</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Buy stackable jetpack charges (Max 32)</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" class="shop-desc">Buy stackable jetpack charges (Max 32)</div>
             </div>
-            <button id="buy-jetpack-btn">COST: 30 PTS (0/32)</button>
+            <button id="buy-jetpack-btn" style="background: linear-gradient(135deg, #00ffff 0%, #0088ff 100%);">COST: 30 PTS (0/32)</button>
         </div>
 
         <div class="shop-item">
             <div style="text-align: left;">
                 <div style="font-size: 14px; letter-spacing: 0.5px;">SLOT 3: DOUBLE POINTS</div>
-                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;">Boost points gained per run</div>
+                <div style="font-size: 11px; color: #aaa; font-family: sans-serif;" class="shop-desc">Boost points gained per run</div>
             </div>
-            <button id="buy-points-btn">COST: 35 PTS</button>
+            <button id="buy-points-btn" style="background: linear-gradient(135deg, #ffd93d 0%, #a06cff 100%);">COST: 35 PTS</button>
         </div>
 
         <button id="close-shop-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.4); margin-top: 15px;">BACK TO MENU</button>
     </div>
 
     <div id="admin-screen">
-        <h1 style="color: #00ff00; margin-bottom: 15px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 0, 0.4);">ADMIN CODES</h1>
+        <h1 style="color: #00ff00; margin-bottom: 15px; font-size: min(6.5vw, 34px); text-shadow: 0 0 15px rgba(0, 255, 0, 0.4);" class="admin-title">ADMIN CODES</h1>
         <input type="text" id="admin-code-input" class="admin-input" placeholder="ENTER CODE HERE">
         <div class="btn-group">
             <button id="submit-code-btn" style="background: linear-gradient(135deg, #00ff00 0%, #005500 100%); border-color: #00ff00; box-shadow: 0 4px 15px rgba(0, 255, 0, 0.3);">SUBMIT</button>
@@ -540,11 +741,16 @@
 </div>
 
 <audio id="bgm" src="BART SIMP DO COPY.mp3" preload="auto"></audio>
+<audio id="bossmusic" src="lisaboss.mp3" preload="auto" loop></audio>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const startScreen = document.getElementById("start-screen");
+const themeScreen = document.getElementById("theme-screen");
+const themeNightBtn = document.getElementById("theme-night-btn");
+const themeMorningBtn = document.getElementById("theme-morning-btn");
+const openThemeBtn = document.getElementById("open-theme-btn");
 const levelScreen = document.getElementById("level-screen");
 const cutsceneScreen = document.getElementById("cutscene-screen");
 const cutsceneText = document.getElementById("cutscene-text");
@@ -572,6 +778,7 @@ const throwBtn = document.getElementById("throw-btn");
 const joystickZone = document.getElementById("joystick-zone");
 const joystickStick = document.getElementById("joystick-stick");
 const bgm = document.getElementById("bgm");
+const bossMusic = document.getElementById("bossmusic");
 const audioStatus = document.getElementById("audio-status");
 
 const menuPointsDisplay = document.getElementById("menu-points");
@@ -604,6 +811,9 @@ document.addEventListener("visibilitychange", () => {
         if (!bgm.paused) {
             isAudioPlayingBeforeTabOut = true;
             bgm.pause();
+        } else if (!bossMusic.paused) {
+            isAudioPlayingBeforeTabOut = true;
+            bossMusic.pause();
         } else {
             isAudioPlayingBeforeTabOut = false;
         }
@@ -611,7 +821,7 @@ document.addEventListener("visibilitychange", () => {
         isTabActive = true;
         lastTime = performance.now();
         if (gameActive && !cutsceneActive && isAudioPlayingBeforeTabOut) {
-            bgm.play().catch(e => {});
+            if (isBossMode) { bossMusic.play().catch(e => {}); } else { bgm.play().catch(e => {}); }
         }
         if (gameActive && !cutsceneActive) {
             requestAnimationFrame(animate);
@@ -684,6 +894,36 @@ let bgOffset = 0;
 let particles = [];
 
 let playerPoints = parseInt(getCookie("bart_points")) || 0;
+
+let gameTheme = getCookie("bart_theme") || null;
+
+function applyTheme(theme) {
+    gameTheme = theme;
+    setCookie("bart_theme", theme);
+    themeScreen.style.display = "none";
+    startScreen.style.display = "flex";
+    
+    // Dynamically manage overall body class based on theme selection
+    if (theme === "morning") {
+        document.body.classList.add("morning-theme");
+    } else {
+        document.body.classList.remove("morning-theme");
+    }
+}
+
+themeNightBtn.addEventListener("click", () => applyTheme("night"));
+themeMorningBtn.addEventListener("click", () => applyTheme("morning"));
+openThemeBtn.addEventListener("click", () => {
+    startScreen.style.display = "none";
+    themeScreen.style.display = "flex";
+});
+
+if (gameTheme) {
+    applyTheme(gameTheme);
+} else {
+    themeScreen.style.display = "flex";
+    startScreen.style.display = "none";
+}
 let upgradeLife = parseInt(getCookie("bart_up_life")) || 0; 
 let upgradeJetpack = parseInt(getCookie("bart_up_jetpack")) || 0; 
 let upgradeDouble = parseInt(getCookie("bart_up_double")) || 0; 
@@ -873,8 +1113,8 @@ function processAdminCode() {
 }
 
 function triggerDirectBossFight() {
-    try { bgm.currentTime = 0; bgm.loop = true; } catch (e) {}
-    bgm.play().catch(e => {});
+    try { bgm.pause(); bossMusic.currentTime = 0; } catch (e) {}
+    bossMusic.play().catch(e => {});
 
     gameActive = true;
     isBossMode = true;
@@ -944,7 +1184,7 @@ buyPointsBtn.addEventListener("click", () => {
 
 bgm.addEventListener('canplaythrough', () => {
     audioStatus.innerText = "Audio Status: Ready!";
-    audioStatus.style.color = "#00ffff";
+    audioStatus.style.color = gameTheme === 'morning' ? "#1565c0" : "#00ffff";
 });
 
 bgm.addEventListener('ended', () => {
@@ -1226,7 +1466,7 @@ function showNextDialogue() {
             throwBtn.style.display = "block";
             joystickZone.style.display = "block";
             
-            try { bgm.loop = true; bgm.play().catch(e => {}); } catch(e) {}
+            try { bgm.pause(); bossMusic.currentTime = 0; bossMusic.play().catch(e => {}); } catch(e) {}
             
             lastTime = performance.now();
             animate(lastTime);
@@ -1247,16 +1487,16 @@ function showNextDialogue() {
         cutsceneText.innerHTML = currentLine.text;
         if (currentLine.speaker === 'bart') {
             cutsceneImg.src = "bart.png";
-            cutsceneImg.style.borderColor = "#ff00ff";
-            cutsceneImg.style.boxShadow = "0 0 15px rgba(255, 0, 255, 0.5)";
+            cutsceneImg.style.borderColor = gameTheme === 'morning' ? "#4a90e2" : "#ff00ff";
+            cutsceneImg.style.boxShadow = gameTheme === 'morning' ? "0 5px 15px rgba(74, 144, 226, 0.4)" : "0 0 15px rgba(255, 0, 255, 0.5)";
         } else if (currentLine.speaker === 'bob') {
             cutsceneImg.src = "bob.jpg";
-            cutsceneImg.style.borderColor = "#ff3366";
-            cutsceneImg.style.boxShadow = "0 0 15px rgba(255, 51, 102, 0.5)";
+            cutsceneImg.style.borderColor = gameTheme === 'morning' ? "#d32f2f" : "#ff3366";
+            cutsceneImg.style.boxShadow = gameTheme === 'morning' ? "0 5px 15px rgba(211, 47, 47, 0.4)" : "0 0 15px rgba(255, 51, 102, 0.5)";
         } else if (currentLine.speaker === 'lisa') {
             cutsceneImg.src = "lisa.png";
-            cutsceneImg.style.borderColor = "#00ff88";
-            cutsceneImg.style.boxShadow = "0 0 15px rgba(0, 255, 136, 0.5)";
+            cutsceneImg.style.borderColor = gameTheme === 'morning' ? "#388e3c" : "#00ff88";
+            cutsceneImg.style.boxShadow = gameTheme === 'morning' ? "0 5px 15px rgba(56, 142, 60, 0.4)" : "0 0 15px rgba(0, 255, 136, 0.5)";
         }
     }
 }
@@ -1290,6 +1530,7 @@ function triggerBossCutscene() {
 function triggerDeathCutscene() {
     gameActive = false;
     bgm.pause();
+    bossMusic.pause();
     jetpackBtn.style.display = "none";
     shieldBtn.style.display = "none";
     throwBtn.style.display = "none";
@@ -1305,6 +1546,7 @@ function triggerDeathCutscene() {
 
 function runActualGame() {
     try { 
+        bossMusic.pause();
         bgm.currentTime = 0; 
         bgm.loop = false; 
     } catch (e) {}
@@ -1336,20 +1578,82 @@ class Obstacle {
     }
     update(timeScale) { this.x -= gameSpeed * timeScale; }
     draw() {
+        const theme = gameTheme || 'night';
         ctx.save();
-        ctx.shadowBlur = 10;
-        if (this.type.includes('spike')) {
-            ctx.shadowColor = "#ff00ff";
-            let c = this.type === 'double-spike' ? 2 : this.type === 'triple-spike' ? 3 : 1;
-            let w = this.width / c;
-            for (let i = 0; i < c; i++) {
-                let sx = this.x + (i * w);
-                ctx.fillStyle = "#ff00ff";
-                ctx.beginPath(); ctx.moveTo(sx, this.y + this.height); ctx.lineTo(sx + w / 2, this.y); ctx.lineTo(sx + w, this.y + this.height); ctx.closePath(); ctx.fill();
+        
+        if (theme === 'morning') {
+            // Flat, clean clean morning aesthetics
+            if (this.type.includes('spike')) {
+                let c = this.type === 'double-spike' ? 2 : this.type === 'triple-spike' ? 3 : 1;
+                let w = this.width / c;
+                for (let i = 0; i < c; i++) {
+                    let sx = this.x + (i * w);
+                    ctx.fillStyle = "#e53935";
+                    ctx.strokeStyle = "#b71c1c";
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(sx, this.y + this.height);
+                    ctx.lineTo(sx + w / 2, this.y);
+                    ctx.lineTo(sx + w, this.y + this.height);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            } else {
+                ctx.fillStyle = "#90caf9";
+                ctx.strokeStyle = "#1565c0";
+                ctx.lineWidth = 3;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+                ctx.strokeRect(this.x, this.y, this.width, this.height);
             }
         } else {
-            ctx.shadowColor = "#00ffff"; ctx.fillStyle = "rgba(0, 255, 255, 0.4)"; ctx.strokeStyle = "#00ffff"; ctx.lineWidth = 3;
-            ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
+            // Classic Neon Aesthetics
+            ctx.shadowBlur = 12;
+            if (this.type.includes('spike')) {
+                ctx.shadowColor = "#ff00ff";
+                let c = this.type === 'double-spike' ? 2 : this.type === 'triple-spike' ? 3 : 1;
+                let w = this.width / c;
+                for (let i = 0; i < c; i++) {
+                    let sx = this.x + (i * w);
+                    // base plate
+                    ctx.fillStyle = "#5a0055";
+                    ctx.fillRect(sx + 2, this.y + this.height - 5, w - 4, 5);
+                    // spike body with gradient
+                    let spikeGrad = ctx.createLinearGradient(sx, this.y, sx, this.y + this.height);
+                    spikeGrad.addColorStop(0, "#ff66ff");
+                    spikeGrad.addColorStop(0.5, "#ff00ff");
+                    spikeGrad.addColorStop(1, "#8800aa");
+                    ctx.fillStyle = spikeGrad;
+                    ctx.strokeStyle = "#ffccff";
+                    ctx.lineWidth = 1.5;
+                    ctx.beginPath();
+                    ctx.moveTo(sx, this.y + this.height);
+                    ctx.lineTo(sx + w / 2, this.y);
+                    ctx.lineTo(sx + w, this.y + this.height);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    // inner highlight edge
+                    ctx.strokeStyle = "rgba(255,255,255,0.5)";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(sx + w / 2, this.y);
+                    ctx.lineTo(sx + w / 2 - 3, this.y + this.height * 0.4);
+                    ctx.stroke();
+                }
+            } else {
+                let blockGrad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+                blockGrad.addColorStop(0, "rgba(120, 255, 255, 0.55)");
+                blockGrad.addColorStop(1, "rgba(0, 180, 255, 0.35)");
+                ctx.shadowColor = "#00ffff"; ctx.fillStyle = blockGrad; ctx.strokeStyle = "#00ffff"; ctx.lineWidth = 3;
+                ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
+                // rivets / detail
+                ctx.fillStyle = "rgba(255,255,255,0.6)";
+                for (let rx = this.x + 6; rx < this.x + this.width - 4; rx += 14) {
+                    ctx.beginPath(); ctx.arc(rx, this.y + 6, 2, 0, Math.PI * 2); ctx.fill();
+                    ctx.beginPath(); ctx.arc(rx, this.y + this.height - 6, 2, 0, Math.PI * 2); ctx.fill();
+                }
+            }
         }
         ctx.restore();
     }
@@ -1361,12 +1665,24 @@ class Platform {
     }
     update(timeScale) { this.x -= gameSpeed * timeScale; }
     draw() {
-        ctx.save(); ctx.shadowBlur = 12; ctx.shadowColor = "#00ffcc"; ctx.fillStyle = "#00ffcc";
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-        ctx.fillStyle = "#ff0055";
-        let steps = Math.floor(this.width / 20);
-        for (let i = 0; i < steps; i++) {
-            ctx.beginPath(); ctx.moveTo(this.x + (i * 20), this.y + this.height); ctx.lineTo(this.x + (i * 20) + 10, this.y + this.height + 15); ctx.lineTo(this.x + (i * 20) + 20, this.y + this.height); ctx.closePath(); ctx.fill();
+        const theme = gameTheme || 'night';
+        ctx.save();
+        if (theme === 'morning') {
+            ctx.fillStyle = "#1565c0";
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.fillStyle = "#e53935";
+            let steps = Math.floor(this.width / 20);
+            for (let i = 0; i < steps; i++) {
+                ctx.beginPath(); ctx.moveTo(this.x + (i * 20), this.y + this.height); ctx.lineTo(this.x + (i * 20) + 10, this.y + this.height + 15); ctx.lineTo(this.x + (i * 20) + 20, this.y + this.height); ctx.closePath(); ctx.fill();
+            }
+        } else {
+            ctx.shadowBlur = 12; ctx.shadowColor = "#00ffcc"; ctx.fillStyle = "#00ffcc";
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.fillStyle = "#ff0055";
+            let steps = Math.floor(this.width / 20);
+            for (let i = 0; i < steps; i++) {
+                ctx.beginPath(); ctx.moveTo(this.x + (i * 20), this.y + this.height); ctx.lineTo(this.x + (i * 20) + 10, this.y + this.height + 15); ctx.lineTo(this.x + (i * 20) + 20, this.y + this.height); ctx.closePath(); ctx.fill();
+            }
         }
         ctx.restore();
     }
@@ -1376,8 +1692,12 @@ class Coin {
     constructor(x, y) { this.x = x; this.y = y; this.width = 24; this.height = 24; this.angle = 0; }
     update(timeScale) { this.x -= gameSpeed * timeScale; this.angle += 0.15 * timeScale; }
     draw() {
+        const theme = gameTheme || 'night';
         ctx.save(); ctx.translate(this.x + 12, this.y + 12); ctx.scale(Math.abs(Math.sin(this.angle)), 1);
-        ctx.shadowColor = "#ffd700"; ctx.shadowBlur = 10; ctx.fillStyle = "#ffd700";
+        if (theme !== 'morning') {
+            ctx.shadowColor = "#ffd700"; ctx.shadowBlur = 10;
+        }
+        ctx.fillStyle = "#ffd700";
         ctx.beginPath(); ctx.arc(0, 0, 12, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
     }
@@ -1420,7 +1740,7 @@ function checkCollision(r1, r2) {
 }
 
 function gameOver(won = false) {
-    gameActive = false; bgm.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none"; joystickZone.style.display = "none"; resetJoystick();
+    gameActive = false; bgm.pause(); bossMusic.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none"; joystickZone.style.display = "none"; resetJoystick();
     if (won && currentLevel === 1) {
         lvl1Beaten = true;
         setCookie("bart_lvl1_beat", "1");
@@ -1433,31 +1753,137 @@ function gameOver(won = false) {
     startScreen.style.display = "flex";
     if (won) {
         document.querySelector("#start-screen h1").innerText = currentLevel === 2 ? "YOU GOT LISA!" : "YOU DEFEATED BOB!";
-        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff;">(+${earned} WIN!)</span>`;
+        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: ${gameTheme === 'morning' ? '#0d47a1' : '#00ffff'};">(+${earned} WIN!)</span>`;
     } else {
         document.querySelector("#start-screen h1").innerText = currentLevel === 2 ? "LISA KILLED YOU!" : "BOB CAUGHT YOU!";
-        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff3366;">(+${earned})</span>`;
+        document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: ${gameTheme === 'morning' ? '#d32f2f' : '#ff3366'};">(+${earned})</span>`;
     }
     startBtn.innerText = "RUN AGAIN";
 }
 
+let bgScrollX = 0;
+
+function drawNuclearPlant(x, groundY, scale, theme) {
+    ctx.save();
+    const towerColor = theme === 'morning' ? "#d9d9e0" : "#3a2a4a";
+    const towerColor2 = theme === 'morning' ? "#c2c2cc" : "#2a1e38";
+    const steamColor = theme === 'morning' ? "rgba(255,255,255,0.7)" : "rgba(200,180,255,0.25)";
+
+    // Two cooling towers (hyperboloid-ish silhouettes)
+    [0, 55].forEach((offset, idx) => {
+        const tx = x + offset * scale;
+        const w = 46 * scale, h = 70 * scale;
+        ctx.fillStyle = idx === 0 ? towerColor : towerColor2;
+        ctx.beginPath();
+        ctx.moveTo(tx, groundY);
+        ctx.quadraticCurveTo(tx + w * 0.15, groundY - h * 0.5, tx + w * 0.3, groundY - h);
+        ctx.lineTo(tx + w * 0.7, groundY - h);
+        ctx.quadraticCurveTo(tx + w * 0.85, groundY - h * 0.5, tx + w, groundY);
+        ctx.closePath();
+        ctx.fill();
+        // steam puff
+        ctx.fillStyle = steamColor;
+        ctx.beginPath();
+        ctx.ellipse(tx + w * 0.5, groundY - h - 14 * scale, 16 * scale, 10 * scale, 0, 0, Math.PI * 2);
+        ctx.fill();
+    });
+
+    // Plant building base
+    ctx.fillStyle = theme === 'morning' ? "#b8b8c2" : "#241a30";
+    ctx.fillRect(x - 20 * scale, groundY - 26 * scale, 140 * scale, 26 * scale);
+    // Warning stripe
+    ctx.fillStyle = "#ffcc00";
+    ctx.fillRect(x - 20 * scale, groundY - 8 * scale, 140 * scale, 4 * scale);
+    ctx.restore();
+}
+
+function drawHouse(x, groundY, w, h, roofColor, wallColor) {
+    ctx.save();
+    ctx.fillStyle = wallColor;
+    ctx.fillRect(x, groundY - h, w, h);
+    ctx.fillStyle = roofColor;
+    ctx.beginPath();
+    ctx.moveTo(x - 6, groundY - h);
+    ctx.lineTo(x + w / 2, groundY - h - w * 0.45);
+    ctx.lineTo(x + w + 6, groundY - h);
+    ctx.closePath();
+    ctx.fill();
+    // window
+    ctx.fillStyle = "rgba(255, 220, 120, 0.85)";
+    ctx.fillRect(x + w * 0.2, groundY - h * 0.6, w * 0.22, h * 0.22);
+    ctx.fillRect(x + w * 0.58, groundY - h * 0.6, w * 0.22, h * 0.22);
+    ctx.restore();
+}
+
 function drawBackground() {
+    const theme = gameTheme || 'night';
+    bgScrollX -= gameSpeed * 0.15;
+    if (bgScrollX < -400) bgScrollX += 400;
+
     let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    grad.addColorStop(0, "#120524"); grad.addColorStop(1, "#54004e");
+    if (theme === 'morning') {
+        grad.addColorStop(0, "#87ceeb"); grad.addColorStop(0.6, "#bfe3f5"); grad.addColorStop(1, "#e8f6e0");
+    } else {
+        grad.addColorStop(0, "#120524"); grad.addColorStop(1, "#54004e");
+    }
     ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#0c021a"; ctx.fillRect(0, 350, canvas.width, 50);
-    ctx.fillStyle = "#ff00ff"; ctx.fillRect(0, 350, canvas.width, 4);
+
+    // Sun / moon
+    ctx.save();
+    if (theme === 'morning') {
+        ctx.fillStyle = "#fff2a8";
+        ctx.beginPath(); ctx.arc(660, 60, 30, 0, Math.PI * 2); ctx.fill();
+    } else {
+        ctx.fillStyle = "#e8e8ff";
+        ctx.shadowColor = "#c0c0ff"; ctx.shadowBlur = 20;
+        ctx.beginPath(); ctx.arc(660, 55, 24, 0, Math.PI * 2); ctx.fill();
+        // stars
+        ctx.fillStyle = "rgba(255,255,255,0.7)";
+        for (let i = 0; i < 25; i++) {
+            const sx = (i * 137) % 800;
+            const sy = (i * 71) % 140;
+            ctx.fillRect(sx, sy + 10, 2, 2);
+        }
+    }
+    ctx.restore();
+
+    const groundLevel = 300;
+
+    // Nuclear plant (far background, slow parallax) - repeats twice for seamless loop
+    drawNuclearPlant(bgScrollX + 40, groundLevel, 1, theme);
+    drawNuclearPlant(bgScrollX + 440, groundLevel, 1, theme);
+
+    // Row of houses (mid background)
+    const houseColors = theme === 'morning'
+        ? [["#e07a5f", "#f4d35e"], ["#5b8c5a", "#fdfcdc"], ["#3d5a80", "#e0e1dd"]]
+        : [["#3a1f4d", "#241333"], ["#4a2050", "#2a1533"], ["#331a44", "#1f0f2c"]];
+    for (let i = 0; i < 6; i++) {
+        const hx = (bgScrollX * 1.4 + i * 130) % 780 - 20;
+        const c = houseColors[i % houseColors.length];
+        drawHouse(hx, groundLevel, 70, 55, c[0], c[1]);
+    }
+
+    // Ground
+    ctx.fillStyle = theme === 'morning' ? "#8fbf6b" : "#0c021a";
+    ctx.fillRect(0, 350, canvas.width, 50);
+    ctx.fillStyle = theme === 'morning' ? "#ffb703" : "#ff00ff";
+    ctx.fillRect(0, 350, canvas.width, 4);
 }
 
 function drawBart(x, y, w, h, sliding) {
+    const theme = gameTheme || 'night';
     ctx.save();
     if (jetpackState === 'active' && !sliding) {
         ctx.fillStyle = "#444"; ctx.fillRect(x - 12, y + 25, 12, 25);
     }
     if (isBossMode) {
-        ctx.shadowBlur = 15; ctx.shadowColor = "#ff00ff";
+        if (theme !== 'morning') {
+            ctx.shadowBlur = 15; ctx.shadowColor = "#ff00ff";
+        }
     } else if (activeLives > 0) {
-        ctx.shadowBlur = 15; ctx.shadowColor = "#00ffcc";
+        if (theme !== 'morning') {
+            ctx.shadowBlur = 15; ctx.shadowColor = "#00ffcc";
+        }
     }
     if (bartLoaded) {
         if (sliding) {
@@ -1473,10 +1899,12 @@ function drawBart(x, y, w, h, sliding) {
     if (isShieldActive && shieldHealth > 0) {
         ctx.restore();
         ctx.save();
-        ctx.strokeStyle = "rgba(0, 255, 102, 0.8)";
+        ctx.strokeStyle = theme === 'morning' ? "rgba(56, 142, 60, 0.9)" : "rgba(0, 255, 102, 0.8)";
         ctx.lineWidth = 4;
-        ctx.shadowColor = "#00ff66";
-        ctx.shadowBlur = 15;
+        if (theme !== 'morning') {
+            ctx.shadowColor = "#00ff66";
+            ctx.shadowBlur = 15;
+        }
         ctx.beginPath();
         ctx.arc(x + w / 2, y + h / 2, Math.max(w, h) * 0.75, 0, Math.PI * 2);
         ctx.stroke();
@@ -1485,23 +1913,28 @@ function drawBart(x, y, w, h, sliding) {
 }
 
 function drawSideshowBob(x, y, w, h) {
+    const theme = gameTheme || 'night';
     ctx.save();
     if (isBossMode) {
-        ctx.fillStyle = "rgba(112, 0, 255, 0.3)";
-        ctx.strokeStyle = "#7000ff";
+        ctx.fillStyle = theme === 'morning' ? "rgba(21, 101, 192, 0.15)" : "rgba(112, 0, 255, 0.3)";
+        ctx.strokeStyle = theme === 'morning' ? "#1565c0" : "#7000ff";
         ctx.lineWidth = 3;
         ctx.fillRect(x - 10, y + h - 5, w + 20, 10);
         ctx.strokeRect(x - 10, y + h - 5, w + 20, 10);
     }
     if (currentLevel === 2) {
-        ctx.shadowBlur = 20; ctx.shadowColor = "#00ff88";
+        if (theme !== 'morning') {
+            ctx.shadowBlur = 20; ctx.shadowColor = "#00ff88";
+        }
         if (lisaLoaded) {
             ctx.drawImage(lisaImg, x, y, w, h);
         } else {
             ctx.fillStyle = "#00ff88"; ctx.fillRect(x, y, w, h);
         }
     } else {
-        ctx.shadowBlur = 20; ctx.shadowColor = "#ff3366";
+        if (theme !== 'morning') {
+            ctx.shadowBlur = 20; ctx.shadowColor = "#ff3366";
+        }
         if (bobLoaded) {
             ctx.drawImage(bobImg, x, y, w, h);
         } else {
@@ -1707,7 +2140,10 @@ function animate(timestamp) {
     for (let i = playerRocks.length - 1; i >= 0; i--) {
         let r = playerRocks[i]; 
         r.y -= r.speed * timeScale;
-        ctx.fillStyle = "#00ffff"; ctx.shadowColor = "#00ffff"; ctx.shadowBlur = 8;
+        ctx.fillStyle = gameTheme === 'morning' ? "#0288d1" : "#00ffff"; 
+        if (gameTheme !== 'morning') {
+            ctx.shadowColor = "#00ffff"; ctx.shadowBlur = 8;
+        }
         ctx.beginPath(); ctx.arc(r.x, r.y, r.radius, 0, Math.PI * 2); ctx.fill();
         let box = { x: r.x - r.radius, y: r.y - r.radius, width: r.radius * 2, height: r.radius * 2 };
         if (checkCollision(box, bob)) {
@@ -1730,13 +2166,13 @@ function animate(timestamp) {
         
         ctx.save(); 
         if (currentLevel === 2) {
-            ctx.fillStyle = "#aaff00"; 
-            ctx.shadowColor = "#aaff00"; 
+            ctx.fillStyle = gameTheme === 'morning' ? "#388e3c" : "#aaff00"; 
+            if (gameTheme !== 'morning') ctx.shadowColor = "#aaff00"; 
         } else {
-            ctx.fillStyle = "#ff3366"; 
-            ctx.shadowColor = "#ff3366"; 
+            ctx.fillStyle = gameTheme === 'morning' ? "#d32f2f" : "#ff3366"; 
+            if (gameTheme !== 'morning') ctx.shadowColor = "#ff3366"; 
         }
-        ctx.shadowBlur = 10;
+        if (gameTheme !== 'morning') ctx.shadowBlur = 10;
         ctx.beginPath();
         ctx.arc(k.x, k.y, k.width / 2, 0, Math.PI * 2);
         ctx.fill();
@@ -1777,33 +2213,34 @@ function animate(timestamp) {
         const bossHPVal = currentLevel === 2 ? lisaHP : bobHP;
         const bossHPMax = currentLevel === 2 ? maxLisaHP : maxBobHP;
         const bossName = currentLevel === 2 ? "LISA" : "BOB";
-        const bossColorA = currentLevel === 2 ? "#00ff88" : "#ff3300";
-        const bossColorB = currentLevel === 2 ? "#00ffcc" : "#ff00ff";
+        const bossColorA = currentLevel === 2 ? (gameTheme === 'morning' ? '#388e3c' : '#00ff88') : (gameTheme === 'morning' ? '#d32f2f' : '#ff3300');
+        const bossColorB = currentLevel === 2 ? (gameTheme === 'morning' ? '#81c784' : '#00ffcc') : (gameTheme === 'morning' ? '#e57373' : '#ff00ff');
 
         // Boss HP bar (top)
-        ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 20, 400, 14);
+        ctx.fillStyle = gameTheme === 'morning' ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 20, 400, 14);
         let hpW = Math.max(0, (bossHPVal / bossHPMax)) * 400;
         let hpGrad = ctx.createLinearGradient(200, 0, 600, 0);
         hpGrad.addColorStop(0, bossColorA); hpGrad.addColorStop(1, bossColorB);
         ctx.fillStyle = hpGrad; ctx.fillRect(200, 20, hpW, 14);
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 20, 400, 14);
+        ctx.strokeStyle = gameTheme === 'morning' ? "#000" : "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 20, 400, 14);
         ctx.save();
         ctx.font = "11px sans-serif";
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = gameTheme === 'morning' ? "#000" : "#fff";
         ctx.textAlign = "center";
         ctx.fillText(bossName, 400, 31);
         ctx.restore();
 
         // Bart HP bar (below Bob's)
-        ctx.fillStyle = "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 42, 400, 14);
+        ctx.fillStyle = gameTheme === 'morning' ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.1)"; ctx.fillRect(200, 42, 400, 14);
         let bartHpW = Math.max(0, (bartHP / maxBartHP)) * 400;
         let bartHpGrad = ctx.createLinearGradient(200, 0, 600, 0);
-        bartHpGrad.addColorStop(0, "#00ff66"); bartHpGrad.addColorStop(1, "#00ffff");
+        bartHpGrad.addColorStop(0, gameTheme === 'morning' ? "#2e7d32" : "#00ff66"); 
+        bartHpGrad.addColorStop(1, gameTheme === 'morning' ? "#0277bd" : "#00ffff");
         ctx.fillStyle = bartHpGrad; ctx.fillRect(200, 42, bartHpW, 14);
-        ctx.strokeStyle = "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 42, 400, 14);
+        ctx.strokeStyle = gameTheme === 'morning' ? "#000" : "#fff"; ctx.lineWidth = 1.5; ctx.strokeRect(200, 42, 400, 14);
         ctx.save();
         ctx.font = "11px sans-serif";
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = gameTheme === 'morning' ? "#000" : "#fff";
         ctx.textAlign = "center";
         ctx.fillText("BART", 400, 53);
         ctx.restore();
