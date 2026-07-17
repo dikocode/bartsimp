@@ -984,13 +984,16 @@ function triggerDirectBossFight() {
         bobBossMusic.pause();
     } catch (e) {}
 
-    // dynamically swap boss music depending on current layout selected
+    // dynamically swap boss music depending on current layout selected and force reference reload
     if (currentLevel === 2) {
         bossMusic = document.getElementById("bossmusic");
+        bossMusic.src = "lisaboss.mp3";
     } else {
         bossMusic = document.getElementById("bobbossmusic");
+        bossMusic.src = "bobboss.mp3";
     }
 
+    bossMusic.load();
     bossMusic.currentTime = 0;
     bossMusic.play().catch(e => {
         console.log("Audio block prevented immediate direct play:", e);
@@ -1359,10 +1362,13 @@ function showNextDialogue() {
 
             if (currentLevel === 2) {
                 bossMusic = document.getElementById("bossmusic");
+                bossMusic.src = "lisaboss.mp3";
             } else {
                 bossMusic = document.getElementById("bobbossmusic");
+                bossMusic.src = "bobboss.mp3";
             }
             
+            bossMusic.load();
             bossMusic.currentTime = 0; 
             bossMusic.play().catch(e => {
                 console.log("Audio block prevented play during cutscene end:", e);
@@ -1413,6 +1419,15 @@ function triggerBossCutscene() {
     shieldHealth = 5;
     shieldCooldownTimer = 0;
     obstacles = []; platforms = []; coins = [];
+    
+    if (currentLevel === 2) {
+        bossMusic = document.getElementById("bossmusic");
+        bossMusic.src = "lisaboss.mp3";
+    } else {
+        bossMusic = document.getElementById("bobbossmusic");
+        bossMusic.src = "bobboss.mp3";
+    }
+    bossMusic.load();
     
     player.x = 400;
     player.y = 300;
