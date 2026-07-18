@@ -29,6 +29,57 @@
             overflow: hidden;
             touch-action: none;
         }
+        body.morning-ui {
+            background: radial-gradient(circle at center, #cfeaf5 0%, #f5ecd0 100%);
+        }
+        body.morning-ui canvas {
+            border-color: #ffb703 !important;
+            box-shadow: 0 0 30px rgba(255, 183, 3, 0.35), inset 0 0 20px rgba(255, 183, 3, 0.15) !important;
+        }
+        body.morning-ui #start-screen {
+            background: linear-gradient(135deg, rgba(255, 250, 230, 0.9) 0%, rgba(230, 245, 255, 0.95) 100%) !important;
+            border-color: rgba(255, 183, 3, 0.4) !important;
+            box-shadow: 0 0 40px rgba(255, 183, 3, 0.25) !important;
+            color: #2a2a3a;
+        }
+        body.morning-ui #start-screen h1 {
+            color: #ff8a00 !important;
+            text-shadow: 0 0 15px rgba(255, 138, 0, 0.35) !important;
+        }
+        body.morning-ui #start-screen p,
+        body.morning-ui .credits-box,
+        body.morning-ui #audio-status {
+            color: #55555f !important;
+        }
+        body.morning-ui .points-display {
+            color: #0088aa !important;
+            text-shadow: 0 0 10px rgba(0, 136, 170, 0.3) !important;
+        }
+        body.morning-ui #score-board {
+            color: #ff8a00 !important;
+        }
+        body.morning-ui #level-screen {
+            background: linear-gradient(135deg, rgba(255, 250, 230, 0.95) 0%, rgba(230, 245, 255, 0.98) 100%) !important;
+            border-color: rgba(255, 183, 3, 0.4) !important;
+            color: #2a2a3a;
+        }
+        body.morning-ui #level-screen h1 {
+            color: #ff8a00 !important;
+        }
+        body.morning-ui #powerup-screen {
+            background: linear-gradient(135deg, rgba(255, 250, 230, 0.92) 0%, rgba(230, 245, 255, 0.98) 100%) !important;
+            color: #2a2a3a;
+        }
+        body.morning-ui #powerup-screen h1 {
+            color: #0088aa !important;
+        }
+        body.morning-ui .shop-item {
+            background: rgba(0, 0, 0, 0.04) !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+        body.morning-ui .shop-item div {
+            color: #2a2a3a !important;
+        }
         #game-container {
             position: relative;
             width: 95vw;
@@ -216,6 +267,10 @@
         @keyframes portraitPop {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes textFadeIn {
+            0% { opacity: 0; transform: translateY(6px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         #cutscene-text {
             font-size: min(4.5vw, 20px);
@@ -484,7 +539,7 @@
         <button id="theme-morning-btn" class="theme-choice">☀️ MORNING</button>
     </div>
 
-    <div id="version-tag">v1.6</div>
+    <div id="version-tag">v1.9</div>
     <div id="music-watermark">music by my friend dj limey</div>
     <div id="score-board">POINTS: 0</div>
     <div id="lives-indicator">LIVES: 0</div>
@@ -533,13 +588,13 @@
                 <span>LVL 2</span>
                 <span class="level-subtext" id="lvl2-subtext" style="color: #ff3366;">beat lvl 1 first</span>
             </button>
-            <button id="lvl3-btn" class="level-btn">
+            <button id="lvl3-btn" class="level-btn" style="background: linear-gradient(135deg, #5588ff 0%, #a06cff 100%); box-shadow: 0 6px 18px rgba(85, 136, 255, 0.35);">
                 <span>LVL 3</span>
-                <span class="level-subtext" style="color: #ff3366;">coming soon</span>
+                <span class="level-subtext" id="lvl3-subtext" style="color: #ff3366;">beat lvl 2 first</span>
             </button>
-            <button id="lvl4-btn" class="level-btn">
+            <button id="lvl4-btn" class="level-btn" style="background: linear-gradient(135deg, #ffaa33 0%, #ff3366 100%); box-shadow: 0 6px 18px rgba(255, 170, 51, 0.35);">
                 <span>LVL 4</span>
-                <span class="level-subtext" style="color: #ff3366;">coming soon</span>
+                <span class="level-subtext" id="lvl4-subtext" style="color: #ff3366;">beat lvl 3 first</span>
             </button>
         </div>
         <button id="close-levels-btn" style="background: linear-gradient(135deg, #ff3366 0%, #ff0000 100%); box-shadow: 0 6px 20px rgba(255, 51, 102, 0.3); font-size: 14px; padding: 10px 20px;">BACK</button>
@@ -600,6 +655,8 @@
 <audio id="bossmusic" src="lisaboss.mp3" preload="auto" loop></audio>
 <!-- added backup elements to allow dynamically switching sources if you need bobboss.mp3 -->
 <audio id="bobbossmusic" src="bobboss.mp3" preload="auto" loop></audio>
+<audio id="skinnerbossmusic" src="skinnerboss.mp3" preload="auto" loop></audio>
+<audio id="homerbossmusic" src="homerboss.mp3" preload="auto" loop></audio>
 
 <script>
 const canvas = document.getElementById("gameCanvas");
@@ -638,6 +695,8 @@ const joystickStick = document.getElementById("joystick-stick");
 const bgm = document.getElementById("bgm");
 let bossMusic = document.getElementById("bossmusic");
 const bobBossMusic = document.getElementById("bobbossmusic");
+const skinnerBossMusic = document.getElementById("skinnerbossmusic");
+const homerBossMusic = document.getElementById("homerbossmusic");
 const audioStatus = document.getElementById("audio-status");
 
 const menuPointsDisplay = document.getElementById("menu-points");
@@ -748,6 +807,21 @@ const lisaImg = new Image();
 lisaImg.onload = () => { lisaLoaded = true; };
 lisaImg.src = "lisa.png";
 
+let skinnerLoaded = false;
+const skinnerImg = new Image();
+skinnerImg.onload = () => { skinnerLoaded = true; };
+skinnerImg.src = "skinner.png";
+
+let homerLoaded = false;
+const homerImg = new Image();
+homerImg.onload = () => { homerLoaded = true; };
+homerImg.src = "homer.png";
+
+let mutantHomerLoaded = false;
+const mutantHomerImg = new Image();
+mutantHomerImg.onload = () => { mutantHomerLoaded = true; };
+mutantHomerImg.src = "mutanthomer.png";
+
 let gameActive = false;
 let score = 0;
 let gameSpeed = 6;
@@ -767,6 +841,7 @@ let gameTheme = getCookie("bart_theme") || null;
 function applyTheme(theme) {
     gameTheme = theme;
     setCookie("bart_theme", theme);
+    document.body.classList.toggle("morning-ui", theme === "morning");
     themeScreen.style.display = "none";
     startScreen.style.display = "flex";
     initAudioContext();
@@ -780,6 +855,7 @@ openThemeBtn.addEventListener("click", () => {
 });
 
 if (gameTheme) {
+    document.body.classList.toggle("morning-ui", gameTheme === "morning");
     themeScreen.style.display = "none";
     startScreen.style.display = "flex";
 } else {
@@ -823,6 +899,36 @@ let currentLevel = 1;
 let lisaHP = 70;
 let maxLisaHP = 70;
 let lvl1Beaten = getCookie("bart_lvl1_beat") === "1";
+let lvl2Beaten = getCookie("bart_lvl2_beat") === "1";
+let lvl3Beaten = getCookie("bart_lvl3_beat") === "1";
+
+let skinnerHP = 90;
+let maxSkinnerHP = 90;
+let skinnerRakes = [];
+
+let homerHP = 1000;
+let maxHomerHP = 1000;
+let isMutantHomer = false;
+let homerDonuts = [];
+let homerBlastTimer = 0;
+const HOMER_BLAST_INTERVAL = 10000;
+const HOMER_BLAST_WARN_TIME = 10000;
+let homerBlastZones = [];
+let homerFissileTimer = 0;
+const HOMER_FISSILE_INTERVAL = 35000;
+let homerFissileWarning = false;
+let homerFissileZone = null;
+
+const SAFE_ZONE_X = 0;
+const SAFE_ZONE_WIDTH = 90;
+let safeZoneRegenTimer = 0;
+const SAFE_ZONE_REGEN_INTERVAL = 2000;
+
+let planeMode = false;
+let planeModeTimer = 0;
+const PLANE_MODE_DURATION = 3200;
+let planeThrustHeld = false;
+let rakeHitCount = 0;
 
 let lastShotTime = 0;
 const SLINGSHOT_COOLDOWN = 500; 
@@ -907,6 +1013,63 @@ const lisaDeathDialogue = [
     { speaker: 'lisa', text: '<span style="color:#00ff88">lisa:</span> yeah...' }
 ];
 
+const skinnerIntroDialogue = [
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> Bartholomew Joesephine Johnathan Simpson! you are a wimp that killed bob!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> nooo! why a fate worse than death!' },
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> you will have bob\'s liz\' and everyone of springfields wrath!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> WHY, gosh for **** sake' },
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> stop stallin idjit lets fight!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> bet u cant catch me!' }
+];
+
+const skinnerBossDialogue = [
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> music ended its time to fight' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> NOOOOO' }
+];
+
+const skinnerDeathDialogue = [
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> frick! why... why... bart your sling shots have... have been destroying us... w- why?' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> homer will stand up for me!' },
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> you... bart will find out what homers wrath is like... once he takes out that damn crayon out of his brain' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> no.... no.... NOOOOOOOOOOO' },
+    { speaker: 'skinner', text: '<span style="color:#5588ff">skinner:</span> my last words are... kid i side with you and so does many people but they said they would torture me if i said this and theyre watching jokes on them they cant save... my... life... frick... the... sideshow... bob.... organisation....' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> skinner? NOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO' }
+];
+
+const homerIntroDialogue = [
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> d- d- dad?' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> first time you called me dad dont try to apologise we know what you did with krusty! you framed him and saved bob and with his guilt he tried to defeat you' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> thats not what happened' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> that IS!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> THAT is NOT!' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> i will kill you why you little!' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> betya cant catch me!' }
+];
+
+const homerBossDialogue = [
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> i can kill people with my slingshot youre harmless!' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> well i can eat this nuclear rod and then some protien and some flesh of a carnivore and metal....' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> dont...' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> bart...' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> what?' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> i dont like this im feeling p-p- PAIN' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> h--h-h-h homer youre mutating!' },
+    { speaker: 'homer', text: '<span style="color:#ff2222">homer:</span> AAAAAAAAARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR AHHHHHHHHHHHHHHHHHHHHHHHH AHHHHUUUUU FU**OOOOW OUCH OOOF SH** F******** *** * ** * ******** * *********** *****8 I CANT WATCH MY FU**** LANGUAGE CUZ ITS SO F**** PAINFUL YOU...' },
+    { speaker: 'mutanthomer', text: '<span style="color:#66ff33">mutant homer:</span> help... me.... oh finally i supress that voice' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> what?' },
+    { speaker: 'mutanthomer', text: '<span style="color:#66ff33">mutant homer:</span> i hate you now, i will KILL YOU' }
+];
+
+const homerDeathDialogue = [
+    { speaker: 'mutanthomer', text: '<span style="color:#66ff33">mutant homer:</span> i was... never built for defeat as my dna told me if i defeat i will go back to my factory settings... ahhhhh AHHHHHHHHH' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> im sorry bart... im sorry' },
+    { speaker: 'bart', text: '<span style="color:#ffd90f">bart:</span> alright what have i got next to do' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> youre all caught up' },
+    { speaker: 'springfield', text: '<span style="color:#00bfff">springfield:</span> we forgive bart!!!!' },
+    { speaker: 'homer', text: '<span style="color:#ffaa33">homer:</span> but bart... sideshow bob is still here upon us his goons revived him now.... we wait and soon we launch our attacks for now we are at peace' },
+    { speaker: 'springfield', text: '<span style="color:#00bfff">springfield:</span> yeaaaaaaaaaah!!!!!!!' }
+];
+
 function updatePointsUI() {
     menuPointsDisplay.innerHTML = "POINTS: " + playerPoints;
     shopPointsDisplay.innerText = "POINTS: " + playerPoints;
@@ -928,6 +1091,24 @@ function updateLvl2Lock() {
         lvl2Btn.disabled = true;
         document.getElementById("lvl2-subtext").innerText = "beat lvl 1 first";
         document.getElementById("lvl2-subtext").style.color = "#ff3366";
+    }
+    if (lvl2Beaten) {
+        lvl3Btn.disabled = false;
+        document.getElementById("lvl3-subtext").innerText = "skinners revenge";
+        document.getElementById("lvl3-subtext").style.color = "#aaccff";
+    } else {
+        lvl3Btn.disabled = true;
+        document.getElementById("lvl3-subtext").innerText = "beat lvl 2 first";
+        document.getElementById("lvl3-subtext").style.color = "#ff3366";
+    }
+    if (lvl3Beaten) {
+        lvl4Btn.disabled = false;
+        document.getElementById("lvl4-subtext").innerText = "homers fury";
+        document.getElementById("lvl4-subtext").style.color = "#ffcc88";
+    } else {
+        lvl4Btn.disabled = true;
+        document.getElementById("lvl4-subtext").innerText = "beat lvl 3 first";
+        document.getElementById("lvl4-subtext").style.color = "#ff3366";
     }
 }
 updatePointsUI();
@@ -971,6 +1152,14 @@ function processAdminCode() {
         updatePointsUI();
         adminScreen.style.display = "none";
         levelScreen.style.display = "flex";
+    } else if (entered === "dikoslvlbeaten67()") {
+        lvl1Beaten = true;
+        lvl2Beaten = true;
+        setCookie("bart_lvl1_beat", "1");
+        setCookie("bart_lvl2_beat", "1");
+        updatePointsUI();
+        adminScreen.style.display = "none";
+        levelScreen.style.display = "flex";
     } else {
         alert("INVALID CODE");
     }
@@ -982,12 +1171,20 @@ function triggerDirectBossFight() {
         bgm.pause(); 
         bossMusic.pause();
         bobBossMusic.pause();
+        skinnerBossMusic.pause();
+        homerBossMusic.pause();
     } catch (e) {}
 
     // dynamically swap boss music depending on current layout selected and force reference reload
     if (currentLevel === 2) {
         bossMusic = document.getElementById("bossmusic");
         bossMusic.src = "lisaboss.mp3";
+    } else if (currentLevel === 3) {
+        bossMusic = document.getElementById("skinnerbossmusic");
+        bossMusic.src = "skinnerboss.mp3";
+    } else if (currentLevel === 4) {
+        bossMusic = document.getElementById("homerbossmusic");
+        bossMusic.src = "homerboss.mp3";
     } else {
         bossMusic = document.getElementById("bobbossmusic");
         bossMusic.src = "bobboss.mp3";
@@ -1085,8 +1282,11 @@ window.addEventListener("keydown", (e) => {
     }
     if (!gameActive || cutsceneActive) return;
     if (!isBossMode) {
-        if (e.code === "Space" && player.isGrounded && !player.isSliding) {
-            player.vy = player.jumpForce; player.isGrounded = false;
+        if (e.code === "Space") {
+            planeThrustHeld = true;
+            if (!planeMode && player.isGrounded && !player.isSliding) {
+                player.vy = player.jumpForce; player.isGrounded = false;
+            }
         }
         if (e.key === "ArrowDown" && player.isGrounded) {
             player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
@@ -1117,6 +1317,7 @@ window.addEventListener("keyup", (e) => {
         if (e.key === "ArrowDown" && player.isSliding) {
             player.isSliding = false; player.height = player.originalHeight; player.y = 350 - player.height;
         }
+        if (e.code === "Space") planeThrustHeld = false;
     }
     if (e.code === "KeyJ") jKeyPressed = false;
 });
@@ -1137,7 +1338,8 @@ window.addEventListener("touchstart", (e) => {
                 player.isSliding = true; player.height = player.originalHeight / 2; player.y = 350 - player.height;
             }
         } else {
-            if (player.isGrounded && !player.isSliding) {
+            planeThrustHeld = true;
+            if (player.isGrounded && !player.isSliding && !planeMode) {
                 player.vy = player.jumpForce; player.isGrounded = false;
             }
         }
@@ -1148,6 +1350,7 @@ window.addEventListener("touchend", (e) => {
     if (!gameActive || cutsceneActive) return;
     if (e.target.classList.contains('hud-btn') || e.target.id === 'cutscene-next-btn' || e.target.tagName === 'INPUT') return;
     e.preventDefault();
+    planeThrustHeld = false;
     for (let i = 0; i < e.changedTouches.length; i++) {
         if (e.changedTouches[i].identifier === activeTouchId) {
             activeTouchId = null;
@@ -1316,6 +1519,30 @@ lvl2Btn.addEventListener("click", () => {
     showNextDialogue();
 });
 
+lvl3Btn.addEventListener("click", () => {
+    if (!lvl2Beaten) return;
+    initAudioContext();
+    currentLevel = 3;
+    levelScreen.style.display = "none";
+    cutsceneScreen.style.display = "flex";
+    cutsceneActive = true;
+    cutsceneMode = 'intro';
+    currentDialogueIndex = 0;
+    showNextDialogue();
+});
+
+lvl4Btn.addEventListener("click", () => {
+    if (!lvl3Beaten) return;
+    initAudioContext();
+    currentLevel = 4;
+    levelScreen.style.display = "none";
+    cutsceneScreen.style.display = "flex";
+    cutsceneActive = true;
+    cutsceneMode = 'intro';
+    currentDialogueIndex = 0;
+    showNextDialogue();
+});
+
 cutsceneNextBtn.addEventListener("click", () => {
     initAudioContext();
     currentDialogueIndex++;
@@ -1330,9 +1557,14 @@ cutsceneNextBtn.addEventListener("touchstart", (e) => {
 
 function showNextDialogue() {
     let currentLine = null;
-    const introArr = currentLevel === 2 ? lisaIntroDialogue : introDialogue;
-    const bossArr = currentLevel === 2 ? lisaBossDialogue : bossDialogue;
-    const deathArr = currentLevel === 2 ? lisaDeathDialogue : deathDialogue;
+    let introArr = introDialogue, bossArr = bossDialogue, deathArr = deathDialogue;
+    if (currentLevel === 2) {
+        introArr = lisaIntroDialogue; bossArr = lisaBossDialogue; deathArr = lisaDeathDialogue;
+    } else if (currentLevel === 3) {
+        introArr = skinnerIntroDialogue; bossArr = skinnerBossDialogue; deathArr = skinnerDeathDialogue;
+    } else if (currentLevel === 4) {
+        introArr = homerIntroDialogue; bossArr = homerBossDialogue; deathArr = homerDeathDialogue;
+    }
 
     if (cutsceneMode === 'intro') {
         if (currentDialogueIndex < introArr.length) {
@@ -1358,11 +1590,15 @@ function showNextDialogue() {
                 bgm.pause(); 
                 bossMusic.pause();
                 bobBossMusic.pause();
+                skinnerBossMusic.pause();
             } catch(e) {}
 
             if (currentLevel === 2) {
                 bossMusic = document.getElementById("bossmusic");
                 bossMusic.src = "lisaboss.mp3";
+            } else if (currentLevel === 3) {
+                bossMusic = document.getElementById("skinnerbossmusic");
+                bossMusic.src = "skinnerboss.mp3";
             } else {
                 bossMusic = document.getElementById("bobbossmusic");
                 bossMusic.src = "bobboss.mp3";
@@ -1390,6 +1626,12 @@ function showNextDialogue() {
     }
 
     if (currentLine) {
+        cutsceneImg.style.animation = "none";
+        cutsceneText.style.animation = "none";
+        void cutsceneImg.offsetWidth;
+        void cutsceneText.offsetWidth;
+        cutsceneImg.style.animation = "portraitPop 0.35s ease-out";
+        cutsceneText.style.animation = "textFadeIn 0.3s ease-out";
         cutsceneText.innerHTML = currentLine.text;
         if (currentLine.speaker === 'bart') {
             cutsceneImg.src = "bart.png";
@@ -1403,6 +1645,27 @@ function showNextDialogue() {
             cutsceneImg.src = "lisa.png";
             cutsceneImg.style.borderColor = "#00ff88";
             cutsceneImg.style.boxShadow = "0 0 15px rgba(0, 255, 136, 0.5)";
+        } else if (currentLine.speaker === 'skinner') {
+            cutsceneImg.src = "skinner.png";
+            cutsceneImg.style.borderColor = "#5588ff";
+            cutsceneImg.style.boxShadow = "0 0 15px rgba(85, 136, 255, 0.5)";
+        } else if (currentLine.speaker === 'willie') {
+            cutsceneImg.src = "skinner.png";
+            cutsceneImg.style.borderColor = "#ff8833";
+            cutsceneImg.style.boxShadow = "0 0 15px rgba(255, 136, 51, 0.5)";
+        } else if (currentLine.speaker === 'homer') {
+            cutsceneImg.src = "homer.png";
+            cutsceneImg.style.borderColor = "#ffaa33";
+            cutsceneImg.style.boxShadow = "0 0 15px rgba(255, 170, 51, 0.5)";
+        } else if (currentLine.speaker === 'mutanthomer') {
+            isMutantHomer = true;
+            cutsceneImg.src = "mutanthomer.png";
+            cutsceneImg.style.borderColor = "#66ff33";
+            cutsceneImg.style.boxShadow = "0 0 20px rgba(102, 255, 51, 0.6)";
+        } else if (currentLine.speaker === 'springfield') {
+            cutsceneImg.src = "bart.png";
+            cutsceneImg.style.borderColor = "#00bfff";
+            cutsceneImg.style.boxShadow = "0 0 15px rgba(0, 191, 255, 0.5)";
         }
     }
 }
@@ -1418,11 +1681,15 @@ function triggerBossCutscene() {
     isShieldActive = false;
     shieldHealth = 5;
     shieldCooldownTimer = 0;
-    obstacles = []; platforms = []; coins = [];
+    obstacles = []; platforms = []; coins = []; skinnerRakes = [];
+    skinnerHP = maxSkinnerHP;
     
     if (currentLevel === 2) {
         bossMusic = document.getElementById("bossmusic");
         bossMusic.src = "lisaboss.mp3";
+    } else if (currentLevel === 3) {
+        bossMusic = document.getElementById("skinnerbossmusic");
+        bossMusic.src = "skinnerboss.mp3";
     } else {
         bossMusic = document.getElementById("bobbossmusic");
         bossMusic.src = "bobboss.mp3";
@@ -1447,6 +1714,7 @@ function triggerDeathCutscene() {
     bgm.pause();
     bossMusic.pause();
     bobBossMusic.pause();
+    skinnerBossMusic.pause();
     jetpackBtn.style.display = "none";
     shieldBtn.style.display = "none";
     throwBtn.style.display = "none";
@@ -1464,6 +1732,7 @@ function runActualGame() {
     try { 
         bossMusic.pause();
         bobBossMusic.pause();
+        skinnerBossMusic.pause();
         bgm.currentTime = 0; 
         bgm.loop = false; 
     } catch (e) {}
@@ -1475,8 +1744,9 @@ function runActualGame() {
     joystickZone.style.display = "none";
     resetJoystick();
     gameActive = true; isBossMode = false; bossWon = false; cutsceneActive = false;
-    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = currentLevel === 2 ? 7 : 6;
-    obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = [];
+    score = 0; scoreBoard.innerText = "POINTS: 0"; gameSpeed = currentLevel === 4 ? 8.5 : (currentLevel === 3 ? 7.5 : (currentLevel === 2 ? 7 : 6));
+    obstacles = []; platforms = []; coins = []; bossKnives = []; playerRocks = []; particles = []; skinnerRakes = [];
+    planeMode = false; planeModeTimer = 0; planeGapCooldown = 0; rakeHitCount = 0;
     player.x = 180; player.y = 280; player.height = player.originalHeight; player.vy = 0; player.isGrounded = true; player.isSliding = false;
     bob.x = 30; bob.y = 240; bob.targetX = 30; bob.targetY = 240;
     activeLives = upgradeLife; updateLivesIndicator();
@@ -1489,9 +1759,25 @@ function runActualGame() {
 class Obstacle {
     constructor(type, overrideY = null) {
         this.type = type; this.x = canvas.width;
-        this.width = type.includes('double') ? 80 : type.includes('triple') ? 120 : 40;
-        this.height = type.includes('block') ? 45 : 40;
-        this.y = overrideY !== null ? overrideY : (type.includes('block') ? 240 : 310);
+        this.hitCount = 0;
+        if (type === 'rake') {
+            this.width = 42; this.height = 40;
+            this.y = overrideY !== null ? overrideY : 310;
+        } else if (type === 'drone') {
+            this.width = 50; this.height = 34;
+            this.y = overrideY !== null ? overrideY : 275;
+        } else if (type === 'hydrant') {
+            this.width = 34; this.height = 40;
+            this.y = overrideY !== null ? overrideY : 310;
+        } else if (type === 'trashbin') {
+            this.width = 40; this.height = 42;
+            this.y = overrideY !== null ? overrideY : 308;
+        } else {
+            // legacy spike types, kept for lvl3 hazard variety
+            this.width = type.includes('double') ? 80 : type.includes('triple') ? 120 : 40;
+            this.height = 40;
+            this.y = overrideY !== null ? overrideY : 310;
+        }
     }
     update(timeScale) { this.x -= gameSpeed * timeScale; }
     draw() {
@@ -1526,17 +1812,68 @@ class Obstacle {
                 ctx.lineTo(sx + w / 2 - 3, this.y + this.height * 0.4);
                 ctx.stroke();
             }
+        } else if (this.type === 'hydrant') {
+            ctx.shadowColor = "#ff4444";
+            ctx.fillStyle = "#d43a2f";
+            ctx.fillRect(this.x + this.width * 0.25, this.y + 6, this.width * 0.5, this.height - 10);
+            ctx.beginPath();
+            ctx.ellipse(this.x + this.width / 2, this.y + 6, this.width * 0.28, 6, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#8a2419";
+            ctx.fillRect(this.x + this.width * 0.15, this.y + this.height - 8, this.width * 0.7, 8);
+            ctx.fillStyle = "#f0f0f0";
+            ctx.fillRect(this.x + 2, this.y + this.height * 0.4, this.width - 4, 5);
+            ctx.beginPath(); ctx.arc(this.x + this.width / 2, this.y + 2, 5, 0, Math.PI * 2); ctx.fillStyle = "#d43a2f"; ctx.fill();
+        } else if (this.type === 'trashbin') {
+            ctx.shadowColor = "#66ff66";
+            ctx.fillStyle = "#3d5a3d";
+            ctx.fillRect(this.x + 3, this.y + 8, this.width - 6, this.height - 8);
+            ctx.fillStyle = "#2a3d2a";
+            ctx.fillRect(this.x, this.y, this.width, 8);
+            ctx.strokeStyle = "#66ff9a"; ctx.lineWidth = 1.5;
+            ctx.strokeRect(this.x + 3, this.y + 8, this.width - 6, this.height - 8);
+            ctx.fillStyle = "rgba(150,255,180,0.4)";
+            for (let ry = this.y + 14; ry < this.y + this.height - 4; ry += 8) {
+                ctx.fillRect(this.x + 6, ry, this.width - 12, 3);
+            }
+        } else if (this.type === 'drone') {
+            ctx.shadowColor = "#aaff00";
+            ctx.fillStyle = "#333"; 
+            ctx.fillRect(this.x + this.width * 0.3, this.y + this.height * 0.3, this.width * 0.4, this.height * 0.35);
+            ctx.fillStyle = "#aaff00";
+            ctx.beginPath(); ctx.arc(this.x + this.width * 0.5, this.y + this.height * 0.15, 6, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = "#888"; ctx.lineWidth = 2;
+            [0.1, 0.9].forEach(fx => {
+                ctx.beginPath(); ctx.moveTo(this.x + this.width * fx, this.y + this.height * 0.4); ctx.lineTo(this.x + this.width * 0.5, this.y + this.height * 0.15); ctx.stroke();
+            });
+            const spin = Math.sin(Date.now() * 0.02) * 8;
+            [0.08, 0.92].forEach(fx => {
+                ctx.strokeStyle = "rgba(200,255,150,0.8)"; ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(this.x + this.width * fx - spin, this.y + this.height * 0.4);
+                ctx.lineTo(this.x + this.width * fx + spin, this.y + this.height * 0.4);
+                ctx.stroke();
+            });
+        } else if (this.type === 'rake') {
+            ctx.shadowColor = this.hitCount > 0 ? "#ff0000" : "#ffaa00";
+            ctx.strokeStyle = this.hitCount > 0 ? "#aa4400" : "#8a5a2a";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.width * 0.5, this.y + this.height);
+            ctx.lineTo(this.x + this.width * 0.5, this.y + 8);
+            ctx.stroke();
+            ctx.fillStyle = this.hitCount > 0 ? "#ff4444" : "#c9c9c9";
+            ctx.fillRect(this.x + 2, this.y, this.width - 4, 8);
+            ctx.fillStyle = this.hitCount > 0 ? "#aa2222" : "#888";
+            for (let tx = this.x + 4; tx < this.x + this.width - 2; tx += 6) {
+                ctx.fillRect(tx, this.y + 8, 3, 8);
+            }
         } else {
             let blockGrad = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
             blockGrad.addColorStop(0, "rgba(120, 255, 255, 0.55)");
             blockGrad.addColorStop(1, "rgba(0, 180, 255, 0.35)");
             ctx.shadowColor = "#00ffff"; ctx.fillStyle = blockGrad; ctx.strokeStyle = "#00ffff"; ctx.lineWidth = 3;
             ctx.fillRect(this.x, this.y, this.width, this.height); ctx.strokeRect(this.x, this.y, this.width, this.height);
-            ctx.fillStyle = "rgba(255,255,255,0.6)";
-            for (let rx = this.x + 6; rx < this.x + this.width - 4; rx += 14) {
-                ctx.beginPath(); ctx.arc(rx, this.y + 6, 2, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(rx, this.y + this.height - 6, 2, 0, Math.PI * 2); ctx.fill();
-            }
         }
         ctx.restore();
     }
@@ -1570,11 +1907,40 @@ class Coin {
     }
 }
 
+function triggerPlaneGap() {
+    planeMode = true;
+    planeModeTimer = PLANE_MODE_DURATION;
+    planeGapCooldown = 8000;
+    // lay down a solid wall of spikes across the ground so there's no way down - forces flying through
+    for (let i = 0; i < 5; i++) {
+        obstacles.push(new Obstacle('triple-spike'));
+        obstacles[obstacles.length - 1].x = canvas.width + i * 130;
+    }
+    player.isGrounded = false;
+    player.isSliding = false;
+    player.height = player.originalHeight;
+}
+
+let planeGapCooldown = 0;
+
 function spawnObstacle(timeScale) {
     if (isBossMode) return;
     spawnTimer += timeScale;
-    const isHardMode = currentLevel === 2;
+    const isLvl2 = currentLevel === 2;
+    const isLvl3 = currentLevel === 3;
+    const isHardMode = isLvl2 || isLvl3;
     const spawnGap = isHardMode ? (60 + Math.random() * 40) : (90 + Math.random() * 60);
+
+    if (planeGapCooldown > 0) planeGapCooldown -= timeScale;
+
+    // Lvl 3: occasionally trigger an unavoidable spike-gap that forces plane mode
+    if (isLvl3 && !planeMode && planeGapCooldown <= 0 && score >= 5 && Math.random() < 0.004 * timeScale) {
+        triggerPlaneGap();
+        return;
+    }
+
+    if (planeMode) return; // no normal obstacle spawns while flying the plane section
+
     if (spawnTimer > spawnGap) {
         let r = Math.random();
         const platformChance = isHardMode ? 0.3 : 0.4;
@@ -1583,18 +1949,21 @@ function spawnObstacle(timeScale) {
             let plat = new Platform(); platforms.push(plat);
             coins.push(new Coin(plat.x + plat.width/2 - 12, plat.y - 35));
             if (isHardMode && Math.random() < 0.5) {
-                obstacles.push(new Obstacle('spike', plat.y - 40));
+                obstacles.push(new Obstacle(isLvl3 ? 'spike' : 'hydrant', plat.y - 40));
             }
         } else if (r < coinChance) {
             coins.push(new Coin(canvas.width, 180 + Math.random() * 60));
         } else {
             let pool;
-            if (isHardMode) {
-                pool = ['spike', 'double-spike', 'double-spike', 'block', 'block'];
-                if (score >= 8) pool.push('triple-spike', 'triple-spike');
+            if (isLvl3) {
+                pool = ['hydrant', 'hydrant', 'trashbin', 'trashbin', 'drone', 'drone', 'rake'];
+                if (score >= 6) pool.push('triple-spike', 'triple-spike', 'triple-spike');
+            } else if (isLvl2) {
+                pool = ['hydrant', 'hydrant', 'trashbin', 'trashbin', 'trashbin', 'drone', 'drone'];
+                if (score >= 8) pool.push('rake');
             } else {
-                pool = ['spike', 'block'];
-                if (score >= 15) pool.push('double-spike');
+                pool = ['hydrant', 'trashbin', 'drone'];
+                if (score >= 15) pool.push('trashbin');
             }
             obstacles.push(new Obstacle(pool[Math.floor(Math.random() * pool.length)]));
         }
@@ -1607,10 +1976,18 @@ function checkCollision(r1, r2) {
 }
 
 function gameOver(won = false) {
-    gameActive = false; bgm.pause(); bossMusic.pause(); bobBossMusic.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none"; joystickZone.style.display = "none"; resetJoystick();
+    gameActive = false; bgm.pause(); bossMusic.pause(); bobBossMusic.pause(); skinnerBossMusic.pause(); homerBossMusic.pause(); jetpackBtn.style.display = "none"; shieldBtn.style.display = "none"; throwBtn.style.display = "none"; livesIndicator.style.display = "none"; joystickZone.style.display = "none"; resetJoystick();
     if (won && currentLevel === 1) {
         lvl1Beaten = true;
         setCookie("bart_lvl1_beat", "1");
+    }
+    if (won && currentLevel === 2) {
+        lvl2Beaten = true;
+        setCookie("bart_lvl2_beat", "1");
+    }
+    if (won && currentLevel === 3) {
+        lvl3Beaten = true;
+        setCookie("bart_lvl3_beat", "1");
     }
     let earned = score;
     if (won) earned += 100;
@@ -1618,14 +1995,21 @@ function gameOver(won = false) {
     playerPoints += earned; setCookie("bart_points", playerPoints); updatePointsUI();
     
     startScreen.style.display = "flex";
+    let winText = "YOU DEFEATED BOB!", loseText = "BOB CAUGHT YOU!";
+    if (currentLevel === 2) { winText = "YOU GOT LISA!"; loseText = "LISA KILLED YOU!"; }
+    else if (currentLevel === 3) { winText = "YOU GOT SKINNER!"; loseText = "SKINNER GOT YOU!"; }
+    else if (currentLevel === 4) { winText = "YOU SAVED HOMER!"; loseText = "MUTANT HOMER GOT YOU!"; }
     if (won) {
-        document.querySelector("#start-screen h1").innerText = currentLevel === 2 ? "YOU GOT LISA!" : "YOU DEFEATED BOB!";
+        document.querySelector("#start-screen h1").innerText = winText;
         document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #00ffff;">(+${earned} WIN!)</span>`;
     } else {
-        document.querySelector("#start-screen h1").innerText = currentLevel === 2 ? "LISA KILLED YOU!" : "BOB CAUGHT YOU!";
+        document.querySelector("#start-screen h1").innerText = loseText;
         document.getElementById("menu-points").innerHTML = `POINTS: ${playerPoints} <span style="color: #ff3366;">(+${earned})</span>`;
     }
     startBtn.innerText = "RUN AGAIN";
+    if (won && currentLevel === 4) {
+        showGameCompleteModal();
+    }
 }
 
 let bgScrollX = 0;
@@ -1680,7 +2064,6 @@ function drawHouse(x, groundY, w, h, roofColor, wallColor) {
 function drawBackground() {
     const theme = gameTheme || 'night';
     bgScrollX -= gameSpeed * 0.15;
-    if (bgScrollX < -400) bgScrollX += 400;
 
     let grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
     if (theme === 'morning') {
@@ -1708,20 +2091,28 @@ function drawBackground() {
     }
     ctx.restore();
 
-    const groundLevel = 300;
+    const groundLevel = 350;
 
-    drawNuclearPlant(bgScrollX + 40, groundLevel, 1, theme);
-    drawNuclearPlant(bgScrollX + 440, groundLevel, 1, theme);
+    // Nuclear plant: two copies spaced 500px apart, wrapped with positive modulo so it never jumps
+    const plantSpacing = 500;
+    const plantWrap = ((bgScrollX * 0.3) % plantSpacing + plantSpacing) % plantSpacing;
+    drawNuclearPlant(plantWrap - 100, groundLevel, 1, theme);
+    drawNuclearPlant(plantWrap - 100 + plantSpacing, groundLevel, 1, theme);
 
+    // Houses: evenly spaced, wrapped with positive modulo, drawn back-to-front by x for stable overlap
     const houseColors = theme === 'morning'
         ? [["#e07a5f", "#f4d35e"], ["#5b8c5a", "#fdfcdc"], ["#3d5a80", "#e0e1dd"]]
         : [["#3a1f4d", "#241333"], ["#4a2050", "#2a1533"], ["#331a44", "#1f0f2c"]];
-    for (let i = 0; i < 6; i++) {
-        const hx = (bgScrollX * 1.4 + i * 130) % 780 - 20;
+    const houseSpacing = 140;
+    const houseCount = 7;
+    for (let i = 0; i < houseCount; i++) {
+        const raw = bgScrollX * 0.6 + i * houseSpacing;
+        const hx = ((raw % (houseSpacing * houseCount)) + (houseSpacing * houseCount)) % (houseSpacing * houseCount) - houseSpacing;
         const c = houseColors[i % houseColors.length];
         drawHouse(hx, groundLevel, 70, 55, c[0], c[1]);
     }
 
+    // Ground strip
     ctx.fillStyle = theme === 'morning' ? "#8fbf6b" : "#0c021a";
     ctx.fillRect(0, 350, canvas.width, 50);
     ctx.fillStyle = theme === 'morning' ? "#ffb703" : "#ff00ff";
@@ -1730,7 +2121,24 @@ function drawBackground() {
 
 function drawBart(x, y, w, h, sliding) {
     ctx.save();
-    if (jetpackState === 'active' && !sliding) {
+    if (planeMode) {
+        ctx.shadowBlur = 18; ctx.shadowColor = "#00ffff";
+        ctx.fillStyle = "#888";
+        ctx.beginPath();
+        ctx.moveTo(x - 20, y + h * 0.5);
+        ctx.lineTo(x + w * 0.4, y + h * 0.3);
+        ctx.lineTo(x + w * 0.4, y + h * 0.7);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#666";
+        ctx.beginPath();
+        ctx.moveTo(x + w + 10, y + h * 0.5);
+        ctx.lineTo(x + w * 0.5, y + h * 0.15);
+        ctx.lineTo(x + w * 0.5, y + h * 0.85);
+        ctx.closePath();
+        ctx.fill();
+    }
+    if (jetpackState === 'active' && !sliding && !planeMode) {
         ctx.fillStyle = "#444"; ctx.fillRect(x - 12, y + 25, 12, 25);
     }
     if (isBossMode) {
@@ -1779,6 +2187,29 @@ function drawSideshowBob(x, y, w, h) {
         } else {
             ctx.fillStyle = "#00ff88"; ctx.fillRect(x, y, w, h);
         }
+    } else if (currentLevel === 3) {
+        ctx.shadowBlur = 20; ctx.shadowColor = "#5588ff";
+        if (skinnerLoaded) {
+            ctx.drawImage(skinnerImg, x, y, w, h);
+        } else {
+            ctx.fillStyle = "#5588ff"; ctx.fillRect(x, y, w, h);
+        }
+    } else if (currentLevel === 4) {
+        if (isMutantHomer) {
+            ctx.shadowBlur = 25; ctx.shadowColor = "#66ff33";
+            if (mutantHomerLoaded) {
+                ctx.drawImage(mutantHomerImg, x, y, w, h);
+            } else {
+                ctx.fillStyle = "#66ff33"; ctx.fillRect(x, y, w, h);
+            }
+        } else {
+            ctx.shadowBlur = 20; ctx.shadowColor = "#ffaa33";
+            if (homerLoaded) {
+                ctx.drawImage(homerImg, x, y, w, h);
+            } else {
+                ctx.fillStyle = "#ffaa33"; ctx.fillRect(x, y, w, h);
+            }
+        }
     } else {
         ctx.shadowBlur = 20; ctx.shadowColor = "#ff3366";
         if (bobLoaded) {
@@ -1791,17 +2222,23 @@ function drawSideshowBob(x, y, w, h) {
 }
 
 function handleBossMovement(timeScale) {
+    const jetpackActive = jetpackState === 'active';
+    const boostMult = (jetpackActive && jKeyPressed) ? 1.6 : 1;
+
     if (keys.ArrowUp) {
-        player.y -= player.speed * timeScale;
+        player.y -= player.speed * boostMult * timeScale;
     }
     if (keys.ArrowDown) {
         player.y += player.speed * timeScale;
     }
     if (keys.ArrowLeft) {
-        player.x -= player.speed * timeScale;
+        player.x -= player.speed * boostMult * timeScale;
     }
     if (keys.ArrowRight) {
-        player.x += player.speed * timeScale;
+        player.x += player.speed * boostMult * timeScale;
+    }
+    if (jetpackActive && jKeyPressed) {
+        player.y -= 4 * timeScale;
     }
 
     if (player.x < 0) player.x = 0;
@@ -1876,7 +2313,19 @@ function animate(timestamp) {
     }
 
     if (!isBossMode) {
-        if (jetpackState !== 'active') {
+        if (planeMode) {
+            planeModeTimer -= dt;
+            const thrustHeld = keys.ArrowUp || jKeyPressed || planeThrustHeld;
+            player.vy = thrustHeld ? -4.5 : 3.5;
+            player.y += player.vy * timeScale;
+            if (player.y < 40) player.y = 40;
+            if (player.y > 220) player.y = 220;
+            player.isGrounded = false;
+            if (planeModeTimer <= 0) {
+                planeMode = false;
+                player.vy = 0;
+            }
+        } else if (jetpackState !== 'active') {
             let currentPlatform = null;
             if (player.vy >= 0) {
                 for (let plat of platforms) {
@@ -1958,7 +2407,15 @@ function animate(timestamp) {
 
     for (let i = obstacles.length - 1; i >= 0; i--) {
         let obs = obstacles[i]; obs.update(timeScale); obs.draw();
-        if (checkCollision(player, obs)) {
+        if (!planeMode && checkCollision(player, obs)) {
+            if (obs.type === 'rake') {
+                rakeHitCount++;
+                obstacles.splice(i, 1);
+                if (rakeHitCount >= 2) {
+                    gameOver(false); return;
+                }
+                continue;
+            }
             if (activeLives > 0) {
                 activeLives--; updateLivesIndicator(); obstacles.splice(i, 1);
             } else {
@@ -1992,6 +2449,9 @@ function animate(timestamp) {
             if (currentLevel === 2) {
                 lisaHP -= 4; playerRocks.splice(i, 1);
                 if (lisaHP <= 0) { triggerDeathCutscene(); return; }
+            } else if (currentLevel === 3) {
+                skinnerHP -= 4; playerRocks.splice(i, 1);
+                if (skinnerHP <= 0) { triggerDeathCutscene(); return; }
             } else {
                 bobHP -= 4; playerRocks.splice(i, 1);
                 if (bobHP <= 0) { triggerDeathCutscene(); return; }
@@ -2010,6 +2470,9 @@ function animate(timestamp) {
         if (currentLevel === 2) {
             ctx.fillStyle = "#aaff00"; 
             ctx.shadowColor = "#aaff00"; 
+        } else if (currentLevel === 3) {
+            ctx.fillStyle = "#8a5a2a";
+            ctx.shadowColor = "#ffaa00";
         } else {
             ctx.fillStyle = "#ff3366"; 
             ctx.shadowColor = "#ff3366"; 
@@ -2052,9 +2515,9 @@ function animate(timestamp) {
     drawSideshowBob(bob.x, bob.y, bob.width, bob.height);
 
     if (isBossMode) {
-        const bossHPVal = currentLevel === 2 ? lisaHP : bobHP;
-        const bossHPMax = currentLevel === 2 ? maxLisaHP : maxBobHP;
-        const bossName = currentLevel === 2 ? "LISA" : "BOB";
+        const bossHPVal = currentLevel === 2 ? lisaHP : (currentLevel === 3 ? skinnerHP : bobHP);
+        const bossHPMax = currentLevel === 2 ? maxLisaHP : (currentLevel === 3 ? maxSkinnerHP : maxBobHP);
+        const bossName = currentLevel === 2 ? "LISA" : (currentLevel === 3 ? "SKINNER" : "BOB");
         const bossColorA = currentLevel === 2 ? "#00ff88" : "#ff3300";
         const bossColorB = currentLevel === 2 ? "#00ffcc" : "#ff00ff";
 
